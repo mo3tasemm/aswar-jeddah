@@ -1,0 +1,28 @@
+<template>
+  <div class="min-h-screen flex flex-col bg-white text-slate-900 font-sans dir-rtl">
+    <!-- Main Header -->
+    <TheHeader />
+    
+    <main class="flex-grow">
+      <slot />
+    </main>
+
+    <!-- Main Footer -->
+    <TheFooter />
+    
+    <!-- Global Slide-over Drawers -->
+    <CartDrawer />
+    <LoginDrawer />
+
+    <!-- Global Floating Actions -->
+    <ScrollToTop />
+  </div>
+</template>
+
+<script setup lang="ts">
+import TheHeader from '~/components/layout/TheHeader.vue'
+import TheFooter from '~/components/layout/TheFooter.vue'
+import CartDrawer from '~/components/cart/CartDrawer.vue'
+import LoginDrawer from '~/components/auth/LoginDrawer.vue'
+import ScrollToTop from '~/components/common/ScrollToTop.vue'
+</script>
