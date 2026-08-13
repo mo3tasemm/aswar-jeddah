@@ -2,14 +2,8 @@
   <div class="cart-page selection:bg-amber-500 selection:text-white bg-[#F8F9FA] min-h-screen pb-20" dir="rtl">
     
     <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <!-- Breadcrumbs -->
-      <nav class="flex items-center text-sm text-slate-500 mb-8 font-medium">
-        <NuxtLink to="/" class="hover:text-[#0B0E28] transition-colors">الرئيسية</NuxtLink>
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mx-2 rtl:-scale-x-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
-        <span class="text-[#0B0E28]">سلة المشتريات</span>
-      </nav>
+      <!-- Central Breadcrumbs -->
+      <Breadcrumbs />
 
       <div class="flex items-center justify-between mb-8">
         <div class="flex items-center gap-3">
@@ -203,6 +197,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import Breadcrumbs from '~/components/common/Breadcrumbs.vue'
 import HomeStoreFeaturesBar from '~/components/home/StoreFeaturesBar.vue'
 
 useHead({

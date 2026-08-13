@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
       <h3 class="font-black text-slate-800 text-lg">أحدث الطلبات</h3>
-      <NuxtLink to="/dashboard/orders" class="text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors flex items-center gap-1">
+      <NuxtLink to="/admin/orders" class="text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors flex items-center gap-1">
         عرض الكل
         <svg class="w-4 h-4 rtl:-scale-x-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />

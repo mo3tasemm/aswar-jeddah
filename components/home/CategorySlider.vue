@@ -22,17 +22,17 @@
       ref="sliderRef"
       class="flex gap-3 sm:gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar pb-4 px-2"
     >
-      <!-- Category Cards -->
+      <!-- Category Cards with Dynamic Slug Link -->
       <NuxtLink 
         v-for="category in categories" 
         :key="category.id"
-        :to="category.linkUrl"
+        :to="`/category/${category.slug || category.id}`"
         class="flex-none w-[calc(50%-6px)] sm:w-[160px] md:w-[200px] h-[180px] sm:h-[220px] rounded-2xl overflow-hidden relative group/card snap-start shadow-sm hover:shadow-md transition-all duration-300 border border-slate-100 flex flex-col bg-white"
       >
         <!-- Image Area -->
         <div class="flex-grow p-4 flex items-center justify-center bg-white overflow-hidden relative">
           <img 
-            :src="category.imageUrl" 
+            :src="category.icon || (category as any).imageUrl || 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=800&q=80'" 
             :alt="category.name"
             loading="lazy"
             decoding="async"
@@ -71,27 +71,23 @@ const scrollAmount = 400 // Smooth scroll amount for desktop
 
 const scrollLeft = () => {
   if (sliderRef.value) {
-    // Negative value scrolls to the left (next items in RTL)
     sliderRef.value.scrollBy({ left: -scrollAmount, behavior: 'smooth' })
   }
 }
 
 const scrollRight = () => {
   if (sliderRef.value) {
-    // Positive value scrolls to the right (previous items in RTL)
     sliderRef.value.scrollBy({ left: scrollAmount, behavior: 'smooth' })
   }
 }
 </script>
 
 <style scoped>
-/* Hide scrollbar for Chrome, Safari and Opera */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
-/* Hide scrollbar for IE, Edge and Firefox */
 .no-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 </style>

@@ -49,7 +49,7 @@
 
     <!-- Form Actions / Sticky Footer -->
     <div class="sticky bottom-0 bg-white/90 backdrop-blur-md p-4 rounded-t-2xl border-t border-slate-200 flex items-center justify-between gap-4 z-40 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)]">
-      <NuxtLink to="/dashboard/brands" class="text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors">
+      <NuxtLink to="/admin/brands" class="text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors">
         إلغاء والعودة
       </NuxtLink>
       <BaseButton type="submit" variant="primary" :loading="isSubmitting" class="w-full sm:w-auto px-12">
@@ -110,6 +110,6 @@ const onSubmit = handleSubmit(async (values) => {
   } else {
     success('تمت الإضافة!', 'تم إضافة البراند الجديد بنجاح.')
   }
-  router.push('/dashboard/brands')
+  router.push('/admin/brands')
 })
 </script>

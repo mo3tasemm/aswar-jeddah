@@ -1,5 +1,5 @@
 <template>
-  <div class="forgot-password-page selection:bg-amber-500 selection:text-white" dir="rtl">
+  <div class="forgot-password-page selection:bg-amber-500 selection:text-white" :dir="layoutDirection">
     
     <!-- SECTION 1: FORGOT PASSWORD CARD SECTION -->
     <section class="auth-section">
@@ -8,43 +8,44 @@
         <!-- HEADER LOGO -->
         <div class="logo-wrapper">
           <NuxtLink to="/">
-            <img src="~/assets/images/Logo.png" alt="أسوار جدة" class="store-logo" />
+            <img src="~/assets/images/Logo.png" alt="أسوار جدة" class="store-logo object-contain" />
           </NuxtLink>
         </div>
 
         <!-- FORM HEADER -->
         <div class="header-text">
-          <h1 class="title">استعادة كلمة المرور</h1>
-          <p class="subtitle">أدخل بريدك الإلكتروني المسجل وسنرسل لك رابطاً آمناً لإعادة ضبط كلمة المرور الخاصة بك.</p>
+          <h1 class="title">{{ t('auth.forgot_password_title') }}</h1>
+          <p class="subtitle">{{ t('auth.forgot_password_desc') }}</p>
         </div>
 
         <!-- FORM -->
         <form @submit.prevent="handleResetPassword" class="reset-form">
           <div class="input-group">
-            <label for="email" class="input-label">البريد الإلكتروني</label>
+            <label for="email" class="input-label text-start">{{ t('auth.email_label') }}</label>
             <input 
               id="email" 
               type="email" 
-              placeholder="example@domain.com" 
+              :placeholder="t('auth.email_placeholder')" 
               v-model="resetEmail" 
               required 
-              class="form-input"
+              class="form-input text-start"
+              dir="ltr"
             />
           </div>
 
           <button type="submit" class="btn-primary" :disabled="isLoading">
-            <span v-if="!isLoading">إرسال رابط إعادة الضبط</span>
-            <span v-else>جاري الإرسال...</span>
+            <span v-if="!isLoading">{{ t('auth.send_reset_link') }}</span>
+            <span v-else>{{ t('auth.sending') }}</span>
           </button>
         </form>
 
         <!-- FOOTER LINK -->
         <div class="card-footer">
-          <NuxtLink class="back-link" to="/login">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 ml-2">
+          <NuxtLink class="back-link flex items-center justify-center gap-2" to="/login">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 rtl:-scale-x-100">
               <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
             </svg>
-            العودة لتسجيل الدخول
+            <span>{{ t('auth.back_to_login') }}</span>
           </NuxtLink>
         </div>
 
@@ -64,25 +65,31 @@
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue'
+<script setup lang="ts">
+import { ref, computed } from 'vue'
 import HomeStoreFeaturesBar from '~/components/home/StoreFeaturesBar.vue'
 import HomeStoreLocationShowcase from '~/components/home/StoreLocationShowcase.vue'
+import { useToast } from '~/composables/useToast'
+import { useLanguage } from '~/composables/useLanguage'
+
+const { t, layoutDirection } = useLanguage()
 
 useHead({
-  title: 'استعادة كلمة المرور | أسوار جدة'
+  title: computed(() => t('auth.forgot_password_page_title'))
 })
 
+const toast = useToast()
 const resetEmail = ref('')
 const isLoading = ref(false)
 
 const handleResetPassword = () => {
+  if (!resetEmail.value) return
   isLoading.value = true
   setTimeout(() => {
     isLoading.value = false
-    alert('تم إرسال رابط إعادة الضبط إلى بريدك الإلكتروني')
+    toast.success(t('auth.forgot_password_title'), t('auth.reset_link_sent'))
     resetEmail.value = ''
-  }, 1200)
+  }, 1000)
 }
 </script>
 
@@ -139,7 +146,6 @@ const handleResetPassword = () => {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  text-align: right;
 }
 
 .input-group {
@@ -149,54 +155,48 @@ const handleResetPassword = () => {
 }
 
 .input-label {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   color: #334155;
 }
 
 .form-input {
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  width: 100%;
   padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  background-color: #f8fafc;
   font-size: 14px;
-  color: #0f172a;
   outline: none;
   transition: all 0.2s ease;
-  direction: ltr; /* Email is LTR */
 }
 
 .form-input:focus {
-  background-color: #ffffff;
   border-color: #0B0E28;
+  background-color: #ffffff;
   box-shadow: 0 0 0 3px rgba(11, 14, 40, 0.1);
 }
 
 .btn-primary {
-  background-color: #0B0E28;
-  color: #ffffff;
-  border: none;
+  width: 100%;
+  padding: 14px;
   border-radius: 12px;
-  padding: 15px;
+  background-color: #0B0E28;
+  color: #fbbf24;
+  font-weight: 800;
   font-size: 14px;
-  font-weight: bold;
+  border: none;
   cursor: pointer;
   transition: all 0.2s ease;
-  margin-top: 10px;
+  box-shadow: 0 4px 12px rgba(11, 14, 40, 0.15);
 }
 
-.btn-primary:hover:not(:disabled) {
-  background-color: #1a204c;
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(11, 14, 40, 0.15);
-}
-
-.btn-primary:active:not(:disabled) {
-  transform: translateY(0);
+.btn-primary:hover {
+  background-color: #151a42;
 }
 
 .btn-primary:disabled {
-  opacity: 0.7;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
@@ -209,24 +209,12 @@ const handleResetPassword = () => {
 .back-link {
   color: #64748b;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   transition: color 0.2s ease;
 }
 
 .back-link:hover {
   color: #0B0E28;
-}
-
-@media (max-width: 640px) {
-  .auth-section {
-    padding: 40px 16px;
-  }
-  .card-container {
-    padding: 30px 20px;
-  }
 }
 </style>

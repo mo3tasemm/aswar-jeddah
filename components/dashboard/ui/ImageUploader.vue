@@ -7,7 +7,7 @@
     <!-- Single Image Mode (maxFiles === 1) -->
     <div 
       v-if="maxFiles === 1 && previews.length > 0"
-      class="relative w-32 h-32 sm:w-48 sm:h-48 rounded-xl border border-slate-200 overflow-hidden group bg-white shadow-sm mx-auto sm:mx-0"
+      class="relative w-full max-w-[180px] aspect-square rounded-xl border border-slate-200 overflow-hidden group bg-white shadow-sm"
     >
       <img :src="previews[0]" class="w-full h-full object-cover" />
       <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">

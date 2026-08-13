@@ -1,11 +1,12 @@
 <template>
-  <div class="w-full relative mb-10 mt-4" dir="rtl">
+  <div class="w-full relative mb-10 mt-4" :dir="layoutDirection">
     <!-- Progress Line Background -->
     <div class="absolute top-5 inset-x-0 h-1 bg-slate-100 rounded-full w-[90%] mx-auto hidden sm:block"></div>
     
     <!-- Progress Line Active -->
     <div 
-      class="absolute top-5 right-[5%] h-1 bg-amber-400 rounded-full transition-all duration-500 hidden sm:block"
+      class="absolute top-5 h-1 bg-amber-400 rounded-full transition-all duration-500 hidden sm:block"
+      :class="layoutDirection === 'rtl' ? 'right-[5%]' : 'left-[5%]'"
       :style="{ width: progressWidth }"
     ></div>
 
@@ -21,7 +22,9 @@
           <svg v-if="currentStep > 1" class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
           <span v-else>1</span>
         </div>
-        <span class="text-xs sm:text-sm font-bold text-center" :class="currentStep >= 1 ? 'text-[#0B0E28]' : 'text-slate-400'">السلة</span>
+        <span class="text-xs sm:text-sm font-bold text-center" :class="currentStep >= 1 ? 'text-[#0B0E28]' : 'text-slate-400'">
+          {{ t('checkout.step_cart') }}
+        </span>
       </div>
 
       <!-- Step 2: Address -->
@@ -35,7 +38,9 @@
           <svg v-if="currentStep > 2" class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
           <span v-else>2</span>
         </div>
-        <span class="text-xs sm:text-sm font-bold text-center" :class="currentStep >= 2 ? 'text-[#0B0E28]' : 'text-slate-400'">التوصيل</span>
+        <span class="text-xs sm:text-sm font-bold text-center" :class="currentStep >= 2 ? 'text-[#0B0E28]' : 'text-slate-400'">
+          {{ t('checkout.step_shipping') }}
+        </span>
       </div>
 
       <!-- Step 3: Payment -->
@@ -49,14 +54,17 @@
           <svg v-if="currentStep > 3" class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
           <span v-else>3</span>
         </div>
-        <span class="text-xs sm:text-sm font-bold text-center" :class="currentStep >= 3 ? 'text-[#0B0E28]' : 'text-slate-400'">الدفع والتأكيد</span>
+        <span class="text-xs sm:text-sm font-bold text-center" :class="currentStep >= 3 ? 'text-[#0B0E28]' : 'text-slate-400'">
+          {{ t('checkout.step_payment') }}
+        </span>
       </div>
     </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
+import { useLanguage } from '~/composables/useLanguage'
 
 const props = defineProps({
   currentStep: {
@@ -65,6 +73,8 @@ const props = defineProps({
     default: 1
   }
 })
+
+const { t, layoutDirection } = useLanguage()
 
 const progressWidth = computed(() => {
   if (props.currentStep === 1) return '0%'

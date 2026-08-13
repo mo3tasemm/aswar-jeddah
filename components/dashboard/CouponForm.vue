@@ -7,7 +7,7 @@
         <p class="text-sm text-slate-500 mt-1">قم بتحديد شروط وأحكام هذا الكوبون.</p>
       </div>
       <div class="flex items-center gap-3">
-        <BaseButton variant="outline" type="button" @click="$router.push('/dashboard/coupons')" class="bg-white">إلغاء</BaseButton>
+        <BaseButton variant="outline" type="button" @click="$router.push('/admin/coupons')" class="bg-white">إلغاء</BaseButton>
         <BaseButton variant="primary" type="submit" :loading="isSubmitting">
           {{ isEdit ? 'حفظ التعديلات' : 'إضافة الكوبون' }}
         </BaseButton>
@@ -208,6 +208,6 @@ const handleSubmit = async () => {
     isEdit.value ? 'تم التعديل' : 'تمت الإضافة', 
     isEdit.value ? 'تم حفظ تعديلات الكوبون بنجاح.' : 'تم إضافة الكوبون الجديد بنجاح.'
   )
-  router.push('/dashboard/coupons')
+  router.push('/admin/coupons')
 }
 </script>

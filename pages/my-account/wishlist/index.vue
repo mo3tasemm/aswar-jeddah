@@ -1,19 +1,9 @@
 <template>
-  <div class="account-wishlist-page selection:bg-amber-500 selection:text-white bg-[#F8F9FA] min-h-screen" dir="rtl">
+  <div class="account-wishlist-page selection:bg-amber-500 selection:text-white bg-[#F8F9FA] min-h-screen" :dir="layoutDirection">
     
     <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <!-- Breadcrumbs -->
-      <nav class="flex items-center text-sm text-slate-500 mb-8 font-medium">
-        <NuxtLink to="/" class="hover:text-[#0B0E28] transition-colors">الرئيسية</NuxtLink>
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mx-2 rtl:-scale-x-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
-        <NuxtLink to="/my-account" class="hover:text-[#0B0E28] transition-colors">حسابي</NuxtLink>
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mx-2 rtl:-scale-x-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
-        <span class="text-[#0B0E28]">قائمة الرغبات</span>
-      </nav>
+      <!-- Central Breadcrumbs -->
+      <Breadcrumbs />
 
       <div class="flex flex-col lg:flex-row gap-10">
         
@@ -23,54 +13,71 @@
         <!-- MAIN CONTENT AREA -->
         <main class="flex-1 min-w-0">
           
-          <!-- Page Header & Bulk Actions -->
-          <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 bg-white p-6 sm:p-8 rounded-[2rem] shadow-sm border border-slate-100/60">
+          <!-- Header Title & Bulk Actions Bar -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-slate-200">
             <div>
               <div class="flex items-center gap-3 mb-1">
-                <h1 class="text-2xl font-black text-[#0B0E28]">قائمة الرغبات والمفضلة</h1>
+                <h1 class="text-2xl font-black text-[#0B0E28]">{{ t('account.wishlist') }}</h1>
                 <span class="bg-amber-100 text-amber-600 text-xs font-bold px-3 py-1 rounded-full">
-                  {{ wishlist.length }} منتجات محفوظة
+                  {{ safeWishlist.length }} {{ t('order.items_count') }}
                 </span>
               </div>
-              <p class="text-sm text-slate-500">احتفظ بمنتجاتك المفضلة هنا لسهولة الوصول إليها وشرائها لاحقاً.</p>
+              <p class="text-sm text-slate-500">{{ t('wishlist.subtitle') }}</p>
             </div>
             
-            <div v-if="wishlist.length > 0" class="flex flex-wrap items-center gap-3 shrink-0">
+            <div v-if="safeWishlist.length > 0" class="flex flex-wrap items-center gap-3 shrink-0">
               <button 
                 @click="clearWishlist"
-                class="px-5 py-2.5 rounded-xl text-sm font-bold bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white transition-colors flex items-center justify-center gap-2"
+                class="px-5 py-2.5 rounded-xl text-sm font-bold bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white transition-colors flex items-center justify-center gap-2 cursor-pointer"
               >
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                إفراغ القائمة
+                <span>{{ t('wishlist.clear_all') }}</span>
               </button>
               <button 
                 @click="addAllToCart"
-                class="px-5 py-2.5 rounded-xl text-sm font-bold bg-amber-400 text-[#0B0E28] hover:bg-amber-500 transition-colors shadow-md shadow-amber-400/20 flex items-center justify-center gap-2"
+                class="px-5 py-2.5 rounded-xl text-sm font-bold bg-amber-400 text-[#0B0E28] hover:bg-amber-500 transition-colors shadow-md shadow-amber-400/20 flex items-center justify-center gap-2 cursor-pointer"
               >
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-                إضافة الكل للسلة
+                <span>{{ layoutDirection === 'ltr' ? 'Add All to Cart' : 'إضافة الكل للسلة' }}</span>
               </button>
             </div>
           </div>
 
-          <!-- Empty State -->
-          <AccountWishlistEmptyState v-if="wishlist.length === 0" />
+          <!-- 1. LOADING STATE -->
+          <div v-if="wishlistPending" class="py-12 text-center space-y-4">
+            <div class="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p class="text-xs font-bold text-slate-500">{{ t('common.loading') }}</p>
+          </div>
 
-          <!-- Wishlist Grid with TransitionGroup -->
-          <div v-else>
-            <TransitionGroup 
-              name="wishlist-list" 
-              tag="div" 
-              class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6"
+          <!-- 2. EMPTY STATE -->
+          <div 
+            v-else-if="safeWishlist.length === 0" 
+            class="bg-white rounded-[2rem] p-12 text-center shadow-sm border border-slate-100/60 flex flex-col items-center justify-center"
+          >
+            <div class="w-24 h-24 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center mb-6">
+              <svg class="w-12 h-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-[#0B0E28] mb-2">{{ t('wishlist.empty_title') }}</h3>
+            <p class="text-slate-500 max-w-sm mx-auto mb-8 text-sm">
+              {{ t('wishlist.empty_desc') }}
+            </p>
+            <NuxtLink 
+              to="/shop" 
+              class="px-8 py-3.5 rounded-xl text-sm font-bold bg-[#0B0E28] text-amber-400 hover:bg-[#151a42] transition-colors shadow-lg shadow-[#0B0E28]/20"
             >
-              <AccountWishlistCard 
-                v-for="product in wishlist" 
-                :key="product.id" 
-                :product="product"
-                @remove-from-wishlist="removeFromWishlist"
-                @add-to-cart="addToCart"
-              />
-            </TransitionGroup>
+              {{ t('cart.back_to_shop') }}
+            </NuxtLink>
+          </div>
+
+          <!-- 3. PRODUCTS GRID -->
+          <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <ProductCard 
+              v-for="product in safeWishlist" 
+              :key="product.id" 
+              :product="product" 
+            />
           </div>
 
         </main>
@@ -90,96 +97,40 @@
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue'
+<script setup lang="ts">
+import { computed } from 'vue'
 import HomeStoreFeaturesBar from '~/components/home/StoreFeaturesBar.vue'
 import HomeStoreLocationShowcase from '~/components/home/StoreLocationShowcase.vue'
+import Breadcrumbs from '~/components/common/Breadcrumbs.vue'
+import AccountSidebarNav from '~/components/account/SidebarNav.vue'
+import ProductCard from '~/components/product/ProductCard.vue'
+import { useWishlist } from '~/composables/useWishlist'
+import { useCart } from '~/composables/useCart'
+import { useToast } from '~/composables/useToast'
+import { useLanguage } from '~/composables/useLanguage'
+
+const { t, layoutDirection } = useLanguage()
 
 useHead({
-  title: 'قائمة الرغبات | أسوار جدة'
+  title: computed(() => `${t('account.wishlist')} | أسوار جدة`)
 })
 
-// Mock Data
-const wishlist = ref([
-  {
-    id: 1,
-    name: 'سوار ذهب عيار 18 بتصميم كلاسيكي مع ألماس نقي',
-    category: 'أساور ذهبية',
-    price: '2,450',
-    oldPrice: '3,000',
-    discount: '18',
-    image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=600&auto=format&fit=crop',
-    inStock: true
-  },
-  {
-    id: 2,
-    name: 'قلادة ألماس مرصعة بزمرد طبيعي فائق النقاء',
-    category: 'قلائد',
-    price: '5,800',
-    oldPrice: null,
-    discount: null,
-    image: 'https://images.unsplash.com/photo-1599643478514-4a42041b3780?q=80&w=600&auto=format&fit=crop',
-    inStock: true
-  },
-  {
-    id: 3,
-    name: 'خاتم زواج سولتير پلاتينيوم بتصميم عصري',
-    category: 'خواتم',
-    price: '4,200',
-    oldPrice: null,
-    discount: null,
-    image: 'https://images.unsplash.com/photo-1605100804763-247f67b254a4?q=80&w=600&auto=format&fit=crop',
-    inStock: false
-  },
-  {
-    id: 4,
-    name: 'طقم مجوهرات متكامل للعرايس مطلي بالذهب',
-    category: 'أطقم مجوهرات',
-    price: '12,500',
-    oldPrice: '15,000',
-    discount: '15',
-    image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=600&auto=format&fit=crop',
-    inStock: true
-  }
-])
+const { wishlist, wishlistItems, wishlistPending, clearWishlist } = useWishlist()
+const { addToCart } = useCart()
+const toast = useToast()
 
-const removeFromWishlist = (id) => {
-  wishlist.value = wishlist.value.filter(p => p.id !== id)
-}
-
-const clearWishlist = () => {
-  wishlist.value = []
-}
-
-const addToCart = (product) => {
-  // In a real app, dispatch to store/cart composable
-  console.log('Added to cart:', product.name)
-}
+const safeWishlist = computed(() => {
+  return wishlist?.value || wishlistItems?.value || []
+})
 
 const addAllToCart = () => {
-  const availableItems = wishlist.value.filter(p => p.inStock)
-  console.log('Added all available items to cart:', availableItems.length)
-  // Optionally clear or keep wishlist items
+  if (safeWishlist.value.length === 0) return
+  safeWishlist.value.forEach(item => {
+    addToCart(item, 1)
+  })
+  toast.success(
+    t('product.added_to_cart'), 
+    layoutDirection.value === 'ltr' ? 'All items added to cart.' : 'تمت إضافة جميع منتجات القائمة لسلة الشراء بنجاح.'
+  )
 }
 </script>
-
-<style scoped>
-/* Transition Group Animations */
-.wishlist-list-move,
-.wishlist-list-enter-active,
-.wishlist-list-leave-active {
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.wishlist-list-enter-from,
-.wishlist-list-leave-to {
-  opacity: 0;
-  transform: scale(0.9) translateY(20px);
-}
-
-/* Ensure leaving items are taken out of layout flow so moving items animate smoothly */
-.wishlist-list-leave-active {
-  position: absolute;
-  width: calc(100% - 1.5rem); /* account for gap if absolute */
-}
-</style>

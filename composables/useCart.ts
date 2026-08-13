@@ -1,95 +1,207 @@
-import { computed } from 'vue';
-import type { CartItem, Product } from '~/types';
+/**
+ * Production-ready Vue 3 / Nuxt 3 Cart Composable connected to live WedgetStore Cart API
+ * Features global singleton state, request deduplication lock & dynamic locale sync.
+ */
+import { ref, computed, watch, onMounted } from 'vue'
+import type { CartItem, Product } from '~/types/product'
+import { cartApiService } from '~/services/cartApiService'
+import { useLanguage } from '~/composables/useLanguage'
+import { useToast } from '~/composables/useToast'
+
+// Module-level shared singleton locks to prevent duplicate concurrent API fetches
+const globalCartItems = ref<CartItem[]>([])
+const isCartOpenState = ref<boolean>(false)
+const isCartLoadingState = ref<boolean>(false)
+const isCartInitialized = ref<boolean>(false)
+const isFetchingCart = ref<boolean>(false)
 
 export const useCart = () => {
-  const cart = useState<CartItem[]>('cart', () => [
-    {
-      product: {
-        id: '201',
-        title: 'تريم سميج - غلاية ماء بسعة 1.7 لتر - أسود',
-        slug: 'smeg-kettle-1-7l-black',
-        price: 29999,
-        formattedPrice: '29.999,00 EGP',
-        images: ['https://images.unsplash.com/photo-1585659722983-38ca899af4e3?w=800&q=80'],
-        description: 'غلاية ماء سميج بتصميم أنيق كلاسيكي.',
-        category: 'أجهزة المطبخ',
-        inStock: true,
-        brand: 'SMEG',
-        sku: 'KLF03BLEU',
-      },
-      quantity: 1,
+  const { currentLanguage, formatCurrency } = useLanguage()
+  const toast = useToast()
+
+  /**
+   * Load cart from backend API with global deduplication lock
+   */
+  const loadCart = async (force: boolean = false) => {
+    // Prevent duplicate concurrent requests
+    if (isFetchingCart.value && !force) return
+    if (isCartInitialized.value && !force) return
+
+    isFetchingCart.value = true
+    isCartLoadingState.value = true
+
+    try {
+      const items = await cartApiService.fetchCart()
+      globalCartItems.value = items || []
+      isCartInitialized.value = true
+    } catch (err) {
+      console.warn('[useCart] Failed to sync cart with API:', err)
+    } finally {
+      isCartLoadingState.value = false
+      isFetchingCart.value = false
     }
-  ]);
-  const isCartOpen = useState<boolean>('isCartOpen', () => false);
+  }
+
+  // Trigger load once on client side
+  onMounted(() => {
+    if (process.client && !isCartInitialized.value && !isFetchingCart.value) {
+      loadCart()
+    }
+  })
+
+  // Watch for language changes and refresh localized cart names
+  watch(currentLanguage, () => {
+    if (process.client && isCartInitialized.value) {
+      loadCart(true)
+    }
+  })
 
   const toggleCart = () => {
-    isCartOpen.value = !isCartOpen.value;
-  };
+    isCartOpenState.value = !isCartOpenState.value
+  }
 
   const openCart = () => {
-    isCartOpen.value = true;
-  };
+    isCartOpenState.value = true
+  }
 
   const closeCart = () => {
-    isCartOpen.value = false;
-  };
+    isCartOpenState.value = false
+  }
 
-  const addToCart = (product: Product, quantity: number = 1, size?: string, color?: string) => {
-    const existingItemIndex = cart.value.findIndex(
-      (item) => item.product.id === product.id && item.selectedSize === size && item.selectedColor === color
-    );
+  /**
+   * Add item to cart
+   */
+  const addToCart = async (product: Product, quantity: number = 1, size?: string, color?: string) => {
+    if (!product || !product.id) return
 
-    if (existingItemIndex > -1) {
-      cart.value[existingItemIndex].quantity += quantity;
+    // Optimistic local update
+    const existingIndex = globalCartItems.value.findIndex(
+      (item) => String(item.product?.id) === String(product.id) && item.selectedSize === size && item.selectedColor === color
+    )
+
+    if (existingIndex > -1) {
+      globalCartItems.value[existingIndex].quantity += quantity
     } else {
-      cart.value.push({
+      globalCartItems.value.push({
+        id: `cart-${product.id}-${Date.now()}`,
         product,
         quantity,
         selectedSize: size,
-        selectedColor: color,
-      });
+        selectedColor: color
+      })
     }
-  };
 
-  const removeFromCart = (productId: string | number) => {
-    cart.value = cart.value.filter((item) => item.product.id !== productId);
-  };
+    const prodTitle = currentLanguage.value === 'en' ? (product.title_en || product.name_en || product.title || product.name) : (product.title || product.name)
+    toast.success(currentLanguage.value === 'en' ? 'Item added to cart' : 'تمت إضافة المنتج إلى السلة', prodTitle)
 
-  const updateQuantity = (productId: string | number, quantity: number) => {
-    const item = cart.value.find((item) => item.product.id === productId);
-    if (item) {
-      if (quantity <= 0) {
-        removeFromCart(productId);
-      } else {
-        item.quantity = quantity;
+    // Backend sync
+    try {
+      await cartApiService.addToCart(product, quantity)
+    } catch (e) {
+      console.warn('[useCart] API sync fallback:', e)
+    } finally {
+      await loadCart(true)
+    }
+  }
+
+  /**
+   * Remove item from cart by product.id or cart item id
+   */
+  const removeFromCart = async (targetId: string | number) => {
+    if (!targetId) return
+
+    const index = globalCartItems.value.findIndex(
+      (item) => String(item.id) === String(targetId) || String(item.product?.id) === String(targetId)
+    )
+
+    if (index > -1) {
+      const removedItem = globalCartItems.value.splice(index, 1)[0]
+      const apiProductId = removedItem?.product?.id || targetId
+
+      toast.info(currentLanguage.value === 'en' ? 'Item removed from cart' : 'تمت إزالة المنتج من السلة')
+
+      try {
+        await cartApiService.removeFromCart(apiProductId)
+      } catch (e) {
+        console.warn('[useCart] Remove API sync fallback:', e)
+      } finally {
+        await loadCart(true)
       }
     }
-  };
+  }
+
+  /**
+   * Update item quantity by product.id or cart item id
+   */
+  const updateQuantity = async (targetId: string | number, newQty: number) => {
+    if (!targetId) return
+
+    const item = globalCartItems.value.find(
+      (i) => String(i.id) === String(targetId) || String(i.product?.id) === String(targetId)
+    )
+
+    if (!item) return
+
+    if (newQty <= 0) {
+      await removeFromCart(targetId)
+      return
+    }
+
+    item.quantity = newQty
+
+    try {
+      await cartApiService.updateQuantity(item.product.id, newQty)
+    } catch (e) {
+      console.warn('[useCart] Update Qty API sync fallback:', e)
+    } finally {
+      await loadCart(true)
+    }
+  }
+
+  /**
+   * Clear entire cart
+   */
+  const clearCart = async () => {
+    globalCartItems.value = []
+    try {
+      await cartApiService.clearAllCart()
+      toast.info(currentLanguage.value === 'en' ? 'Cart cleared' : 'تم تفريغ السلة')
+    } catch (e) {
+      console.warn('[useCart] Clear cart API error:', e)
+    } finally {
+      await loadCart(true)
+    }
+  }
 
   const cartCount = computed(() => {
-    return cart.value.reduce((total, item) => total + item.quantity, 0);
-  });
+    return globalCartItems.value.reduce((total, item) => total + (item.quantity || 1), 0)
+  })
 
   const cartTotal = computed(() => {
-    return cart.value.reduce((total, item) => total + item.product.price * item.quantity, 0);
-  });
+    return globalCartItems.value.reduce((total, item) => {
+      const price = typeof item.product?.price === 'number' ? item.product.price : Number(item.product?.price || 0)
+      return total + (isNaN(price) ? 0 : price) * (item.quantity || 1)
+    }, 0)
+  })
 
   const formattedCartTotal = computed(() => {
-    const total = cartTotal.value;
-    return total.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' EGP';
-  });
+    return formatCurrency(cartTotal.value || 0)
+  })
 
   return {
-    cart,
-    isCartOpen,
+    cart: globalCartItems,
+    isCartOpen: isCartOpenState,
+    isCartLoading: isCartLoadingState,
+    cartCount,
+    cartTotal,
+    formattedCartTotal,
+    loadCart,
     toggleCart,
     openCart,
     closeCart,
     addToCart,
     removeFromCart,
     updateQuantity,
-    cartCount,
-    cartTotal,
-    formattedCartTotal,
-  };
-};
+    clearCart
+  }
+}

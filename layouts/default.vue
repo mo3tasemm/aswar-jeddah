@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-white text-slate-900 font-sans dir-rtl">
+  <div class="min-h-screen flex flex-col bg-white text-slate-900 font-sans" :dir="dir">
     <!-- Main Header -->
     <TheHeader />
     
@@ -25,4 +25,7 @@ import TheFooter from '~/components/layout/TheFooter.vue'
 import CartDrawer from '~/components/cart/CartDrawer.vue'
 import LoginDrawer from '~/components/auth/LoginDrawer.vue'
 import ScrollToTop from '~/components/common/ScrollToTop.vue'
+import { useLanguage } from '~/composables/useLanguage'
+
+const { dir } = useLanguage()
 </script>

@@ -223,6 +223,6 @@ const save = async () => {
     isEdit.value ? 'تم حفظ بيانات المشرف بنجاح.' : 'تم إضافة المشرف الجديد بنجاح.'
   )
   
-  router.push('/dashboard/staff')
+  router.push('/admin/staff')
 }
 </script>

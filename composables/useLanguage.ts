@@ -1,0 +1,374 @@
+/**
+ * Centralized Multi-Language (i18n / Locale) Management Composable for Nuxt 3 / Vue 3
+ * Provides reactive language state, translation dictionary, LTR/RTL layout syncing, API locale mapping, and Currency Formatting.
+ */
+import { ref, computed, watch, onMounted } from 'vue'
+import { useState, useHead } from '#imports'
+
+export type LanguageCode = 'ar' | 'en'
+export type ApiLocaleCode = 'sa' | 'en'
+
+// Dictionary type definition
+type TranslationDictionary = Record<string, Record<LanguageCode, string>>
+
+const translations: TranslationDictionary = {
+  // Navigation & Header
+  'nav.home': { ar: 'الرئيسية', en: 'Home' },
+  'nav.shop': { ar: 'المتجر', en: 'Shop' },
+  'nav.categories': { ar: 'الأقسام', en: 'Categories' },
+  'nav.search_placeholder': { ar: 'دور واختر على راحتك..', en: 'Search for products...' },
+  'nav.account': { ar: 'حسابي', en: 'My Account' },
+  'nav.login': { ar: 'تسجيل الدخول', en: 'Login / Register' },
+  'nav.hotline': { ar: 'الخط الساخن', en: 'Hotline' },
+  'nav.cart': { ar: 'السلة', en: 'Cart' },
+
+  // Categories
+  'cat.appliances': { ar: 'الأجهزة الكهربائية', en: 'Electric Appliances' },
+  'cat.houseware': { ar: 'الأدوات المنزلية', en: 'Houseware' },
+  'cat.security': { ar: 'النظم الأمنية', en: 'Security Systems' },
+  'cat.laptops': { ar: 'لاب توب وكمبيوتر', en: 'Laptops & Computers' },
+  'cat.networks': { ar: 'أنظمة الشبكات', en: 'Networks' },
+  'cat.pos': { ar: 'أنظمة الكاشير', en: 'POS Systems' },
+  'cat.mobile': { ar: 'موبايل وثابت', en: 'Mobiles & Phones' },
+  'cat.scooter': { ar: 'سكوتر', en: 'Scooters' },
+  'cat.blog': { ar: 'المدونة', en: 'Blog' },
+
+  // Product Details & Cards
+  'product.price': { ar: 'السعر', en: 'Price' },
+  'product.add_to_cart': { ar: 'إضافة إلى السلة', en: 'Add to Cart' },
+  'product.added_to_cart': { ar: 'تمت الإضافة للسلة', en: 'Added to Cart' },
+  'product.out_of_stock': { ar: 'غير متوفر بالمخزون', en: 'Out of Stock' },
+  'product.in_stock': { ar: 'متاح بالمخزون', en: 'In Stock' },
+  'product.pre_order': { ar: 'متاح للحجز المسبق', en: 'Pre-order Available' },
+  'product.sku': { ar: 'رمز المنتج SKU:', en: 'SKU:' },
+  'product.quick_view': { ar: 'نظرة سريعة', en: 'Quick View' },
+  'product.wishlist': { ar: 'المفضلة', en: 'Wishlist' },
+  'product.compare': { ar: 'مقارنة', en: 'Compare' },
+  'product.discount': { ar: 'خصم', en: 'OFF' },
+  'product.currency': { ar: 'ر.س', en: 'SAR' },
+
+  // Shop Page & Filters
+  'shop.title': { ar: 'متجر الأجهزة الكهربائية', en: 'Electric Appliances Store' },
+  'shop.subtitle': { ar: 'استكشف أحدث منتجات الأجهزة المنزلية بأسعار استثنائية وضمان أصلي 100%.', en: 'Explore the latest home appliances at exceptional prices with 100% original warranty.' },
+  'shop.filters': { ar: 'الفلاتر', en: 'Filters' },
+  'shop.sort_by': { ar: 'ترتيب حسب:', en: 'Sort By:' },
+  'shop.sort_latest': { ar: 'الأحدث', en: 'Latest' },
+  'shop.sort_price_low': { ar: 'السعر: من الأقل للأعلى', en: 'Price: Low to High' },
+  'shop.sort_price_high': { ar: 'السعر: من الأعلى للأقل', en: 'Price: High to Low' },
+  'shop.reset_filters': { ar: 'إعادة ضبط الفلاتر', en: 'Reset Filters' },
+  'shop.no_products_title': { ar: 'عذراً، لم نجد أي نتائج', en: 'Sorry, no products found' },
+  'shop.no_products_desc': { ar: 'لم نتمكن من العثور على منتجات تطابق الفلاتر أو الكلمات البحثية المدخلة.', en: 'We could not find products matching your filters or search terms.' },
+  'shop.retry': { ar: 'إعادة المحاولة', en: 'Try Again' },
+  'shop.refresh': { ar: 'تحديث المنتجات', en: 'Refresh Products' },
+
+  // Drawers & Cart
+  'cart.title': { ar: 'سلة المشتريات', en: 'Shopping Cart' },
+  'cart.compare': { ar: 'المقارنة', en: 'Compare' },
+  'cart.wishlist': { ar: 'المفضلة', en: 'Wishlist' },
+  'cart.empty_title': { ar: 'سلة المشتريات فارغة', en: 'Your Cart is Empty' },
+  'cart.empty_desc': { ar: 'لم تقم بإضافة أي منتجات للسلة بعد. تصفح منتجاتنا واكتشف العروض المميزة!', en: 'You haven\'t added any products to your cart yet. Explore our products and discover great deals!' },
+  'cart.back_to_shop': { ar: 'العودة للمتجر', en: 'Back to Shop' },
+  'cart.subtotal': { ar: 'المجموع الفرعي:', en: 'Subtotal:' },
+  'cart.taxes_note': { ar: 'الضرائب ورسوم الشحن تُحسب عند إتمام الطلب.', en: 'Taxes and shipping calculated at checkout.' },
+  'cart.checkout_btn': { ar: 'الانتقال للدفع وإتمام الشراء', en: 'Proceed to Checkout' },
+
+  // Checkout Page
+  'checkout.title': { ar: 'إتمام الشراء | أسوار جدة', en: 'Checkout | Aswar Jeddah' },
+  'checkout.secure_shopping': { ar: 'تسوق آمن 100%', en: '100% Secure Shopping' },
+  'checkout.step_cart': { ar: 'السلة', en: 'Cart' },
+  'checkout.step_shipping': { ar: 'التوصيل', en: 'Shipping' },
+  'checkout.step_payment': { ar: 'الدفع والتأكيد', en: 'Payment & Confirmation' },
+  'checkout.delivery_address': { ar: 'عنوان التوصيل', en: 'Delivery Address' },
+  'checkout.add_address': { ar: 'إضافة عنوان جديد', en: 'Add New Address' },
+  'checkout.loading_addresses': { ar: 'جاري تحميل عناوينك...', en: 'Loading your addresses...' },
+  'checkout.no_addresses': { ar: 'لم تقم بإضافة عنوان توصيل بعد.', en: 'No delivery address added yet.' },
+  'checkout.add_first_address': { ar: 'إضافة عنوانك الأول', en: 'Add Your First Address' },
+  'checkout.default_home': { ar: 'المنزل', en: 'Home' },
+  'checkout.select_payment': { ar: 'اختر طريقة الدفع المناسبة', en: 'Select Payment Method' },
+  'checkout.offline_payment_title': { ar: 'التحويل البنكي أو الدفع اليدوي (Offline Payment)', en: 'Bank Transfer / Manual Payment' },
+  'checkout.recommended_badge': { ar: 'خيار معتمد', en: 'Recommended' },
+  'checkout.offline_payment_desc': { ar: 'تحويل المبلغ وإرفاق رقم الإيصال أو التواصل معنا عبر الواتساب لتأكيد الطلب بسرعة.', en: 'Transfer the amount and contact us via WhatsApp to quickly confirm your order.' },
+  'checkout.paymob_title': { ar: 'الدفع الإلكتروني (Paymob / مدى)', en: 'Digital Payment (Paymob / Mada)' },
+  'checkout.tabby_title': { ar: 'تقسيط تابي / تمارا', en: 'Tabby / Tamara Installments' },
+  'checkout.interest_free': { ar: 'بدون فوائد', en: 'Interest-Free' },
+  'checkout.offline_instructions_title': { ar: 'تعليمات الدفع عبر التحويل البنكي / اليدوي:', en: 'Bank Transfer Payment Instructions:' },
+  'checkout.offline_instruction_1': { ar: 'عند الضغط على "تأكيد وإتمام الطلب"، سيتم إنشاء طلبك وتخصيص رقم طلب رسمي لك.', en: 'Upon clicking "Place Order", your order will be generated with an official ID.' },
+  'checkout.offline_instruction_2': { ar: 'يمكنك إكمال عملية التحويل البنكي وإرسال إيصال التحويل إلى خدمة العملاء عبر الواتساب لتأكيد الشحنة فوراً.', en: 'Send your transfer receipt to customer support via WhatsApp for immediate confirmation.' },
+  'checkout.order_notes_label': { ar: 'ملاحظات على الطلب (اختياري)', en: 'Order Notes (Optional)' },
+  'checkout.order_notes_placeholder': { ar: 'أضف أي ملاحظات خاصة بالتوصيل أو التغليف...', en: 'Add any special delivery or packaging instructions...' },
+  'checkout.order_summary': { ar: 'ملخص الطلب', en: 'Order Summary' },
+  'checkout.have_coupon': { ar: 'لديك كود خصم؟', en: 'Have a promo code?' },
+  'checkout.apply_coupon': { ar: 'تطبيق', en: 'Apply' },
+  'checkout.free_shipping': { ar: 'شحن مجاني', en: 'Free Shipping' },
+  'checkout.total_incl_vat': { ar: '(شامل الضريبة)', en: '(Incl. VAT)' },
+  'checkout.proceed_to_payment': { ar: 'متابعة إلى الدفع', en: 'Proceed to Payment' },
+  'checkout.place_order': { ar: 'تأكيد وإتمام الطلب', en: 'Place Order' },
+  'checkout.back_to_address': { ar: 'العودة لعنوان التوصيل', en: 'Back to Shipping Address' },
+  'checkout.secure_payment_badge': { ar: 'دفع إلكتروني آمن 100%', en: '100% Secure Payment' },
+  'checkout.guarantee_badge': { ar: 'ضمان ذهبي معتمد', en: 'Certified Guarantee' },
+
+  // Auth Page & Drawer & Forgot Password
+  'auth.login_register_title': { ar: 'تسجيل الدخول والإنشاء | أسوار جدة', en: 'Login & Register | Aswar Jeddah' },
+  'auth.login_tab': { ar: 'تسجيل الدخول', en: 'Sign In' },
+  'auth.register_tab': { ar: 'إنشاء حساب', en: 'Sign Up' },
+  'auth.welcome_title': { ar: 'أهلاً بك في متجر أسوار جدة', en: 'Welcome to Aswar Jeddah' },
+  'auth.welcome_desc': { ar: 'سجّل دخولك للوصول إلى طلباتك والمفضلة وحسابك الشخصي بسهولة.', en: 'Log in to easily access your orders, wishlist, and personal account.' },
+  'auth.email_label': { ar: 'البريد الإلكتروني', en: 'Email Address' },
+  'auth.password_label': { ar: 'كلمة المرور', en: 'Password' },
+  'auth.login_btn': { ar: 'تسجيل الدخول', en: 'Sign In' },
+  'auth.logging_in': { ar: 'جاري تسجيل الدخول...', en: 'Signing in...' },
+  'auth.login_error': { ar: 'البريد الإلكتروني أو كلمة المرور غير صحيحة.', en: 'Invalid email or password.' },
+  'auth.forgot_password': { ar: 'هل نسيت كلمة المرور؟', en: 'Forgot password?' },
+  'auth.forgot_password_title': { ar: 'استعادة كلمة المرور', en: 'Forgot Password' },
+  'auth.forgot_password_page_title': { ar: 'استعادة كلمة المرور | أسوار جدة', en: 'Reset Password | Aswar Jeddah' },
+  'auth.forgot_password_desc': { ar: 'أدخل بريدك الإلكتروني المسجل وسنرسل لك رابطاً آمناً لإعادة ضبط كلمة المرور الخاصة بك.', en: 'Enter your registered email address and we will send you a secure link to reset your password.' },
+  'auth.send_reset_link': { ar: 'إرسال رابط إعادة الضبط', en: 'Send Reset Link' },
+  'auth.sending': { ar: 'جاري الإرسال...', en: 'Sending...' },
+  'auth.back_to_login': { ar: 'العودة لتسجيل الدخول', en: 'Back to Login' },
+  'auth.reset_link_sent': { ar: 'تم إرسال رابط إعادة الضبط إلى بريدك الإلكتروني بنجاح.', en: 'Reset link has been sent to your email successfully.' },
+  'auth.no_account': { ar: 'ليس لديك حساب؟', en: 'Don\'t have an account?' },
+  'auth.register_now': { ar: 'إنشاء حساب جديد', en: 'Sign up now' },
+  'auth.create_account': { ar: 'إنشاء حساب جديد', en: 'Create New Account' },
+  'auth.or_register_with': { ar: 'أو قم بالتسجيل عبر إدخال بياناتك', en: 'Or register with your email details' },
+  'auth.first_name': { ar: 'الاسم الأول', en: 'First Name' },
+  'auth.last_name': { ar: 'اسم العائلة', en: 'Last Name' },
+  'auth.email_placeholder': { ar: 'البريد الإلكتروني', en: 'Email Address' },
+  'auth.phone_placeholder': { ar: 'رقم الهاتف (مثال: 05xxxxxxxx)', en: 'Phone Number (e.g. 05xxxxxxxx)' },
+  'auth.password_placeholder': { ar: 'كلمة المرور (6 أحرف على الأقل)', en: 'Password (min 6 characters)' },
+  'auth.creating_account': { ar: 'جاري الإنشاء...', en: 'Creating Account...' },
+  'auth.create_account_btn': { ar: 'إنشاء الحساب', en: 'Create Account' },
+  'auth.login_title': { ar: 'تسجيل الدخول', en: 'Sign In' },
+  'auth.or_login_with': { ar: 'أو استخدم حسابك المسجل', en: 'Or sign in with your registered account' },
+  'auth.email_or_phone_placeholder': { ar: 'البريد الإلكتروني / رقم الهاتف', en: 'Email or Phone Number' },
+  'auth.welcome_back_title': { ar: 'مرحباً بك مجدداً!', en: 'Welcome Back!' },
+  'auth.welcome_back_desc': { ar: 'لمتابعة تسوقك والإطلاع على طلباتك وسلتك، يرجى تسجيل الدخول ببياناتك', en: 'To continue shopping and view your orders, please log in with your credentials' },
+  'auth.welcome_new_title': { ar: 'مرحباً بك في أسوار جدة!', en: 'Welcome to Aswar Jeddah!' },
+  'auth.welcome_new_desc': { ar: 'أنشئ حسابك الآن واستمتع بأفضل العروض الحصرية والأجهزة الإلكترونية والمنزلية', en: 'Create your account now and enjoy exclusive deals on electronics and home appliances' },
+
+  // Account Dashboard Pages
+  'account.overview': { ar: 'نظرة عامة', en: 'Overview' },
+  'account.orders': { ar: 'طلباتي', en: 'My Orders' },
+  'account.coupons': { ar: 'قسائم التخفيض والعروض', en: 'Coupons & Offers' },
+  'account.details': { ar: 'تفاصيل الحساب', en: 'Account Details' },
+  'account.addresses': { ar: 'العناوين المحفوظة', en: 'Saved Addresses' },
+  'account.wishlist': { ar: 'المفضلة', en: 'Wishlist' },
+  'account.compare': { ar: 'مقارنة المنتجات', en: 'Product Comparison' },
+  'account.logout': { ar: 'تسجيل الخروج', en: 'Logout' },
+  'account.customer': { ar: 'عميل', en: 'Customer' },
+  'account.welcome_back': { ar: 'مرحباً بعودتك إلى أسوار جدة', en: 'Welcome back to Aswar Jeddah' },
+  'account.welcome_user': { ar: 'أهلاً بك،', en: 'Welcome,' },
+  'account.dashboard_desc': { ar: 'هذه لوحة التحكم الخاصة بك. يمكنك من هنا تتبع طلباتك الحالية، استعراض فواتيرك، إدارة عناوينك بكل سهولة وتحديث بياناتك الشخصية للحصول على تجربة تسوق أفضل.', en: 'This is your dashboard. From here, you can track your current orders, review your invoices, easily manage your addresses, and update your personal details for a better shopping experience.' },
+  'account.total_orders': { ar: 'إجمالي الطلبات', en: 'Total Orders' },
+  'account.processing_orders': { ar: 'طلبات قيد التجهيز', en: 'Processing Orders' },
+  'account.completed_orders': { ar: 'طلبات مكتملة', en: 'Completed Orders' },
+  'account.loading_orders': { ar: 'جاري جلب أحدث الطلبات من السيرفر...', en: 'Loading latest orders from server...' },
+  'account.recent_orders': { ar: 'أحدث الطلبات', en: 'Recent Orders' },
+
+  // Orders Table & Page
+  'orders.track_subtitle': { ar: 'متابعة أحدث شحناتك وفواتيرك الحالية', en: 'Track your latest shipments and invoices' },
+  'orders.view_all': { ar: 'عرض جميع الطلبات', en: 'View All Orders' },
+  'orders.order_id': { ar: 'رقم الطلب', en: 'Order ID' },
+  'orders.date': { ar: 'التاريخ', en: 'Date' },
+  'orders.total': { ar: 'الإجمالي', en: 'Total' },
+  'orders.status': { ar: 'الحالة', en: 'Status' },
+  'orders.action': { ar: 'الإجراء', en: 'Action' },
+  'orders.details': { ar: 'تفاصيل الطلب', en: 'View Details' },
+  'orders.empty': { ar: 'لا تتوفر أي طلبات حالياً.', en: 'No orders available currently.' },
+  'orders.completed': { ar: 'مكتمل', en: 'Completed' },
+  'orders.cancelled': { ar: 'ملغي', en: 'Cancelled' },
+  'orders.processing': { ar: 'قيد التجهيز', en: 'Processing' },
+
+  // Compare Page
+  'compare.title': { ar: 'مقارنة المنتجات', en: 'Product Comparison' },
+  'compare.subtitle': { ar: 'قارن بين مواصفات المنتجات وأسعارها لتتخذ القرار الأفضل والمناسب لاحتياجاتك.', en: 'Compare product specifications and prices to make the best decision for your needs.' },
+  'compare.clear_all': { ar: 'تفريغ القائمة', en: 'Clear List' },
+  'compare.empty_title': { ar: 'قائمة المقارنة فارغة', en: 'Comparison List is Empty' },
+  'compare.empty_desc': { ar: 'قم بإضافة المنتجات لقائمة المقارنة لمقارنة الأسعار والمواصفات بسهولة.', en: 'Add products to your compare list to easily review prices and specs.' },
+  'compare.features': { ar: 'المواصفات والخصائص', en: 'Specifications & Features' },
+  'compare.category': { ar: 'الأقسام', en: 'Category' },
+  'compare.brand': { ar: 'العلامة التجارية', en: 'Brand' },
+  'compare.price': { ar: 'السعر النهائي', en: 'Final Price' },
+  'compare.availability': { ar: 'الحالة بالمخزون', en: 'Stock Status' },
+  'compare.rating': { ar: 'تقييم العملاء', en: 'Customer Rating' },
+
+  // Wishlist Page
+  'wishlist.subtitle': { ar: 'احفظ منتجاتك المفضلة للعودة إليها والشراء بسهولة في أي وقت.', en: 'Save your favorite products to easily return and purchase anytime.' },
+  'wishlist.empty_title': { ar: 'قائمة المفضلة فارغة', en: 'Wishlist is Empty' },
+  'wishlist.empty_desc': { ar: 'لم تقم بإضافة أي منتج للمفضلة بعد. تصفح منتجاتنا واضغط رمز القلب لحفظ المنتجات!', en: 'You haven\'t added any products to your wishlist yet. Explore our store and click the heart icon!' },
+  'wishlist.clear_all': { ar: 'تفريغ المفضلة', en: 'Clear Wishlist' },
+
+  // Order Details Modal
+  'order.details_title': { ar: 'تفاصيل الطلب', en: 'Order Details' },
+  'order.date': { ar: 'تاريخ الطلب:', en: 'Order Date:' },
+  'order.canceled_title': { ar: 'تم إلغاء هذا الطلب', en: 'This Order Was Cancelled' },
+  'order.canceled_badge': { ar: 'ملغي', en: 'Cancelled' },
+  'order.canceled_desc': { ar: 'تم إلغاء هذا الطلب نهائياً بناءً على طلبك أو بقرار من النظام. لم يتم خصم أي مبالغ إضافية ولن يتم شحن أي منتجات لهذا الطلب.', en: 'This order was cancelled based on your request or system decision. No additional charges were made and no products will be shipped for this order.' },
+  'order.status_header': { ar: 'حالة الشحنة والطلب', en: 'Shipment & Order Status' },
+  'order.step_placed': { ar: 'تم الطلب', en: 'Placed' },
+  'order.step_confirmed': { ar: 'تم التأكيد', en: 'Confirmed' },
+  'order.step_processing': { ar: 'قيد التجهيز', en: 'Processing' },
+  'order.step_shipped': { ar: 'تم الشحن', en: 'Shipped' },
+  'order.step_delivered': { ar: 'تم التوصيل', en: 'Delivered' },
+  'order.items_header': { ar: 'المنتجات المطلوبة في هذا الطلب', en: 'Items in this order' },
+  'order.items_count': { ar: 'منتجات', en: 'items' },
+  'order.empty_items': { ar: 'لا تتوفر قائمة تفاصيل للمنتجات في هذا الطلب حالياً.', en: 'No details available for products in this order.' },
+  'order.qty': { ar: 'الكمية:', en: 'Qty:' },
+  'order.shipping_info': { ar: 'معلومات الشحن والتوصيل', en: 'Shipping & Delivery Info' },
+  'order.payment_method': { ar: 'طريقة الدفع:', en: 'Payment Method:' },
+  'order.invoice_summary': { ar: 'ملخص الفاتورة', en: 'Invoice Summary' },
+  'order.subtotal': { ar: 'المجموع الفرعي:', en: 'Subtotal:' },
+  'order.shipping_fee': { ar: 'رسوم الشحن:', en: 'Shipping Fee:' },
+  'order.discount': { ar: 'الخصم المطبق:', en: 'Discount Applied:' },
+  'order.grand_total': { ar: 'الإجمالي النهائي:', en: 'Grand Total:' },
+  'order.reorder': { ar: 'إعادة الطلب', en: 'Reorder' },
+  'order.reordering': { ar: 'جاري التكرار...', en: 'Reordering...' },
+  'order.refund_request': { ar: 'طلب استرجاع', en: 'Refund Request' },
+  'order.refund_applied': { ar: 'تم تقديم طلب استرجاع', en: 'Refund Requested' },
+  'order.refund_submitting': { ar: 'جاري التقديم...', en: 'Submitting...' },
+  'order.cancel_order': { ar: 'إلغاء الطلب', en: 'Cancel Order' },
+  'order.support': { ar: 'الدعم الفني', en: 'Support' },
+  'order.close': { ar: 'إغلاق', en: 'Close' },
+
+  // Addresses Page
+  'addresses.add_new': { ar: 'إضافة عنوان جديد', en: 'Add New Address' },
+  'addresses.default_badge': { ar: 'افتراضي', en: 'Default' },
+  'addresses.subtitle': { ar: 'إدارة العناوين المحفوظة لتسهيل عملية الدفع في طلباتك القادمة.', en: 'Manage saved addresses for faster checkout on your future orders.' },
+  'addresses.loading': { ar: 'جاري تحميل قائمة العناوين المحفوظة...', en: 'Loading saved addresses list...' },
+  'addresses.empty_title': { ar: 'لا توجد عناوين محفوظة', en: 'No Saved Addresses' },
+  'addresses.empty_desc': { ar: 'قم بإضافة عنوان التوصيل الخاص بك لتتمكن من إتمام طلباتك بكل سرعة وسهولة.', en: 'Add your delivery address to quickly complete your checkout process.' },
+  'addresses.add_first': { ar: 'إضافة عنوانك الأول', en: 'Add Your First Address' },
+  'addresses.modal_title': { ar: 'إضافة عنوان توصيل جديد', en: 'Add New Delivery Address' },
+  'addresses.recipient_name': { ar: 'اسم المستلم', en: 'Recipient Name' },
+  'addresses.phone': { ar: 'رقم الجوال', en: 'Phone Number' },
+  'addresses.detailed': { ar: 'العنوان التفصيلي', en: 'Detailed Address' },
+  'addresses.save': { ar: 'حفظ العنوان', en: 'Save Address' },
+  'addresses.saving': { ar: 'جاري الحفظ...', en: 'Saving...' },
+  'addresses.default_title': { ar: 'عنوان التوصيل', en: 'Delivery Address' },
+
+  // Coupons Page
+  'coupons.subtitle': { ar: 'استمتع بأقوى الخصومات وأكواد التخفيض الحصرية المتاحة لحسابك واستخدمها مباشرة فور التسوق.', en: 'Enjoy exclusive discount codes available for your account and apply them directly while shopping.' },
+  'coupons.available': { ar: 'قسائم التخفيض المتاحة', en: 'Available Coupons' },
+  'coupons.hint': { ar: 'انسخ كود الكوبون أو اضغط "تطبيق على السلة" للاستفادة الفورية بالخصم.', en: 'Copy coupon code or click "Apply to Cart" for immediate discount.' },
+  'coupons.active_count': { ar: 'قسائم فعالة', en: 'Active Coupons' },
+  'coupons.loading': { ar: 'جاري جلب القسائم والعروض الفعالة...', en: 'Loading active coupons and offers...' },
+  'coupons.empty_title': { ar: 'لا تتوفر قسائم تخفيض حالياً', en: 'No Coupons Available Currently' },
+  'coupons.empty_desc': { ar: 'تابعنا باستمرار للاستفادة من أحدث العروض وأكواد التخفيض الموسمية الحصرية.', en: 'Follow us regularly to benefit from our latest seasonal and exclusive discount codes.' },
+  'coupons.expires': { ar: 'ينتهي:', en: 'Expires:' },
+  'coupons.copy': { ar: 'نسخ', en: 'Copy' },
+  'coupons.apply': { ar: 'تطبيق على السلة', en: 'Apply to Cart' },
+  'coupons.applying': { ar: 'جاري التطبيق...', en: 'Applying...' },
+  'coupons.off': { ar: 'خصم', en: 'OFF' },
+
+  // Actions & Common
+  'common.save': { ar: 'حفظ', en: 'Save' },
+  'common.cancel': { ar: 'إلغاء', en: 'Cancel' },
+  'common.delete': { ar: 'حذف', en: 'Delete' },
+  'common.edit': { ar: 'تعديل', en: 'Edit' },
+  'common.back': { ar: 'العودة', en: 'Back' },
+  'common.close': { ar: 'إغلاق', en: 'Close' },
+  'common.loading': { ar: 'جاري التحميل...', en: 'Loading...' },
+  'common.view_all': { ar: 'عرض الكل', en: 'View All' },
+  'common.language': { ar: 'اللغة', en: 'Language' },
+  'common.arabic': { ar: 'العربية', en: 'Arabic' },
+  'common.english': { ar: 'English', en: 'English' }
+}
+
+export const useLanguage = () => {
+  // Global State for Language ('ar' | 'en')
+  const currentLanguage = useState<LanguageCode>('appLanguage', () => 'ar')
+
+  // Computed API Locale Parameter Code ('sa' for Arabic API query, 'en' for English API query)
+  const apiLocale = computed<ApiLocaleCode>(() => (currentLanguage.value === 'en' ? 'en' : 'sa'))
+
+  // Computed Text Direction ('rtl' | 'ltr')
+  const dir = computed<'rtl' | 'ltr'>(() => (currentLanguage.value === 'en' ? 'ltr' : 'rtl'))
+  const isRtl = computed<boolean>(() => dir.value === 'rtl')
+
+  /**
+   * Update Document HTML Attributes (dir, lang)
+   */
+  const updateHtmlAttributes = (lang: LanguageCode) => {
+    if (process.client) {
+      const targetDir = lang === 'en' ? 'ltr' : 'rtl'
+      document.documentElement.setAttribute('dir', targetDir)
+      document.documentElement.setAttribute('lang', lang)
+      localStorage.setItem('aswar_lang', lang)
+    }
+  }
+
+  /**
+   * Switch Language Function
+   */
+  const setLanguage = (lang: LanguageCode) => {
+    if (currentLanguage.value !== lang) {
+      currentLanguage.value = lang
+      updateHtmlAttributes(lang)
+    }
+  }
+
+  /**
+   * Toggle Between Arabic and English
+   */
+  const toggleLanguage = () => {
+    const nextLang: LanguageCode = currentLanguage.value === 'ar' ? 'en' : 'ar'
+    setLanguage(nextLang)
+  }
+
+  /**
+   * Translate Helper Function (t)
+   */
+  const t = (key: string, fallback?: string): string => {
+    const dictItem = translations[key]
+    if (dictItem && dictItem[currentLanguage.value]) {
+      return dictItem[currentLanguage.value]
+    }
+    return fallback || key
+  }
+
+  /**
+   * Central Currency Formatter Helper Function
+   * Formats numbers and currency according to active locale:
+   * - In English (LTR): "399 SAR"
+   * - In Arabic (RTL): "399 ر.س"
+   */
+  const formatCurrency = (amount: number | string): string => {
+    let num = 0
+    if (typeof amount === 'number') {
+      num = amount
+    } else if (typeof amount === 'string') {
+      const cleanStr = amount.replace(/[^0-9.-]+/g, '')
+      num = Number(cleanStr)
+    }
+    if (isNaN(num)) num = 0
+
+    if (currentLanguage.value === 'en') {
+      return `${num.toLocaleString('en-US')} SAR`
+    }
+    return `${num.toLocaleString('ar-SA')} ر.س`
+  }
+
+  // Sync on Client Mount
+  onMounted(() => {
+    if (process.client) {
+      const savedLang = localStorage.getItem('aswar_lang') as LanguageCode | null
+      if (savedLang && (savedLang === 'ar' || savedLang === 'en')) {
+        currentLanguage.value = savedLang
+        updateHtmlAttributes(savedLang)
+      } else {
+        updateHtmlAttributes(currentLanguage.value)
+      }
+    }
+  })
+
+  return {
+    currentLanguage,
+    apiLocale,
+    dir,
+    layoutDirection: dir,
+    isRtl,
+    setLanguage,
+    toggleLanguage,
+    t,
+    formatCurrency
+  }
+}

@@ -76,6 +76,11 @@ const layoutState = ref<HomeSection[]>([
       id: 'sec-side-banner-1',
       type: 'side_banner',
       sideBannerImage: 'https://images.unsplash.com/photo-1590725140246-20acdee442be?q=80&w=800&auto=format&fit=crop',
+      sideBannerImages: [
+        'https://images.unsplash.com/photo-1590725140246-20acdee442be?q=80&w=800&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=800&q=80',
+        'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=800&q=80'
+      ],
       sideBannerUrl: '/brand/smeg',
       category: 'أجهزة المطبخ',
       limit: 5
@@ -84,6 +89,10 @@ const layoutState = ref<HomeSection[]>([
       id: 'sec-side-banner-2',
       type: 'side_banner',
       sideBannerImage: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=800&q=80',
+      sideBannerImages: [
+        'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=800&q=80',
+        'https://images.unsplash.com/photo-1590725140246-20acdee442be?q=80&w=800&auto=format&fit=crop'
+      ],
       sideBannerUrl: '/brand/philips',
       brandName: 'PHILIPS',
       limit: 10

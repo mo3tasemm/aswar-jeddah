@@ -40,17 +40,31 @@ const handleAddToCart = () => {
   openCart()
 }
 
-const handleScroll = () => {
-  // Show only after scrolling down 400px (past the main buy button usually)
-  isVisible.value = window.scrollY > 400
-}
-
 onMounted(() => {
-  window.addEventListener('scroll', handleScroll, { passive: true })
-})
+  let ticking = false
+  const updateScroll = () => {
+    const y = window.scrollY
+    if (!isVisible.value && y > 400) {
+      isVisible.value = true
+    } else if (isVisible.value && y < 300) {
+      isVisible.value = false
+    }
+    ticking = false
+  }
 
-onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll)
+  const handleScroll = () => {
+    if (!ticking) {
+      window.requestAnimationFrame(updateScroll)
+      ticking = true
+    }
+  }
+
+  window.addEventListener('scroll', handleScroll, { passive: true })
+  updateScroll()
+
+  onUnmounted(() => {
+    window.removeEventListener('scroll', handleScroll)
+  })
 })
 </script>
 

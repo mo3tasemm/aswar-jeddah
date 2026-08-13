@@ -1,5 +1,5 @@
 <template>
-  <footer class="w-full dir-rtl" dir="rtl">
+  <footer class="w-full" :dir="layoutDirection">
     
     <!-- 1. Main Footer Content (Dark Navy #0B0E28) -->
     <div class="bg-[#0B0E28] text-slate-300 pt-16 pb-12 border-t border-slate-800">
@@ -12,14 +12,14 @@
             <NuxtLink to="/" class="inline-block">
               <img 
                 src="~/assets/images/Logo.png" 
-                alt="مكة ستور - Makka Store" 
+                alt="أسوار جدة - Aswar Jeddah" 
                 class="h-12 lg:h-14 w-auto object-contain" 
               />
             </NuxtLink>
 
             <!-- Description -->
             <p class="text-slate-400 text-sm leading-relaxed mt-4 mb-6">
-              مكة ستور وجهتك الأولى لأحدث أجهزة كهربائية وإلكترونيات تجمع بين الإبتكار، الأداء الممتاز، والتصميم الراقي.
+              أسوار جدة وجهتك الأولى لأحدث أجهزة كهربائية وإلكترونيات تجمع بين الإبتكار، الأداء الممتاز، والتصميم الراقي.
             </p>
 
             <!-- Social Media Title -->
@@ -72,14 +72,14 @@
 
           <!-- Column 2: Top Categories -->
           <div>
-            <h3 class="text-white font-bold text-lg mb-4 relative pb-2 after:content-[''] after:absolute after:right-0 after:bottom-0 after:w-8 after:h-0.5 after:bg-slate-600">
-              أهم الأقسام
+            <h3 class="text-white font-bold text-lg mb-4 relative pb-2 after:content-[''] after:absolute after:start-0 after:bottom-0 after:w-8 after:h-0.5 after:bg-slate-600">
+              {{ t('nav.categories') }}
             </h3>
             <ul class="space-y-1">
               <li v-for="link in categoryLinks" :key="link.name">
                 <NuxtLink 
                   :to="link.url" 
-                  class="transition-all duration-300 hover:text-white hover:-translate-x-1.5 block py-1.5 text-sm text-slate-400"
+                  class="transition-all duration-300 hover:text-white hover:translate-x-1.5 rtl:hover:-translate-x-1.5 block py-1.5 text-sm text-slate-400"
                 >
                   {{ link.name }}
                 </NuxtLink>
@@ -89,14 +89,14 @@
 
           <!-- Column 3: My Account -->
           <div>
-            <h3 class="text-white font-bold text-lg mb-4 relative pb-2 after:content-[''] after:absolute after:right-0 after:bottom-0 after:w-8 after:h-0.5 after:bg-slate-600">
-              حسابي
+            <h3 class="text-white font-bold text-lg mb-4 relative pb-2 after:content-[''] after:absolute after:start-0 after:bottom-0 after:w-8 after:h-0.5 after:bg-slate-600">
+              {{ t('nav.account') }}
             </h3>
             <ul class="space-y-1">
               <li v-for="link in accountLinks" :key="link.name">
                 <NuxtLink 
                   :to="link.url" 
-                  class="transition-all duration-300 hover:text-white hover:-translate-x-1.5 block py-1.5 text-sm text-slate-400"
+                  class="transition-all duration-300 hover:text-white hover:translate-x-1.5 rtl:hover:-translate-x-1.5 block py-1.5 text-sm text-slate-400"
                 >
                   {{ link.name }}
                 </NuxtLink>
@@ -104,19 +104,33 @@
             </ul>
           </div>
 
-          <!-- Column 4: Important Links -->
-          <div>
-            <h3 class="text-white font-bold text-lg mb-4 relative pb-2 after:content-[''] after:absolute after:right-0 after:bottom-0 after:w-8 after:h-0.5 after:bg-slate-600">
-              روابط هامة
+          <!-- Column 4: Contact & Hotline -->
+          <div class="space-y-4">
+            <h3 class="text-white font-bold text-lg mb-4 relative pb-2 after:content-[''] after:absolute after:start-0 after:bottom-0 after:w-8 after:h-0.5 after:bg-slate-600">
+              تواصل معنا
             </h3>
-            <ul class="space-y-1">
-              <li v-for="link in importantLinks" :key="link.name">
-                <NuxtLink 
-                  :to="link.url" 
-                  class="transition-all duration-300 hover:text-white hover:-translate-x-1.5 block py-1.5 text-sm text-slate-400"
-                >
-                  {{ link.name }}
-                </NuxtLink>
+            
+            <ul class="space-y-3 text-sm text-slate-400">
+              <li class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>المملكة العربية السعودية، جدة</span>
+              </li>
+
+              <li class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1.001 1.001 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+                <a href="tel:01286000037" class="hover:text-amber-400 transition-colors font-bold dir-ltr">01286000037</a>
+              </li>
+
+              <li class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <a href="mailto:info@aswarjeddah.com" class="hover:text-amber-400 transition-colors font-medium">info@aswarjeddah.com</a>
               </li>
             </ul>
           </div>
@@ -125,16 +139,20 @@
       </div>
     </div>
 
-    <!-- 2. Copyright & Sub-footer Bar -->
-    <div class="bg-[#07091B] py-6 border-t border-slate-800/60 text-xs text-slate-400">
-      <div class="flex flex-col md:flex-row items-center justify-between gap-4 max-w-[1550px] mx-auto px-4 lg:px-8 text-center md:text-right">
-        <!-- Right -->
-        <p>جميع الحقوق محفوظة © لشركة مكة للتجارة العامة والتوزيع</p>
-
-        <!-- Left -->
-        <p class="dir-ltr text-slate-400 font-medium">
-          رقم التسجيل الضريبي : 192-325-215
+    <!-- 2. Bottom Footer Bar (Copyright & Payments) -->
+    <div class="bg-[#07091B] text-slate-400 text-xs py-6 border-t border-slate-900">
+      <div class="max-w-[1550px] mx-auto px-4 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <p class="font-medium text-center md:text-start">
+          جميع الحقوق محفوظة © {{ currentYear }} متجر أسوار جدة لقطع الغيار والأجهزة.
         </p>
+
+        <!-- Payment Badges Placeholder -->
+        <div class="flex items-center gap-3">
+          <span class="px-3 py-1 bg-slate-900 rounded border border-slate-800 text-[10px] font-bold text-slate-300">mada</span>
+          <span class="px-3 py-1 bg-slate-900 rounded border border-slate-800 text-[10px] font-bold text-slate-300">VISA</span>
+          <span class="px-3 py-1 bg-slate-900 rounded border border-slate-800 text-[10px] font-bold text-slate-300">MasterCard</span>
+          <span class="px-3 py-1 bg-slate-900 rounded border border-slate-800 text-[10px] font-bold text-amber-400">Apple Pay</span>
+        </div>
       </div>
     </div>
 
@@ -142,26 +160,25 @@
 </template>
 
 <script setup lang="ts">
-const categoryLinks = [
-  { name: 'الأجهزة الكهربائية', url: '/category/appliances' },
-  { name: 'الأدوات المنزلية', url: '/category/houseware' },
-  { name: 'النظم الأمنية', url: '/category/security' },
-  { name: 'موبايل وثابت', url: '/category/mobile' },
-  { name: 'لاب توب', url: '/category/laptops' },
-];
+import { computed } from 'vue'
+import { useLanguage } from '~/composables/useLanguage'
 
-const accountLinks = [
-  { name: 'حسابي الشخصي', url: '/account' },
-  { name: 'سجل الطلبات', url: '/account/orders' },
-  { name: 'قائمة انتظار المنتجات', url: '/account/waitlist' },
-  { name: 'قائمة الأمنيات', url: '/wishlist' },
-];
+const { t, layoutDirection } = useLanguage()
 
-const importantLinks = [
-  { name: 'الفروع وأرقام التواصل', url: '/contact' },
-  { name: 'الإستبدال والإسترجاع', url: '/returns' },
-  { name: 'الشحن والتوصيل', url: '/shipping' },
-  { name: 'تتبع الطلبات', url: '/track-order' },
-  { name: 'المدونة', url: '/blog' },
-];
+const currentYear = computed(() => new Date().getFullYear())
+
+const categoryLinks = computed(() => [
+  { name: t('cat.appliances'), url: '/category/appliances' },
+  { name: t('cat.houseware'), url: '/category/houseware' },
+  { name: t('cat.security'), url: '/category/security' },
+  { name: t('cat.laptops'), url: '/category/laptops' },
+  { name: t('cat.networks'), url: '/category/networks' },
+])
+
+const accountLinks = computed(() => [
+  { name: t('nav.account'), url: '/my-account' },
+  { name: t('product.wishlist'), url: '/wishlist' },
+  { name: t('product.compare'), url: '/compare' },
+  { name: t('nav.cart'), url: '/cart' },
+])
 </script>

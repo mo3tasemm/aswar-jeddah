@@ -50,6 +50,8 @@
       <HomeSideBannerSliderShowcase 
         v-else-if="section.type === 'side_banner'"
         :sideBannerImage="section.sideBannerImage"
+        :sideBannerImages="section.sideBannerImages"
+        :sideBannerSlides="section.sideBannerSlides || section.slides"
         :sideBannerUrl="section.sideBannerUrl"
         :products="section.brandName ? getProductsByBrand(section.brandName).slice(0, section.limit) : getProductsByCategory(section.category).slice(0, section.limit)"
         class="mb-12"
