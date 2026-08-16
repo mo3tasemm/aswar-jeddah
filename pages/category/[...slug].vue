@@ -1,14 +1,10 @@
 <template>
   <div class="w-full bg-slate-50/50 min-h-screen pb-16" :dir="layoutDirection">
     <div class="container mx-auto px-4 max-w-7xl">
-      <!-- 1. Breadcrumb -->
-      <Breadcrumbs :items="[
-        { label: layoutDirection === 'ltr' ? 'Home' : 'الرئيسية', to: '/' },
-        { label: layoutDirection === 'ltr' ? 'Shop' : 'المتجر', to: '/shop' },
-        { label: displayCategoryName }
-      ]" />
+      <!-- 1. Dynamic Breadcrumbs Hierarchy -->
+      <Breadcrumbs :items="breadcrumbItems" />
 
-      <!-- 2. Header & Categories -->
+      <!-- 2. Header & Subcategories -->
       <div class="mb-8">
         <h1 class="text-2xl sm:text-3xl font-bold text-[#0B0E28] mb-6 mt-6 text-start">{{ displayCategoryName }}</h1>
         <CategoryHierarchyBar 
@@ -151,10 +147,25 @@ const { products, pending: productsPending, error: productsError, isEmpty, total
 const { categories, loadCategories } = useCategories()
 const { brands, loadBrands } = useBrands()
 
-// Active Route Category Slug
-const categorySlug = computed(() => String(route.params.slug || ''))
+// Parse Catch-all Slugs Hierarchy (e.g. ['care', 'skin'] from /category/care/skin)
+const slugs = computed<string[]>(() => {
+  const s = route.params.slug
+  if (!s) return []
+  if (Array.isArray(s)) return s.map(String).filter(Boolean)
+  return String(s).split('/').filter(Boolean)
+})
 
-// Category Name Localization Helper
+// Current path segments for building nested child links
+const currentCategoryPath = computed(() => {
+  return slugs.value.join('/')
+})
+
+// Deepest leaf slug in current route
+const targetLeafSlug = computed(() => {
+  return slugs.value.length > 0 ? slugs.value[slugs.value.length - 1] : ''
+})
+
+// Localization helper for Category Name
 const getCategoryName = (cat: any) => {
   if (!cat) return ''
   if (currentLanguage.value === 'en') {
@@ -163,53 +174,150 @@ const getCategoryName = (cat: any) => {
   return cat.name_ar || cat.name
 }
 
-// Match current category item from live categories composable
-const currentCategory = computed(() => {
-  if (!categories.value || categories.value.length === 0) return null
-  return categories.value.find(c => String(c.slug) === categorySlug.value || String(c.id) === categorySlug.value)
-})
+interface MatchedTier {
+  category: any;
+  slug: string;
+  name: string;
+  url: string;
+}
 
-// Resolve category ID across top-level categories and subcategories
-const resolvedCategoryId = computed(() => {
-  const slug = categorySlug.value
-  if (!slug) return undefined
+// Build complete hierarchical trail across tiers
+const hierarchyTrail = computed<MatchedTier[]>(() => {
+  const trail: MatchedTier[] = []
+  if (!categories.value || categories.value.length === 0) return trail
 
-  if (currentCategory.value?.id) {
-    return currentCategory.value.id
-  }
+  let currentLevelList = categories.value
+  let accumulatedPath = '/category'
 
-  for (const cat of categories.value) {
-    if (String(cat.id) === slug || cat.slug === slug) return cat.id
-    if (cat.subCategories && cat.subCategories.length > 0) {
-      const subMatch = cat.subCategories.find(s => String(s.id) === slug || s.slug === slug)
-      if (subMatch) return subMatch.id
+  for (let i = 0; i < slugs.value.length; i++) {
+    const slugSegment = slugs.value[i]
+    let matched = currentLevelList.find(c => String(c.slug) === slugSegment || String(c.id) === slugSegment)
+    
+    if (matched) {
+      accumulatedPath += `/${matched.slug || matched.id}`
+      trail.push({
+        category: matched,
+        slug: matched.slug || String(matched.id),
+        name: getCategoryName(matched),
+        url: accumulatedPath
+      })
+      currentLevelList = matched.subCategories || matched.childes || []
+    } else {
+      // Global Fallback search
+      let globalMatch: any = null
+      for (const cat of categories.value) {
+        if (String(cat.slug) === slugSegment || String(cat.id) === slugSegment) {
+          globalMatch = cat
+          break
+        }
+        if (cat.subCategories && cat.subCategories.length > 0) {
+          const sub = cat.subCategories.find((s: any) => String(s.slug) === slugSegment || String(s.id) === slugSegment)
+          if (sub) {
+            globalMatch = sub
+            break
+          }
+        }
+      }
+
+      if (globalMatch) {
+        accumulatedPath += `/${globalMatch.slug || globalMatch.id}`
+        trail.push({
+          category: globalMatch,
+          slug: globalMatch.slug || String(globalMatch.id),
+          name: getCategoryName(globalMatch),
+          url: accumulatedPath
+        })
+        currentLevelList = globalMatch.subCategories || globalMatch.childes || []
+      } else {
+        accumulatedPath += `/${slugSegment}`
+        trail.push({
+          category: null,
+          slug: slugSegment,
+          name: slugSegment.replace(/-/g, ' '),
+          url: accumulatedPath
+        })
+      }
     }
   }
 
-  if (!isNaN(Number(slug))) {
-    return Number(slug)
-  }
+  return trail
+})
 
-  return slug
+// Active leaf tier and category item
+const activeLeafTier = computed(() => {
+  return hierarchyTrail.value.length > 0 ? hierarchyTrail.value[hierarchyTrail.value.length - 1] : null
+})
+
+const currentCategory = computed(() => {
+  return activeLeafTier.value?.category || null
+})
+
+// Resolved Category ID for API queries
+const resolvedCategoryId = computed(() => {
+  if (currentCategory.value?.id) {
+    return currentCategory.value.id
+  }
+  const leaf = targetLeafSlug.value
+  if (!leaf) return undefined
+  if (!isNaN(Number(leaf))) return Number(leaf)
+  return leaf
 })
 
 // Display Category Name
 const displayCategoryName = computed(() => {
+  if (activeLeafTier.value?.name) {
+    return activeLeafTier.value.name
+  }
   if (currentCategory.value) {
     return getCategoryName(currentCategory.value)
   }
-  const slug = categorySlug.value
+  const slug = targetLeafSlug.value
   return slug ? slug.replace(/-/g, ' ') : (currentLanguage.value === 'en' ? 'Category' : 'تصنيف المنتجات')
 })
 
-// Subcategories list with localized names
+// Dynamic Breadcrumb Trail
+const breadcrumbItems = computed(() => {
+  const isEn = layoutDirection.value === 'ltr'
+  const items: { label: string; to?: string }[] = [
+    { label: isEn ? 'Home' : 'الرئيسية', to: '/' },
+    { label: isEn ? 'Shop' : 'المتجر', to: '/shop' }
+  ]
+
+  hierarchyTrail.value.forEach((tier, index) => {
+    const isLast = index === hierarchyTrail.value.length - 1
+    items.push({
+      label: tier.name,
+      to: isLast ? undefined : tier.url
+    })
+  })
+
+  return items
+})
+
+// Subcategories list with nested hierarchical URLs
 const subCategoriesList = computed(() => {
-  if (currentCategory.value?.subCategories) {
+  // If active category has child subcategories, render them with nested URLs
+  if (currentCategory.value?.subCategories && currentCategory.value.subCategories.length > 0) {
     return currentCategory.value.subCategories.map((sub: any) => ({
       ...sub,
-      name: getCategoryName(sub)
+      name: getCategoryName(sub),
+      customUrl: `/category/${currentCategoryPath.value}/${sub.slug || sub.id}`
     }))
   }
+
+  // If leaf subcategory has siblings under parent, render sibling links
+  if (hierarchyTrail.value.length > 1) {
+    const parentTier = hierarchyTrail.value[hierarchyTrail.value.length - 2]
+    if (parentTier?.category?.subCategories && parentTier.category.subCategories.length > 0) {
+      const parentPath = slugs.value.slice(0, -1).join('/')
+      return parentTier.category.subCategories.map((sub: any) => ({
+        ...sub,
+        name: getCategoryName(sub),
+        customUrl: `/category/${parentPath}/${sub.slug || sub.id}`
+      }))
+    }
+  }
+
   return []
 })
 
@@ -266,12 +374,13 @@ const fetchCategoryProducts = async () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  // Ensure categories are loaded first to map category ID accurately
+  // Ensure categories and brands are loaded
   if (categories.value.length === 0) {
     await loadCategories()
   }
+  loadBrands(true)
 
-  const targetCategoryId = selectedSubCategoryId.value || resolvedCategoryId.value || categorySlug.value
+  const targetCategoryId = selectedSubCategoryId.value || resolvedCategoryId.value || targetLeafSlug.value
   const selectedBrandId = filters.value.brands.length > 0 ? filters.value.brands[0] : undefined
 
   fetchFilteredProducts({
@@ -359,4 +468,3 @@ useHead({
   title: computed(() => `${displayCategoryName.value} | ${layoutDirection.value === 'ltr' ? 'Aswar Jeddah' : 'أسوار جدة'}`)
 })
 </script>
-

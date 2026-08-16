@@ -89,7 +89,8 @@ const routeSegmentLabels: Record<string, { ar: string; en: string }> = {
   addresses: { ar: 'العناوين', en: 'Addresses' },
   details: { ar: 'تفاصيل الحساب', en: 'Account Details' },
   search: { ar: 'البحث', en: 'Search' },
-  login: { ar: 'تسجيل الدخول', en: 'Login' }
+  login: { ar: 'تسجيل الدخول', en: 'Login' },
+  blog: { ar: 'المدونة', en: 'Blog' }
 }
 
 const normalizedItems = computed<BreadcrumbItem[]>(() => {
@@ -99,6 +100,7 @@ const normalizedItems = computed<BreadcrumbItem[]>(() => {
   if (Array.isArray(rawList) && rawList.length > 0) {
     return rawList
       .filter(i => i && (i.label || i.name))
+      .filter((i, idx) => !(idx === 0 && (i.to === '/' || i.path === '/')))
       .map(i => ({
         label: i.label || i.name || '',
         to: i.to || i.path

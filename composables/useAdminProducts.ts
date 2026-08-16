@@ -103,7 +103,9 @@ export const useAdminProducts = () => {
   }
 
   /**
-   * 3. SUBMIT Form (POST Add / POST Update via FormData)
+   * 3. SUBMIT Form (Direct Multipart FormData with Binary Files -> POST Add / POST Update)
+   * NOTE: /api/v1/admin/products/upload-images does NOT exist on this server.
+   * Images are sent directly as binary files inside the add/update request.
    */
   const submitForm = async (payload: ProductFormDataPayload, isEditMode: boolean = false, productId?: string | number): Promise<boolean> => {
     isSubmitting.value = true

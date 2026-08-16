@@ -3,14 +3,14 @@
     
     <!-- Header -->
     <div class="flex items-center justify-between mb-8 px-2">
-      <h2 class="text-2xl font-bold text-luxury-black">تسوق حسب القسم</h2>
+      <h2 class="text-2xl font-bold text-luxury-black">{{ layoutDirection === 'ltr' ? 'Shop by Category' : 'تسوق حسب القسم' }}</h2>
     </div>
 
     <!-- Right Arrow (Scroll Right in RTL) -->
     <button 
       @click="scrollRight"
       class="hidden md:flex absolute right-0 top-[55%] -translate-y-1/2 z-10 w-12 h-12 items-center justify-center rounded-full bg-white/90 backdrop-blur-md text-luxury-black shadow-lg hover:bg-luxury-gold hover:text-white transition-all duration-300 opacity-0 group-hover:opacity-100 border border-slate-200"
-      aria-label="التمرير يميناً"
+      :aria-label="layoutDirection === 'ltr' ? 'Scroll right' : 'التمرير يميناً'"
     >
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
         <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
@@ -50,7 +50,7 @@
     <button 
       @click="scrollLeft"
       class="hidden md:flex absolute left-0 top-[55%] -translate-y-1/2 z-10 w-12 h-12 items-center justify-center rounded-full bg-white/90 backdrop-blur-md text-luxury-black shadow-lg hover:bg-luxury-gold hover:text-white transition-all duration-300 opacity-0 group-hover:opacity-100 border border-slate-200"
-      aria-label="التمرير يساراً"
+      :aria-label="layoutDirection === 'ltr' ? 'Scroll left' : 'التمرير يساراً'"
     >
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -63,8 +63,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useCategories } from '~/composables/useCategories'
+import { useLanguage } from '~/composables/useLanguage'
 
 const { categories } = useCategories()
+const { layoutDirection } = useLanguage()
 const sliderRef = ref<HTMLElement | null>(null)
 
 const scrollAmount = 400 // Smooth scroll amount for desktop

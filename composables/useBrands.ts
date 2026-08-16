@@ -9,24 +9,26 @@ import { useLanguage } from '~/composables/useLanguage'
 const sharedBrands = ref<BrandItem[]>([])
 const sharedPending = ref<boolean>(false)
 const sharedError = ref<string | null>(null)
-const isFetched = ref<boolean>(false)
+const lastFetchedLocale = ref<string | null>(null)
 
 export const useBrands = () => {
   const { apiLocale, currentLanguage } = useLanguage()
 
   const loadBrands = async (force: boolean = false) => {
-    // Deduplication: Return if already fetching or if cached data exists and not forced
+    const currentLoc = apiLocale.value || 'sa'
+    
+    // Deduplication: Return if already fetching or if cached data exists for this exact locale and not forced
     if (sharedPending.value) return
-    if (isFetched.value && !force && sharedBrands.value.length > 0) return
+    if (!force && lastFetchedLocale.value === currentLoc && sharedBrands.value.length > 0) return
 
     sharedPending.value = true
     sharedError.value = null
 
     try {
-      const data = await brandApiService.fetchBrands('1', apiLocale.value)
+      const data = await brandApiService.fetchBrands('1', currentLoc)
       if (Array.isArray(data)) {
         sharedBrands.value = data
-        isFetched.value = true
+        lastFetchedLocale.value = currentLoc
       }
     } catch (err: any) {
       console.error('[useBrands] Load error:', err)
@@ -36,16 +38,16 @@ export const useBrands = () => {
     }
   }
 
-  // Auto-refetch when language changes (only if previously fetched)
+  // Auto-refetch when language changes
   watch([apiLocale, currentLanguage], () => {
-    if (isFetched.value) {
-      loadBrands(true)
-    }
+    loadBrands(true)
   })
 
-  // Trigger initial fetch on client side if not already fetched
-  if (process.client && !isFetched.value && !sharedPending.value) {
-    loadBrands()
+  // Trigger fetch on client side if not already fetched for the current locale
+  if (process.client && !sharedPending.value) {
+    if (lastFetchedLocale.value !== apiLocale.value || sharedBrands.value.length === 0) {
+      loadBrands(true)
+    }
   }
 
   return {

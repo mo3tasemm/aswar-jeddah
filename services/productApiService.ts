@@ -41,24 +41,31 @@ const getAuthToken = (): string | null => {
   return null
 }
 
-const getLangCode = (): string => {
-  if (process.client) {
-    return localStorage.getItem('aswar_lang') || 'ar'
+export const getCurrentApiLocale = (localeInput?: string): string => {
+  if (localeInput) {
+    const clean = localeInput.trim()
+    if (clean.toUpperCase() === 'EN' || clean.toLowerCase() === 'en') return 'EN'
+    if (clean.toLowerCase() === 'sa' || clean.toLowerCase() === 'ar') return 'sa'
+    return clean
   }
-  return 'ar'
+  if (process.client) {
+    const saved = localStorage.getItem('aswar_lang')
+    if (saved === 'en') return 'EN'
+  }
+  return 'sa'
 }
 
-const buildHeaders = (): Record<string, string> => {
+const buildHeaders = (localeInput?: string): Record<string, string> => {
   const token = getAuthToken()
-  const lang = getLangCode()
-  const isEn = lang === 'en'
+  const locale = getCurrentApiLocale(localeInput)
+  const isEn = locale === 'EN'
 
   const headers: Record<string, string> = {
     'Accept': 'application/json',
     'X-Requested-With': 'XMLHttpRequest',
     'Accept-Language': isEn ? 'en-US,en;q=0.9' : 'ar-SA,ar;q=0.9',
-    'X-localization': isEn ? 'en' : 'sa',
-    'lang': isEn ? 'en' : 'sa',
+    'X-localization': locale,
+    'lang': locale,
     'X-Language': isEn ? 'en' : 'ar'
   }
   if (token) {
@@ -82,8 +89,7 @@ export const productApiService = {
    */
   async fetchFilteredProducts(params: ProductFetchParams = {}): Promise<{ products: Product[]; total: number }> {
     const guestId = params.guest_id || '1'
-    const lang = getLangCode()
-    const locale = params.locale || (lang === 'en' ? 'en' : 'sa')
+    const locale = getCurrentApiLocale(params.locale)
     let endpoint = ''
 
     if (params.category_id) {
@@ -107,7 +113,7 @@ export const productApiService = {
     try {
       const response = await $fetch<any>(endpoint, {
         method: 'GET',
-        headers: buildHeaders(),
+        headers: buildHeaders(locale),
         retry: 1,
         timeout: 10000
       })
@@ -170,8 +176,7 @@ export const productApiService = {
     locale?: string;
   } = {}): Promise<{ products: Product[]; total: number }> {
     const guestId = params.guest_id || '1'
-    const lang = getLangCode()
-    const locale = params.locale || (lang === 'en' ? 'en' : 'sa')
+    const locale = getCurrentApiLocale(params.locale)
     const searchTerm = params.name || params.keyword || ''
 
     const queryParams = new URLSearchParams()
@@ -188,7 +193,7 @@ export const productApiService = {
     try {
       const response = await $fetch<any>(endpoint, {
         method: 'GET',
-        headers: buildHeaders(),
+        headers: buildHeaders(locale),
         timeout: 8000
       })
 
@@ -221,16 +226,15 @@ export const productApiService = {
   /**
    * Fetch Single Product Details by ID or Slug with fallback search
    */
-  async fetchProductDetails(slugOrId: string | number): Promise<Product | null> {
+  async fetchProductDetails(slugOrId: string | number, guestIdInput?: string | number, localeInput?: string): Promise<Product | null> {
     try {
-      const guestId = '1'
-      const lang = getLangCode()
-      const locale = lang === 'en' ? 'en' : 'sa'
+      const guestId = guestIdInput || '1'
+      const locale = getCurrentApiLocale(localeInput)
       const endpoint = `${API_BASE_URL}/products/details/${slugOrId}?guest_id=${guestId}&locale=${locale}`
 
       const response = await $fetch<any>(endpoint, {
         method: 'GET',
-        headers: buildHeaders(),
+        headers: buildHeaders(locale),
         timeout: 8000
       })
 
@@ -251,7 +255,7 @@ export const productApiService = {
     // Fallback: If direct slug/ID API call failed or returned 404, search latest products
     try {
       const cleanKey = String(slugOrId).split('-')[0] || String(slugOrId)
-      const fallbackRes = await this.fetchFilteredProducts({ search: cleanKey, limit: 10 })
+      const fallbackRes = await this.fetchFilteredProducts({ search: cleanKey, limit: 10, locale: localeInput })
       if (fallbackRes.products && fallbackRes.products.length > 0) {
         const found = fallbackRes.products.find(p => String(p.slug) === String(slugOrId) || String(p.id) === String(slugOrId))
         return found || fallbackRes.products[0]
@@ -267,7 +271,7 @@ export const productApiService = {
    * Alias method for fetchProductDetails to support loadProductBySlug
    */
   async fetchProductBySlug(slugOrId: string | number, guestId?: string, localeInput?: string): Promise<Product | null> {
-    return this.fetchProductDetails(slugOrId)
+    return this.fetchProductDetails(slugOrId, guestId, localeInput)
   },
 
   /**
@@ -276,13 +280,13 @@ export const productApiService = {
    */
   async fetchProductReviews(productId: number | string, guestId?: string, localeInput?: string): Promise<ProductReviewItem[]> {
     try {
-      const lang = getLangCode()
-      const locale = localeInput || (lang === 'en' ? 'en' : 'sa')
+      const locale = getCurrentApiLocale(localeInput)
+      const isEn = locale === 'EN'
       const endpoint = `${API_BASE_URL}/products/reviews/${productId}?locale=${locale}`
 
       const response = await $fetch<any>(endpoint, {
         method: 'GET',
-        headers: buildHeaders(),
+        headers: buildHeaders(locale),
         timeout: 8000
       })
 

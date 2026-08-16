@@ -23,7 +23,7 @@
         </div>
         
         <button 
-          @click="$emit('remove-item', item.product.id || item.id)"
+          @click="$emit('remove-item', item.key || item.id || item.product?.id)"
           class="w-8 h-8 shrink-0 flex items-center justify-center rounded-full text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-colors cursor-pointer"
           :title="t('common.delete')"
         >
@@ -111,13 +111,13 @@ const formattedPrice = computed(() => {
 
 const decreaseQty = () => {
   if (props.item.quantity > 1) {
-    const targetId = props.item.product?.id || props.item.id
-    emit('update-quantity', targetId, props.item.quantity - 1)
+    const targetKey = props.item.key || props.item.id || props.item.product?.id
+    emit('update-quantity', targetKey, props.item.quantity - 1)
   }
 }
 
 const increaseQty = () => {
-  const targetId = props.item.product?.id || props.item.id
-  emit('update-quantity', targetId, props.item.quantity + 1)
+  const targetKey = props.item.key || props.item.id || props.item.product?.id
+  emit('update-quantity', targetKey, props.item.quantity + 1)
 }
 </script>

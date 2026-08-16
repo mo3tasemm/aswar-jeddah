@@ -14,6 +14,9 @@
     <CartDrawer />
     <LoginDrawer />
 
+    <!-- Global Toast Notifications -->
+    <TheToast />
+
     <!-- Global Floating Actions -->
     <ScrollToTop />
   </div>
@@ -24,6 +27,7 @@ import TheHeader from '~/components/layout/TheHeader.vue'
 import TheFooter from '~/components/layout/TheFooter.vue'
 import CartDrawer from '~/components/cart/CartDrawer.vue'
 import LoginDrawer from '~/components/auth/LoginDrawer.vue'
+import TheToast from '~/components/dashboard/ui/TheToast.vue'
 import ScrollToTop from '~/components/common/ScrollToTop.vue'
 import { useLanguage } from '~/composables/useLanguage'
 

@@ -42,11 +42,22 @@ export const useToast = () => {
     addToast({ title, message, type: 'error', duration })
   }
 
+  const info = (title: string, message: string = '', duration: number = 3000) => {
+    addToast({ title, message, type: 'info', duration })
+  }
+
+  const warning = (title: string, message: string = '', duration: number = 4000) => {
+    addToast({ title, message, type: 'warning', duration })
+  }
+
   return {
     toasts,
     addToast,
     removeToast,
     success,
-    error
+    error,
+    info,
+    warning
   }
 }
+

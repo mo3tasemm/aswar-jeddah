@@ -207,12 +207,39 @@ const getCategoryName = (cat: any) => {
   return cat.name || cat.name_ar
 }
 
+const BRAND_AR_MAP: Record<string, string> = {
+  'ويسلامك': 'weslamic',
+  'اشهار التسويقية': 'ESHHAR',
+  'ايفون هاي كوبي': 'IPhone High copy',
+  'ناتشر ريبورت': 'NATURE REPORT',
+  'ارجان': 'Argan',
+  'أنكر ساوندكور': 'Anker Soundcore',
+  'توسما': 'TOSMA',
+  'ديورا بوكس': 'DURA BOX',
+  'سوني': 'SONY',
+  'بايسِل': 'Piecell',
+  'بيلديند': 'Beldend',
+  'ريجرسي': 'REGRSI',
+  'جو ديس': 'Go-Des',
+  'أسوار جدة': 'Aswar Jeddah',
+  'فيليبس': 'PHILIPS',
+  'سامسونج': 'SAMSUNG',
+  'كينوود': 'KENWOOD'
+}
+
 const getBrandName = (brand: any) => {
   if (!brand) return ''
-  if (layoutDirection.value === 'ltr') {
-    return brand.name_en || brand.title_en || brand.name
+  const isLtr = layoutDirection.value === 'ltr'
+  if (isLtr) {
+    if (brand.name_en && !/[\u0600-\u06FF]/.test(brand.name_en)) return brand.name_en
+    if (brand.alt_text && !/[\u0600-\u06FF]/.test(brand.alt_text)) return brand.alt_text
+    if (brand.image_alt_text && !/[\u0600-\u06FF]/.test(brand.image_alt_text)) return brand.image_alt_text
+    if (brand.name && !/[\u0600-\u06FF]/.test(brand.name)) return brand.name
+    if (brand.name_ar && BRAND_AR_MAP[brand.name_ar]) return BRAND_AR_MAP[brand.name_ar]
+    if (brand.name && BRAND_AR_MAP[brand.name]) return BRAND_AR_MAP[brand.name]
+    return brand.name_en || brand.name || brand.name_ar || ''
   }
-  return brand.name || brand.name_ar
+  return brand.name_ar || brand.name || brand.name_en || ''
 }
 
 const filteredBrands = computed(() => {

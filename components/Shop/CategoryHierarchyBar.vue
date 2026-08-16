@@ -6,23 +6,23 @@
 
     <div class="flex items-center gap-4 sm:gap-6 overflow-x-auto pb-4 pt-2 custom-scrollbar snap-x snap-mandatory hide-scroll-mobile px-2">
       
-      <!-- Category Item with Direct Route to /category/[slug] -->
+      <!-- Category Item with Nested/Dynamic Route -->
       <NuxtLink
         v-for="cat in categories"
         :key="cat.id"
-        :to="`/category/${cat.slug || cat.id}`"
+        :to="getCategoryUrl(cat)"
         class="group flex flex-col items-center gap-2.5 shrink-0 snap-start outline-none cursor-pointer"
       >
         <!-- Circle Image / Icon Container -->
         <div 
           class="w-16 h-16 sm:w-20 sm:h-20 rounded-[1.5rem] bg-white p-2.5 flex items-center justify-center relative shadow-sm border border-slate-100 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-lg group-hover:shadow-indigo-500/10 group-hover:border-indigo-500"
-          :class="{ 'border-indigo-600 shadow-md shadow-indigo-600/10 ring-2 ring-indigo-500/30': selectedCategoryId === cat.id }"
+          :class="{ 'border-indigo-600 shadow-md shadow-indigo-600/10 ring-2 ring-indigo-500/30': isSelected(cat) }"
         >
           <div class="w-full h-full rounded-xl bg-slate-50 overflow-hidden flex items-center justify-center relative">
             <img 
               v-if="cat.icon"
               :src="cat.icon" 
-              :alt="cat.name"
+              :alt="getCatName(cat)"
               class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             />
             <i v-else class="fa-solid fa-layer-group text-slate-400 text-lg group-hover:text-indigo-600 transition-colors"></i>
@@ -33,12 +33,12 @@
         <div class="text-center">
           <h3 
             class="text-[11px] sm:text-xs font-black transition-colors max-w-[80px] sm:max-w-[100px] truncate"
-            :class="selectedCategoryId === cat.id ? 'text-indigo-600' : 'text-slate-800 group-hover:text-indigo-600'"
+            :class="isSelected(cat) ? 'text-indigo-600' : 'text-slate-800 group-hover:text-indigo-600'"
           >
-            {{ cat.name }}
+            {{ getCatName(cat) }}
           </h3>
           <span v-if="cat.productCount" class="text-[9px] sm:text-[10px] font-bold text-slate-400 mt-0.5 block">
-            {{ cat.productCount }} منتج
+            {{ cat.productCount }} {{ layoutDirection === 'ltr' ? 'Products' : 'منتج' }}
           </span>
         </div>
       </NuxtLink>
@@ -48,10 +48,39 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
+import { useLanguage } from '~/composables/useLanguage'
+
+const props = defineProps<{
   categories: any[]
   selectedCategoryId?: number | string | null
+  basePath?: string
 }>()
+
+const { layoutDirection } = useLanguage()
+
+const getCatName = (cat: any) => {
+  if (!cat) return ''
+  if (layoutDirection.value === 'ltr') {
+    return cat.name_en || cat.title_en || cat.name
+  }
+  return cat.name_ar || cat.name
+}
+
+const getCategoryUrl = (cat: any) => {
+  if (cat.customUrl) return cat.customUrl
+  if (cat.fullPath) return `/category/${cat.fullPath}`
+  if (props.basePath) {
+    const cleanBase = props.basePath.replace(/^\/|\/$/g, '')
+    const catSlug = cat.slug || cat.id
+    return `/${cleanBase}/${catSlug}`
+  }
+  return `/category/${cat.slug || cat.id}`
+}
+
+const isSelected = (cat: any) => {
+  if (!props.selectedCategoryId) return false
+  return String(props.selectedCategoryId) === String(cat.id) || String(props.selectedCategoryId) === String(cat.slug)
+}
 </script>
 
 <style scoped>

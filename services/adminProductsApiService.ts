@@ -1,10 +1,13 @@
 /**
  * Admin Products API Service Layer with Multi-language Translation Support
  * Live API Endpoints:
- * 1. GET /api/v1/admin/products/list?page={page}&limit={limit}
+ * 1. GET  /api/v1/admin/products/list?page={page}&limit={limit}
  * 2. DELETE /api/v1/admin/products/delete/{id}
- * 3. POST /api/v1/admin/products/add
- * 4. POST /api/v1/admin/products/update/{id}
+ * 3. POST /api/v1/admin/products/add (Multipart FormData with binary files)
+ * 4. POST /api/v1/admin/products/update/{id} (Multipart FormData with binary files)
+ *
+ * NOTE: /api/v1/admin/products/upload-images is NOT a valid endpoint on this server.
+ * Images MUST be sent directly as binary files inside the add/update FormData request.
  */
 
 const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://wedgetstore.com/api/v1'
@@ -47,6 +50,14 @@ export interface PaginationMeta {
   total: number;
 }
 
+export interface ProductVariationItem {
+  code: string;
+  color_name?: string;
+  price: string | number;
+  sku: string;
+  qty: string | number;
+}
+
 export interface ProductFormDataPayload {
   id?: number | string;
   name_ar: string;
@@ -69,15 +80,44 @@ export interface ProductFormDataPayload {
   colors?: string[];
   choice_attributes?: (string | number)[];
   choice_options?: Record<string | number, string[]>;
-  variations?: Array<{
-    code: string;
-    price: string | number;
-    sku: string;
-    qty: string | number;
-  }>;
-  thumbnail?: File | null;
-  images?: File[];
-  color_images?: Record<string, File>;
+  variations?: ProductVariationItem[];
+  thumbnail?: File | string | null;
+  images?: (File | string)[];
+  color_images?: Record<string, File | string>;
+}
+
+/**
+ * Normalizes product image url into a complete absolute URL
+ */
+export function normalizeProductImageUrl(raw: any): string {
+  if (!raw) return ''
+  if (typeof raw === 'object') {
+    if (raw.path) return String(raw.path)
+    if (raw.url) return String(raw.url)
+    if (raw.image_full_url?.path) return String(raw.image_full_url.path)
+  }
+  if (typeof raw === 'string') {
+    const trimmed = raw.trim()
+    if (!trimmed || trimmed === 'null' || trimmed === 'undefined') return ''
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed
+    if (trimmed.startsWith('data:image/')) return trimmed
+    if (trimmed.startsWith('/')) return `https://wedgetstore.com${trimmed}`
+    return `https://wedgetstore.com/storage/app/public/product/${trimmed}`
+  }
+  return ''
+}
+
+/**
+ * Extracts pure filename from path or URL
+ */
+export function extractCleanFilename(raw: string): string {
+  if (!raw) return ''
+  const trimmed = raw.trim()
+  if (trimmed.includes('/')) {
+    const parts = trimmed.split('/')
+    return parts[parts.length - 1] || trimmed
+  }
+  return trimmed
 }
 
 /**
@@ -126,128 +166,178 @@ export function extractMultiLangField(item: any, fieldName: 'name' | 'descriptio
 }
 
 /**
- * Builds standard FormData for Add / Update Admin Products API
+ * Helper to parse backend error response from 6valley Laravel API
+ */
+export function formatApiErrorMessage(err: any): string {
+  if (!err) return 'حدث خطأ غير متوقع في الخادم.'
+  if (err.data) {
+    if (typeof err.data === 'string') return err.data
+    if (Array.isArray(err.data.errors) && err.data.errors.length > 0) {
+      return err.data.errors.map((e: any) => e.message || e.code || JSON.stringify(e)).join(' - ')
+    }
+    if (err.data.errors && typeof err.data.errors === 'object') {
+      const messages = Object.values(err.data.errors).flat()
+      if (messages.length > 0) return messages.join(' - ')
+    }
+    if (err.data.message) return err.data.message
+  }
+  return err.message || 'فشل الاتصال بالخادم.'
+}
+
+/**
+ * Builds standard FormData for Add / Update Admin Products API (6valley Standard)
+ * - Multi-language: ONLY lang[], name[], description[] arrays
+ * - Attributes & Choices: ONLY choice_no[] and choice_attributes[] when active
+ * - Colors: colors_active ('1'|'0') & colors[] & color_image_{cleanHex}
+ * - Variations: Clean keys without '#' symbols (price_{cleanCode}, sku_{cleanCode}, qty_{cleanCode})
+ * - Images: Binary File objects sent directly as multipart (thumbnail=File, image=File, images[]=File, color_image_{hex}=File)
  */
 export function buildProductFormData(payload: ProductFormDataPayload): FormData {
   const formData = new FormData()
-
   const nameAr = (payload.name_ar || '').trim()
   const nameEn = (payload.name_en || payload.name_ar || '').trim()
-
   const descAr = (payload.description_ar || '').trim()
   const descEn = (payload.description_en || payload.description_ar || '').trim()
 
-  // 1. Languages
+  // 1. Multi-language Arrays ONLY (Matching lang[] and name[] / description[] by index)
   formData.append('lang[]', 'ar')
-  formData.append('lang[]', 'en')
-
   formData.append('name[]', nameAr)
-  formData.append('name[]', nameEn)
-
   formData.append('description[]', descAr)
+
+  formData.append('lang[]', 'en')
+  formData.append('name[]', nameEn)
   formData.append('description[]', descEn)
 
-  // 2. Category & Brand
-  if (payload.category_id !== undefined && payload.category_id !== null && payload.category_id !== '') {
+  // 2. Category Hierarchy
+  if (payload.category_id !== undefined && payload.category_id !== null && String(payload.category_id).trim() !== '') {
     formData.append('category_id', String(payload.category_id))
   }
-  if (payload.sub_category_id) {
+  if (payload.sub_category_id !== undefined && payload.sub_category_id !== null && String(payload.sub_category_id).trim() !== '') {
     formData.append('sub_category_id', String(payload.sub_category_id))
   }
-  if (payload.sub_sub_category_id) {
+  if (payload.sub_sub_category_id !== undefined && payload.sub_sub_category_id !== null && String(payload.sub_sub_category_id).trim() !== '') {
     formData.append('sub_sub_category_id', String(payload.sub_sub_category_id))
   }
-  if (payload.brand_id) {
+
+  // 3. Brand
+  if (payload.brand_id !== undefined && payload.brand_id !== null && String(payload.brand_id).trim() !== '') {
     formData.append('brand_id', String(payload.brand_id))
   }
 
-  // 3. Pricing & Stock
-  formData.append('unit_price', String(payload.unit_price || 0))
-  if (payload.purchase_price !== undefined) {
-    formData.append('purchase_price', String(payload.purchase_price || 0))
-  }
-  if (payload.minimum_order_qty !== undefined) {
-    formData.append('minimum_order_qty', String(payload.minimum_order_qty || 1))
-  }
-  if (payload.current_stock !== undefined) {
-    formData.append('current_stock', String(payload.current_stock || 0))
-  }
+  // 4. Pricing, Stock & Defaults
+  const unitPrice = String(payload.unit_price || 0)
+  const purchasePrice = String(payload.purchase_price !== undefined && payload.purchase_price !== null && payload.purchase_price !== '' ? payload.purchase_price : unitPrice)
+  const currentStock = String(payload.current_stock !== undefined ? payload.current_stock : 0)
+  const minOrderQty = String(payload.minimum_order_qty || 1)
 
-  // 4. Discount
-  if (payload.discount !== undefined) {
-    formData.append('discount', String(payload.discount || 0))
-  }
+  formData.append('unit_price', unitPrice)
+  formData.append('purchase_price', purchasePrice)
+  formData.append('unit', 'pc')
+  formData.append('tax', '15')
+  formData.append('tax_type', 'percent')
+  formData.append('tax_model', 'exclude')
+  formData.append('minimum_order_qty', minOrderQty)
+  formData.append('current_stock', currentStock)
+  formData.append('discount', String(payload.discount || 0))
   formData.append('discount_type', payload.discount_type || 'flat')
-  if (payload.discount_start_date) {
-    formData.append('discount_start_date', payload.discount_start_date)
-  }
-  if (payload.discount_end_date) {
-    formData.append('discount_end_date', payload.discount_end_date)
-  }
+  if (payload.discount_start_date) formData.append('discount_start_date', payload.discount_start_date)
+  if (payload.discount_end_date) formData.append('discount_end_date', payload.discount_end_date)
+  formData.append('shipping_cost', '0')
+  formData.append('multiply_qty', '0')
+  formData.append('status', '1')
+  formData.append('request_status', '1')
 
-  // 5. Colors & Variations
-  const isColorsActive = payload.colors_active ? 1 : 0
-  formData.append('colors_active', String(isColorsActive))
+  // 5. Colors
+  // 6valley stores colors in DB — the exact format (with or without '#') depends on the version.
+  // We send BOTH formats so Color::where('code', $item)->first() succeeds regardless.
+  const isColorsActive = Boolean(payload.colors_active && payload.colors && payload.colors.length > 0)
+  formData.append('colors_active', isColorsActive ? '1' : '0')
 
-  if (payload.colors && payload.colors.length > 0) {
-    payload.colors.forEach((colorCode) => {
-      const cleanColor = colorCode.replace(/^#/, '')
-      formData.append('colors[]', cleanColor)
+  const cleanColorCodes: string[] = [] // without '#', uppercase
+  if (isColorsActive && payload.colors && payload.colors.length > 0) {
+    payload.colors.forEach((c) => {
+      const clean = c.replace(/^#/, '').toUpperCase().trim()
+      if (clean) {
+        cleanColorCodes.push(clean)
+        // Send BOTH formats for maximum compatibility
+        formData.append('colors[]', clean)           // without '#' (e.g. FF0505)
+        formData.append('colors[]', `#${clean}`)     // with '#' (e.g. #FF0505)
+      }
     })
   }
 
-  if (payload.choice_attributes && payload.choice_attributes.length > 0) {
-    payload.choice_attributes.forEach((attrId) => {
-      formData.append('choice_attributes[]', String(attrId))
-      
+  // 6. Attributes & Choice Options (Only appended when attributes are selected)
+  const choiceAttrs = (payload.choice_attributes || []).map(String).filter(Boolean)
+  if (choiceAttrs.length > 0) {
+    choiceAttrs.forEach((attrId) => {
+      formData.append('choice_no[]', attrId)
+      formData.append('choice_attributes[]', attrId)
+
       const options = payload.choice_options?.[attrId] || []
       options.forEach((opt) => {
-        formData.append(`choice_options_${attrId}[]`, opt)
+        const val = String(opt || '').trim()
+        if (val) {
+          formData.append(`choice_options_${attrId}[]`, val)
+        }
       })
     })
   }
 
-  if (payload.variations && payload.variations.length > 0) {
+  // 7. Variations & Combinations
+  // Only send if colors OR attributes are actually active
+  const hasVariations = Boolean(
+    (isColorsActive && cleanColorCodes.length > 0) || choiceAttrs.length > 0
+  )
+  if (hasVariations && payload.variations && payload.variations.length > 0) {
     payload.variations.forEach((varItem) => {
-      formData.append(`price_${varItem.code}`, String(varItem.price || 0))
-      formData.append(`sku_${varItem.code}`, varItem.sku || '')
-      formData.append(`qty_${varItem.code}`, String(varItem.qty || 0))
+      // cleanCode is WITHOUT '#' uppercase (e.g. FF0505 or FF0505-S)
+      const cleanCode = String(varItem.code || '').replace(/^#/, '').trim().toUpperCase()
+      if (!cleanCode) return
+
+      const price = String(varItem.price || unitPrice)
+      const sku = varItem.sku || `SKU-${cleanCode}`
+      const qty = String(varItem.qty || 10)
+      const lowerCode = cleanCode.toLowerCase()
+
+      // Send without '#' (uppercase + lowercase)
+      formData.append(`price_${cleanCode}`, price)
+      formData.append(`sku_${cleanCode}`, sku)
+      formData.append(`qty_${cleanCode}`, qty)
+      if (lowerCode !== cleanCode) {
+        formData.append(`price_${lowerCode}`, price)
+        formData.append(`sku_${lowerCode}`, sku)
+        formData.append(`qty_${lowerCode}`, qty)
+      }
     })
   }
 
-  // 6. Files
-  if (payload.thumbnail && payload.thumbnail instanceof File) {
+  // 8. Files & Media Attachments (Direct Binary Multipart — no pre-upload step)
+  if (payload.thumbnail) {
+    formData.append('image', payload.thumbnail)
     formData.append('thumbnail', payload.thumbnail)
   }
 
   if (payload.images && payload.images.length > 0) {
-    payload.images.forEach((file) => {
-      if (file instanceof File) {
-        formData.append('images[]', file)
-      }
+    payload.images.forEach((img) => {
+      if (img) formData.append('images[]', img)
     })
   }
 
-  if (payload.color_images) {
-    Object.entries(payload.color_images).forEach(([colorCode, file]) => {
-      if (file instanceof File) {
-        const cleanColor = colorCode.replace(/^#/, '')
-        formData.append(`color_image[${cleanColor}]`, file)
+  if (payload.color_images && isColorsActive) {
+    Object.entries(payload.color_images).forEach(([colorKey, fileOrStr]) => {
+      const cleanCode = colorKey.replace(/^#/, '').trim()
+      if (fileOrStr) {
+        formData.append(`color_image_${cleanCode}`, fileOrStr)
       }
     })
   }
-
-  // 7. Mandatory default keys
-  formData.append('unit', 'pc')
-  formData.append('tax', '15')
-  formData.append('tax_type', 'percent')
 
   return formData
 }
 
 export const adminProductsApiService = {
   /**
-   * 1. GET Admin Products List with Pagination & Accept-Language Headers
+   * 1. GET Admin Products List with Pagination & Multi-lang formatting
    */
   async fetchProducts(
     token: string, 
@@ -261,7 +351,7 @@ export const adminProductsApiService = {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json',
-          'Accept-Language': 'ar', // Pass Arabic language header
+          'Accept-Language': 'ar',
           'X-Requested-With': 'XMLHttpRequest',
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           'Pragma': 'no-cache'
@@ -284,7 +374,6 @@ export const adminProductsApiService = {
         pagination.last_page = Math.ceil(response.length / limit) || 1
       } else if (response && typeof response === 'object') {
         rawProducts = response.products || response.data || response.list || []
-        
         const meta = response.meta || response.pagination || response
         pagination.current_page = Number(meta.current_page || meta.page || page)
         pagination.per_page = Number(meta.per_page || meta.limit || limit)
@@ -319,8 +408,8 @@ export const adminProductsApiService = {
           discount_type: p.discount_type || 'flat',
           discount_start_date: p.discount_start_date || '',
           discount_end_date: p.discount_end_date || '',
-          thumbnail: p.thumbnail_full_url?.path || p.thumbnail || p.images?.[0] || '',
-          images: Array.isArray(p.images) ? p.images.map((img: any) => typeof img === 'string' ? img : (img?.path || img?.url || '')) : [],
+          thumbnail: normalizeProductImageUrl(p.thumbnail_full_url?.path || p.thumbnail || p.images?.[0] || ''),
+          images: Array.isArray(p.images) ? p.images.map((img: any) => normalizeProductImageUrl(typeof img === 'string' ? img : (img?.path || img?.url || ''))) : [],
           status: p.status ?? 1,
           created_at: p.created_at || ''
         }
@@ -332,18 +421,18 @@ export const adminProductsApiService = {
         pagination
       }
     } catch (err: any) {
-      console.warn('Admin fetchProducts Error:', err?.data?.message || err?.message || err)
+      console.warn('Admin fetchProducts Error:', err)
       return {
         success: false,
         data: [],
         pagination: { current_page: page, last_page: 1, per_page: limit, total: 0 },
-        message: err?.data?.message || err?.message || 'فشل جلب قائمة المنتجات.'
+        message: formatApiErrorMessage(err)
       }
     }
   },
 
   /**
-   * 2. DELETE Admin Product
+   * 2. DELETE Admin Product by ID
    */
   async deleteProduct(id: string | number, token: string): Promise<{ success: boolean; message?: string }> {
     try {
@@ -367,13 +456,87 @@ export const adminProductsApiService = {
       console.error('Admin deleteProduct Error:', err)
       return {
         success: false,
-        message: err?.data?.message || err?.message || 'فشل حذف المنتج.'
+        message: formatApiErrorMessage(err)
       }
     }
   },
 
   /**
-   * 3. POST Add Admin Product (FormData)
+   * 3. Step 1: POST Upload Single Image (type: 'thumbnail' | 'product')
+   * Endpoint: POST /api/v1/admin/products/upload-images
+   */
+  async uploadProductImage(
+    file: File, 
+    type: 'thumbnail' | 'product' = 'product', 
+    token: string
+  ): Promise<{ success: boolean; imageName: string; message?: string }> {
+    try {
+      const uploadData = new FormData()
+      uploadData.append('image', file)
+      uploadData.append('file', file)
+      uploadData.append('type', type)
+
+      const endpoint = `${API_BASE_URL}/admin/products/upload-images`
+      const response = await $fetch<any>(endpoint, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+          'Accept-Language': 'ar',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: uploadData,
+        timeout: 30000
+      })
+
+      let imageName = ''
+      if (typeof response === 'string') {
+        imageName = response
+      } else if (response && typeof response === 'object') {
+        imageName = 
+          response.image_name || 
+          response.img_name ||
+          response.imageName ||
+          response.file_name || 
+          response.name || 
+          response.data?.image_name || 
+          response.data?.name || 
+          (Array.isArray(response.data) ? response.data[0] : (typeof response.data === 'string' ? response.data : '')) ||
+          (Array.isArray(response.images) ? response.images[0] : response.images) ||
+          (Array.isArray(response.image) ? response.image[0] : response.image) ||
+          (Array.isArray(response) ? response[0] : '') ||
+          ''
+      }
+
+      if (!imageName && response?.data && typeof response.data === 'string') {
+        imageName = response.data
+      }
+
+      if (imageName) {
+        return { 
+          success: true, 
+          imageName: extractCleanFilename(String(imageName)), 
+          message: 'تم رفع الصورة بنجاح.' 
+        }
+      } else {
+        return { 
+          success: false, 
+          imageName: '', 
+          message: 'لم يتم استلام اسم الصورة من السيرفر بعد الرفع.' 
+        }
+      }
+    } catch (err: any) {
+      console.error('Admin uploadProductImage Error:', err)
+      return {
+        success: false,
+        imageName: '',
+        message: formatApiErrorMessage(err)
+      }
+    }
+  },
+
+  /**
+   * 4. Step 2: POST Add Admin Product (Metadata with Text Image Names)
    */
   async addProduct(formData: FormData, token: string): Promise<{ success: boolean; message?: string; data?: any }> {
     try {
@@ -387,7 +550,7 @@ export const adminProductsApiService = {
           'X-Requested-With': 'XMLHttpRequest'
         },
         body: formData,
-        timeout: 15000
+        timeout: 30000
       })
 
       return {
@@ -399,13 +562,13 @@ export const adminProductsApiService = {
       console.error('Admin addProduct Error:', err)
       return {
         success: false,
-        message: err?.data?.message || err?.message || 'فشل إضافة المنتج.'
+        message: formatApiErrorMessage(err)
       }
     }
   },
 
   /**
-   * 4. POST Update Admin Product (FormData)
+   * 5. Step 2: POST Update Admin Product (Metadata with Text Image Names)
    */
   async updateProduct(id: string | number, formData: FormData, token: string): Promise<{ success: boolean; message?: string; data?: any }> {
     try {
@@ -419,7 +582,7 @@ export const adminProductsApiService = {
           'X-Requested-With': 'XMLHttpRequest'
         },
         body: formData,
-        timeout: 15000
+        timeout: 30000
       })
 
       return {
@@ -431,7 +594,7 @@ export const adminProductsApiService = {
       console.error('Admin updateProduct Error:', err)
       return {
         success: false,
-        message: err?.data?.message || err?.message || 'فشل تحديث المنتج.'
+        message: formatApiErrorMessage(err)
       }
     }
   }

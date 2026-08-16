@@ -25,6 +25,7 @@
       :is-edit-mode="true" 
       :initial-data="productData" 
       :is-submitting="isSubmitting"
+      :server-error="errorMessage"
       @submit="handleUpdate"
       @cancel="navigateTo('/admin/products')"
     />
@@ -49,7 +50,7 @@ useHead({
 const route = useRoute()
 const productId = String(route.params.id)
 
-const { fetchProducts, submitForm, isSubmitting } = useAdminProducts()
+const { fetchProducts, submitForm, isSubmitting, errorMessage } = useAdminProducts()
 const loading = ref(true)
 const productData = ref<Partial<ProductFormDataPayload>>({})
 

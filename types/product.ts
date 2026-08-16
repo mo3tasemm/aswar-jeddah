@@ -111,9 +111,16 @@ export interface Product {
 }
 
 export interface CartItem {
-  id: string;
+  id: string | number;
+  key?: string | number;
+  cartKey?: string | number;
+  cart_group_id?: string | number;
+  product_id?: string | number;
   product: Product;
   quantity: number;
+  price?: number;
+  discount?: number;
+  tax?: number;
   selectedSize?: string;
   selectedColor?: string;
 }
@@ -162,17 +169,37 @@ export const mapApiProductToProduct = (rawInput: any): Product => {
   // 1. Localized Title Extraction
   let prodTitle = ''
   if (lang === 'en') {
-    prodTitle = (apiProd as any).name_en || (apiProd as any).title_en || (apiProd as any).en_name || apiProd.name || apiProd.title || 'Featured Product'
+    let enTitle = (apiProd as any).name_en || (apiProd as any).title_en || (apiProd as any).en_name
+    if (!enTitle && Array.isArray(apiProd.translations)) {
+      const tr = apiProd.translations.find((t: any) => (t.key === 'name' || t.key === 'title') && (t.locale === 'en' || t.lang === 'en'))
+      if (tr?.value) enTitle = String(tr.value).trim()
+    }
+    prodTitle = enTitle || apiProd.name || apiProd.title || 'Featured Product'
   } else {
-    prodTitle = apiProd.name || (apiProd as any).name_ar || apiProd.title || (apiProd as any).title_ar || 'منتج مميز'
+    let arTitle = (apiProd as any).name_ar || (apiProd as any).title_ar
+    if (!arTitle && Array.isArray(apiProd.translations)) {
+      const tr = apiProd.translations.find((t: any) => (t.key === 'name' || t.key === 'title') && (t.locale === 'sa' || t.locale === 'ar'))
+      if (tr?.value) arTitle = String(tr.value).trim()
+    }
+    prodTitle = arTitle || apiProd.name || apiProd.title || 'منتج مميز'
   }
 
   // 2. Localized Description Extraction
   let prodDesc = ''
   if (lang === 'en') {
-    prodDesc = (apiProd as any).details_en || (apiProd as any).description_en || apiProd.details || apiProd.description || ''
+    let enDesc = (apiProd as any).details_en || (apiProd as any).description_en
+    if (!enDesc && Array.isArray(apiProd.translations)) {
+      const tr = apiProd.translations.find((t: any) => (t.key === 'details' || t.key === 'description') && (t.locale === 'en' || t.lang === 'en'))
+      if (tr?.value) enDesc = String(tr.value).trim()
+    }
+    prodDesc = enDesc || apiProd.details || apiProd.description || ''
   } else {
-    prodDesc = apiProd.details || apiProd.description || (apiProd as any).details_ar || (apiProd as any).description_ar || ''
+    let arDesc = (apiProd as any).details_ar || (apiProd as any).description_ar
+    if (!arDesc && Array.isArray(apiProd.translations)) {
+      const tr = apiProd.translations.find((t: any) => (t.key === 'details' || t.key === 'description') && (t.locale === 'sa' || t.locale === 'ar'))
+      if (tr?.value) arDesc = String(tr.value).trim()
+    }
+    prodDesc = arDesc || apiProd.details || apiProd.description || ''
   }
 
   // 3. Image Path Extraction with Null Safety & Base URL normalization
@@ -225,7 +252,16 @@ export const mapApiProductToProduct = (rawInput: any): Product => {
   let categoryId = apiProd.category_id
 
   if (typeof apiProd.category === 'object' && apiProd.category?.name) {
-    categoryName = lang === 'en' ? (apiProd.category.name_en || apiProd.category.name) : apiProd.category.name
+    if (lang === 'en') {
+      let catEn = apiProd.category.name_en || (apiProd.category as any).title_en
+      if (!catEn && Array.isArray(apiProd.category.translations)) {
+        const tr = apiProd.category.translations.find((t: any) => (t.key === 'name' || t.key === 'title') && (t.locale === 'en' || t.lang === 'en'))
+        if (tr?.value) catEn = String(tr.value).trim()
+      }
+      categoryName = catEn || apiProd.category.name
+    } else {
+      categoryName = apiProd.category.name
+    }
     if (apiProd.category.id) categoryId = apiProd.category.id
   } else if (typeof apiProd.category === 'string' && apiProd.category.trim() !== '') {
     categoryName = apiProd.category
@@ -239,7 +275,16 @@ export const mapApiProductToProduct = (rawInput: any): Product => {
 
   let brandNameStr = ''
   if (apiProd.brand && typeof apiProd.brand === 'object' && apiProd.brand?.name) {
-    brandNameStr = lang === 'en' ? (apiProd.brand.name_en || apiProd.brand.name) : apiProd.brand.name
+    if (lang === 'en') {
+      let brandEn = apiProd.brand.name_en || (apiProd.brand as any).title_en
+      if (!brandEn && Array.isArray(apiProd.brand.translations)) {
+        const tr = apiProd.brand.translations.find((t: any) => (t.key === 'name' || t.key === 'title') && (t.locale === 'en' || t.lang === 'en'))
+        if (tr?.value) brandEn = String(tr.value).trim()
+      }
+      brandNameStr = brandEn || apiProd.brand.name
+    } else {
+      brandNameStr = apiProd.brand.name
+    }
   } else if (typeof apiProd.brand === 'string' && apiProd.brand.trim() !== '') {
     brandNameStr = apiProd.brand.trim()
   } else if ((apiProd as any).brand_name && typeof (apiProd as any).brand_name === 'string') {

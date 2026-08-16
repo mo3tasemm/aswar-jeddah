@@ -69,7 +69,7 @@ export const useProducts = () => {
     productReviews.value = []
 
     try {
-      const result = await productApiService.fetchProductDetails(slugOrId)
+      const result = await productApiService.fetchProductDetails(slugOrId, '1', apiLocale.value)
       if (!result) {
         error.value = currentLanguage.value === 'en' ? 'The requested product is unavailable or not found.' : 'المنتج المطلوب غير موجود أو غير متاح حالياً.'
       } else {

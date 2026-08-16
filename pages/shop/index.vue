@@ -143,7 +143,7 @@ import ProductCard from '~/components/product/ProductCard.vue'
 import ProductCardSkeleton from '~/components/product/ProductCardSkeleton.vue'
 import EmptyState from '~/components/common/EmptyState.vue'
 
-const { t, layoutDirection, currentLanguage } = useLanguage()
+const { t, layoutDirection, currentLanguage, apiLocale } = useLanguage()
 
 // 1. Live Composables Integration
 const { 
@@ -227,6 +227,7 @@ const fetchShopProducts = () => {
     offset: (currentPage.value - 1) * itemsPerPage.value,
     category_id: activeCatId || undefined,
     brand_id: selectedBrandId || undefined,
+    locale: apiLocale.value,
     min_price: filters.value.priceMin || undefined,
     max_price: filters.value.priceMax || undefined,
     sort_by: sortBy.value === 'default' ? 'latest' : (sortBy.value as any)
@@ -273,7 +274,7 @@ const removeFilter = (id: string) => {
 }
 
 // Watchers for Pagination, Sorting & Deep Filter / Language changes
-watch([currentPage, sortBy, currentLanguage], () => {
+watch([currentPage, sortBy, apiLocale, currentLanguage], () => {
   fetchShopProducts()
 })
 
@@ -287,6 +288,6 @@ onMounted(() => {
 })
 
 useHead({
-  title: computed(() => `${t('shop.title')} | أسوار جدة`)
+  title: computed(() => `${t('shop.title')} | ${layoutDirection.value === 'ltr' ? 'Aswar Jeddah' : 'أسوار جدة'}`)
 })
 </script>

@@ -6,7 +6,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { useState, useHead } from '#imports'
 
 export type LanguageCode = 'ar' | 'en'
-export type ApiLocaleCode = 'sa' | 'en'
+export type ApiLocaleCode = 'sa' | 'EN'
 
 // Dictionary type definition
 type TranslationDictionary = Record<string, Record<LanguageCode, string>>
@@ -22,6 +22,22 @@ const translations: TranslationDictionary = {
   'nav.hotline': { ar: 'الخط الساخن', en: 'Hotline' },
   'nav.cart': { ar: 'السلة', en: 'Cart' },
 
+  // Footer
+  'footer.about': { 
+    ar: 'أسوار جدة وجهتك الأولى لأحدث أجهزة كهربائية وإلكترونيات تجمع بين الإبتكار، الأداء الممتاز، والتصميم الراقي.', 
+    en: 'Aswar Jeddah is your premier destination for the latest home appliances and electronics combining innovation, top performance, and elegant design.' 
+  },
+  'footer.follow_us': { ar: 'تابعنا لكل جديد', en: 'Follow Us' },
+  'footer.contact_us': { ar: 'تواصل معنا', en: 'Contact Us' },
+  'footer.address': { ar: 'المملكة العربية السعودية، جدة', en: 'Kingdom of Saudi Arabia, Jeddah' },
+  'footer.rights': { 
+    ar: 'جميع الحقوق محفوظة © {year} متجر أسوار جدة لقطع الغيار والأجهزة.', 
+    en: 'All rights reserved © {year} Aswar Jeddah Store for Appliances and Electronics.' 
+  },
+  'footer.facebook': { ar: 'فيسبوك', en: 'Facebook' },
+  'footer.instagram': { ar: 'إنستغرام', en: 'Instagram' },
+  'footer.tiktok': { ar: 'تيك توك', en: 'TikTok' },
+
   // Categories
   'cat.appliances': { ar: 'الأجهزة الكهربائية', en: 'Electric Appliances' },
   'cat.houseware': { ar: 'الأدوات المنزلية', en: 'Houseware' },
@@ -32,6 +48,18 @@ const translations: TranslationDictionary = {
   'cat.mobile': { ar: 'موبايل وثابت', en: 'Mobiles & Phones' },
   'cat.scooter': { ar: 'سكوتر', en: 'Scooters' },
   'cat.blog': { ar: 'المدونة', en: 'Blog' },
+  'blog.title': { ar: 'مدونة أسوار جدة', en: 'Aswar Jeddah Blog' },
+  'blog.subtitle': { ar: 'دليلك الشامل ومصدرك الموثوق لأحدث المقالات، المراجعات، ودليل شراء الأجهزة المنزلية والذكية.', en: 'Your complete guide and trusted source for the latest articles, reviews, and home appliance buying guides.' },
+  'blog.search_placeholder': { ar: 'ابحث في مقالات المدونة...', en: 'Search articles...' },
+  'blog.read_more': { ar: 'اقرأ المزيد', en: 'Read More' },
+  'blog.read_time': { ar: 'دقائق قراءة', en: 'min read' },
+  'blog.featured': { ar: 'المقال المميز', en: 'Featured Post' },
+  'blog.categories': { ar: 'التصنيفات', en: 'Categories' },
+  'blog.all': { ar: 'جميع المقالات', en: 'All Posts' },
+  'blog.no_articles': { ar: 'لم يتم العثور على مقالات مطابقة', en: 'No matching articles found' },
+  'blog.share': { ar: 'مشاركة المقال', en: 'Share Article' },
+  'blog.related': { ar: 'مقالات ذات صلة', en: 'Related Articles' },
+  'blog.back': { ar: 'العودة للمدونة', en: 'Back to Blog' },
 
   // Product Details & Cards
   'product.price': { ar: 'السعر', en: 'Price' },
@@ -60,6 +88,15 @@ const translations: TranslationDictionary = {
   'shop.no_products_desc': { ar: 'لم نتمكن من العثور على منتجات تطابق الفلاتر أو الكلمات البحثية المدخلة.', en: 'We could not find products matching your filters or search terms.' },
   'shop.retry': { ar: 'إعادة المحاولة', en: 'Try Again' },
   'shop.refresh': { ar: 'تحديث المنتجات', en: 'Refresh Products' },
+
+  // Category Page
+  'category.title': { ar: 'تصنيف المنتجات', en: 'Category Products' },
+  'category.subcategories': { ar: 'التصنيفات الفرعية', en: 'Subcategories' },
+  'category.error_title': { ar: 'تعذر تحميل منتجات التصنيف', en: 'Failed to load category products' },
+  'category.empty_title': { ar: 'عذراً، لم نجد أي منتجات', en: 'Sorry, no products found' },
+  'category.empty_desc': { ar: 'لم نتمكن من العثور على منتجات تابعة لهذا التصنيف حالياً. حاول مراجعة الفلاتر أو الأقسام الأخرى.', en: 'We could not find products in this category. Try adjusting filters or exploring other categories.' },
+  'category.reset_filters': { ar: 'إفراغ الفلاتر والمحاولة مجدداً', en: 'Reset Filters & Try Again' },
+  'category.products_count': { ar: 'منتج', en: 'Products' },
 
   // Drawers & Cart
   'cart.title': { ar: 'سلة المشتريات', en: 'Shopping Cart' },
@@ -277,8 +314,8 @@ export const useLanguage = () => {
   // Global State for Language ('ar' | 'en')
   const currentLanguage = useState<LanguageCode>('appLanguage', () => 'ar')
 
-  // Computed API Locale Parameter Code ('sa' for Arabic API query, 'en' for English API query)
-  const apiLocale = computed<ApiLocaleCode>(() => (currentLanguage.value === 'en' ? 'en' : 'sa'))
+  // Computed API Locale Parameter Code ('sa' for Arabic API query, 'EN' for English API query)
+  const apiLocale = computed<ApiLocaleCode>(() => (currentLanguage.value === 'en' ? 'EN' : 'sa'))
 
   // Computed Text Direction ('rtl' | 'ltr')
   const dir = computed<'rtl' | 'ltr'>(() => (currentLanguage.value === 'en' ? 'ltr' : 'rtl'))

@@ -5,45 +5,51 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { categoryApiService, type CategoryItem } from '~/services/categoryApiService'
 import { useLanguage } from '~/composables/useLanguage'
 
+const sharedCategories = ref<CategoryItem[]>([])
+const sharedPending = ref<boolean>(false)
+const sharedError = ref<string | null>(null)
+const isFetched = ref<boolean>(false)
+
 export const useCategories = () => {
   const { apiLocale, currentLanguage } = useLanguage()
 
-  const categories = ref<CategoryItem[]>([])
-  const pending = ref<boolean>(false)
-  const error = ref<string | null>(null)
+  const isEmpty = computed(() => !sharedPending.value && sharedCategories.value.length === 0)
 
-  const isEmpty = computed(() => !pending.value && categories.value.length === 0)
+  const loadCategories = async (force: boolean = false) => {
+    if (isFetched.value && !force && sharedCategories.value.length > 0) {
+      return
+    }
 
-  const loadCategories = async () => {
-    pending.value = true
-    error.value = null
+    sharedPending.value = true
+    sharedError.value = null
 
     try {
       const data = await categoryApiService.fetchCategories('1', apiLocale.value)
-      categories.value = data
+      sharedCategories.value = data
+      isFetched.value = true
     } catch (err: any) {
       console.error('[useCategories] Load error:', err)
-      error.value = 'تعذر تحميل التصنيفات.'
+      sharedError.value = 'تعذر تحميل التصنيفات.'
     } finally {
-      pending.value = false
+      sharedPending.value = false
     }
   }
 
   // Auto-refetch when language changes
   watch([apiLocale, currentLanguage], () => {
-    loadCategories()
+    loadCategories(true)
   })
 
   onMounted(() => {
-    if (categories.value.length === 0) {
+    if (!isFetched.value || sharedCategories.value.length === 0) {
       loadCategories()
     }
   })
 
   return {
-    categories,
-    pending,
-    error,
+    categories: sharedCategories,
+    pending: sharedPending,
+    error: sharedError,
     isEmpty,
     loadCategories
   }

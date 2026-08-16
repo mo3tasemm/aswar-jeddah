@@ -103,7 +103,7 @@ import StickyMobileBuyBar from '~/components/product/details/StickyMobileBuyBar.
 import LiveSocialProof from '~/components/product/details/LiveSocialProof.vue'
 
 const route = useRoute()
-const { t, layoutDirection, currentLanguage } = useLanguage()
+const { t, layoutDirection, currentLanguage, apiLocale } = useLanguage()
 
 // Composables
 const { currentProduct, productReviews, pending, error, loadProductBySlug, loadProductReviews, products: allProducts, loadProducts } = useProducts()
@@ -126,11 +126,11 @@ const displayProductTitle = computed(() => {
 const fetchProductDetails = async () => {
   if (!productSlug.value) return
   await loadProductBySlug(productSlug.value)
-  loadProducts({ limit: 6 })
+  loadProducts({ limit: 6, locale: apiLocale.value })
 }
 
 // Watchers: Auto-refetch when locale or route slug changes
-watch([currentLanguage, productSlug], () => {
+watch([apiLocale, currentLanguage, productSlug], () => {
   fetchProductDetails()
 })
 
@@ -140,6 +140,8 @@ onMounted(() => {
 
 // Set Dynamic Page Head Title
 useHead({
-  title: computed(() => product.value ? `${displayProductTitle.value} | أسوار جدة` : 'تفاصيل المنتج')
+  title: computed(() => product.value 
+    ? `${displayProductTitle.value} | ${layoutDirection.value === 'ltr' ? 'Aswar Jeddah' : 'أسوار جدة'}` 
+    : (layoutDirection.value === 'ltr' ? 'Product Details' : 'تفاصيل المنتج'))
 })
 </script>

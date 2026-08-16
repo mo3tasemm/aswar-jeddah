@@ -8,7 +8,7 @@ import { cartApiService } from '~/services/cartApiService'
 import { useLanguage } from '~/composables/useLanguage'
 import { useToast } from '~/composables/useToast'
 
-// Module-level shared singleton locks to prevent duplicate concurrent API fetches
+// Module-level shared singleton state
 const globalCartItems = ref<CartItem[]>([])
 const isCartOpenState = ref<boolean>(false)
 const isCartLoadingState = ref<boolean>(false)
@@ -23,7 +23,6 @@ export const useCart = () => {
    * Load cart from backend API with global deduplication lock
    */
   const loadCart = async (force: boolean = false) => {
-    // Prevent duplicate concurrent requests
     if (isFetchingCart.value && !force) return
     if (isCartInitialized.value && !force) return
 
@@ -70,6 +69,7 @@ export const useCart = () => {
 
   /**
    * Add item to cart
+   * Payload: id (product id), quantity, options
    */
   const addToCart = async (product: Product, quantity: number = 1, size?: string, color?: string) => {
     if (!product || !product.id) return
@@ -82,8 +82,12 @@ export const useCart = () => {
     if (existingIndex > -1) {
       globalCartItems.value[existingIndex].quantity += quantity
     } else {
+      const tempId = `temp-${product.id}-${Date.now()}`
       globalCartItems.value.push({
-        id: `cart-${product.id}-${Date.now()}`,
+        id: tempId,
+        key: tempId,
+        cartKey: tempId,
+        product_id: product.id,
         product,
         quantity,
         selectedSize: size,
@@ -91,12 +95,14 @@ export const useCart = () => {
       })
     }
 
-    const prodTitle = currentLanguage.value === 'en' ? (product.title_en || product.name_en || product.title || product.name) : (product.title || product.name)
+    const prodTitle = currentLanguage.value === 'en' 
+      ? (product.title_en || product.name_en || product.title || product.name) 
+      : (product.title || product.name)
     toast.success(currentLanguage.value === 'en' ? 'Item added to cart' : 'تمت إضافة المنتج إلى السلة', prodTitle)
 
     // Backend sync
     try {
-      await cartApiService.addToCart(product, quantity)
+      await cartApiService.addToCart(product.id, quantity, { variant: size, color })
     } catch (e) {
       console.warn('[useCart] API sync fallback:', e)
     } finally {
@@ -105,39 +111,48 @@ export const useCart = () => {
   }
 
   /**
-   * Remove item from cart by product.id or cart item id
+   * Remove item from cart by cartItemKey (or product.id)
+   * Payload: key (cart item key)
    */
   const removeFromCart = async (targetId: string | number) => {
-    if (!targetId) return
+    if (!targetId && targetId !== 0) return
 
     const index = globalCartItems.value.findIndex(
-      (item) => String(item.id) === String(targetId) || String(item.product?.id) === String(targetId)
+      (item) => String(item.id) === String(targetId) || 
+                String(item.key) === String(targetId) || 
+                String(item.cartKey) === String(targetId) || 
+                String(item.product?.id) === String(targetId)
     )
 
+    let targetKey: string | number = targetId
     if (index > -1) {
       const removedItem = globalCartItems.value.splice(index, 1)[0]
-      const apiProductId = removedItem?.product?.id || targetId
+      targetKey = removedItem.key || removedItem.id || removedItem.cartKey || targetId
+    }
 
-      toast.info(currentLanguage.value === 'en' ? 'Item removed from cart' : 'تمت إزالة المنتج من السلة')
+    toast.info(currentLanguage.value === 'en' ? 'Item removed from cart' : 'تمت إزالة المنتج من السلة')
 
-      try {
-        await cartApiService.removeFromCart(apiProductId)
-      } catch (e) {
-        console.warn('[useCart] Remove API sync fallback:', e)
-      } finally {
-        await loadCart(true)
-      }
+    try {
+      await cartApiService.removeFromCart(targetKey)
+    } catch (e) {
+      console.warn('[useCart] Remove API sync fallback:', e)
+    } finally {
+      await loadCart(true)
     }
   }
 
   /**
-   * Update item quantity by product.id or cart item id
+   * Update item quantity by cartItemKey (or product.id)
+   * Payload: key (cart item key), quantity
    */
   const updateQuantity = async (targetId: string | number, newQty: number) => {
-    if (!targetId) return
+    if (!targetId && targetId !== 0) return
 
     const item = globalCartItems.value.find(
-      (i) => String(i.id) === String(targetId) || String(i.product?.id) === String(targetId)
+      (i) => String(i.id) === String(targetId) || 
+             String(i.key) === String(targetId) || 
+             String(i.cartKey) === String(targetId) || 
+             String(i.product?.id) === String(targetId)
     )
 
     if (!item) return
@@ -148,9 +163,10 @@ export const useCart = () => {
     }
 
     item.quantity = newQty
+    const targetKey = item.key || item.id || item.cartKey || targetId
 
     try {
-      await cartApiService.updateQuantity(item.product.id, newQty)
+      await cartApiService.updateQuantity(targetKey, newQty)
     } catch (e) {
       console.warn('[useCart] Update Qty API sync fallback:', e)
     } finally {
@@ -159,12 +175,16 @@ export const useCart = () => {
   }
 
   /**
-   * Clear entire cart
+   * Clear entire cart with key/cart_group_id support and item keys fallback
    */
   const clearCart = async () => {
+    const itemsToClear = [...globalCartItems.value]
+    const itemKeys = itemsToClear.map(i => i.key || i.id || i.product?.id).filter(Boolean) as (string | number)[]
+    const cartGroupId = itemsToClear.find(i => i.cart_group_id)?.cart_group_id
+
     globalCartItems.value = []
     try {
-      await cartApiService.clearAllCart()
+      await cartApiService.clearAllCart({ cartGroupId, itemKeys })
       toast.info(currentLanguage.value === 'en' ? 'Cart cleared' : 'تم تفريغ السلة')
     } catch (e) {
       console.warn('[useCart] Clear cart API error:', e)

@@ -7,7 +7,7 @@
           {{ isEditMode ? 'تعديل منتج موجود' : 'إضافة منتج جديد' }}
         </h2>
         <p class="text-xs sm:text-sm text-slate-500 font-medium mt-1">
-          قم بتعبئة بيانات المنتج باللغتين العربية والإنجليزي وتحديد الأسعار والمخزون والصور.
+          قم بتعبئة بيانات المنتج باللغتين وتحديد التصنيفات، السمات، خيارات الألوان، والأسعار.
         </p>
       </div>
 
@@ -23,21 +23,27 @@
         <button 
           type="submit" 
           :disabled="isSubmitting"
-          class="flex-1 sm:flex-initial px-8 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-[#0B0E28] font-black text-sm transition-all shadow-md shadow-amber-400/20 flex items-center justify-center gap-2 disabled:opacity-50"
+          class="flex-1 sm:flex-initial px-8 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-[#0B0E28] font-black text-sm transition-all shadow-md shadow-amber-400/20 flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
         >
           <span v-if="isSubmitting" class="w-4 h-4 border-2 border-[#0B0E28] border-t-transparent rounded-full animate-spin"></span>
-          <span>{{ isSubmitting ? 'جاري الإرسال (FormData)...' : (isEditMode ? 'حفظ التعديلات' : 'إضافة المنتج') }}</span>
+          <span>{{ isSubmitting ? 'جاري الحفظ والرفع...' : (isEditMode ? 'حفظ التعديلات' : 'إضافة المنتج') }}</span>
         </button>
       </div>
     </div>
 
     <!-- ERROR BANNER -->
-    <div v-if="formError" class="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-xs font-bold text-rose-600 flex items-center gap-3 animate-shake">
-      <svg class="w-5 h-5 shrink-0 text-rose-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-      <span>{{ formError }}</span>
-    </div>
+    <Transition name="fade">
+      <div v-if="formError" class="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-xs font-bold text-rose-600 flex items-center gap-3 animate-shake">
+        <svg class="w-5 h-5 shrink-0 text-rose-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span>{{ formError }}</span>
+      </div>
+    </Transition>
 
-    <!-- TABBED NAVIGATION HEADER (Pure SVG Icons - No Emojis) -->
+    <!-- TABBED NAVIGATION HEADER (Pure SVG Icons) -->
     <div class="bg-white rounded-2xl p-2 shadow-sm border border-slate-100 flex items-center gap-2 overflow-x-auto">
       <button
         type="button"
@@ -68,7 +74,7 @@
           <input 
             type="text" 
             v-model="form.name_ar"
-            placeholder="مثال: ثلاجة سامسونج 18 قدم..." 
+            placeholder="مثال: مكنسة بيسيل بروهيت اللاسلكية..." 
             class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20"
           />
         </div>
@@ -81,7 +87,7 @@
           <input 
             type="text" 
             v-model="form.name_en"
-            placeholder="e.g. Samsung Refrigerator 18 Cu..." 
+            placeholder="e.g. Bissell ProHeat Cordless Vacuum..." 
             class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20"
             dir="ltr"
           />
@@ -89,16 +95,16 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Arabic Description (Rich Text Editor WYSIWYG) -->
+        <!-- Arabic Description (Rich Text Editor) -->
         <RichTextEditor
           v-model="form.description_ar"
           label="الوصف (بالعربي)"
           :required="true"
           dir="rtl"
-          placeholder="اكتب وصفاً مفصلاً ومسقاً للمنتج..."
+          placeholder="اكتب وصفاً مفصلاً ومنسقاً للمنتج..."
         />
 
-        <!-- English Description (Rich Text Editor WYSIWYG) -->
+        <!-- English Description (Rich Text Editor) -->
         <RichTextEditor
           v-model="form.description_en"
           label="الوصف (بالإنجليزي)"
@@ -108,53 +114,82 @@
       </div>
     </div>
 
-    <!-- TAB 2: CATEGORIES & BRAND (Using Custom BaseSelect) -->
+    <!-- TAB 2: DYNAMIC CATEGORIES, SUBCATEGORIES & BRAND -->
     <div v-show="activeTab === 'category'" class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 space-y-6">
-      <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
-        <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-        الأقسام والعلامة التجارية (Category & Brand)
-      </h3>
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+          ربط التصنيفات والفئات الفرعية والعلامة التجارية
+        </h3>
+        <span class="text-xs text-slate-400 font-medium">جلب حي ومترابط من الـ API</span>
+      </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-        <!-- Custom BaseSelect for Category ID -->
-        <BaseSelect 
-          v-model="form.category_id"
-          label="القسم الرئيسي (category_id)"
-          placeholder="-- اختر القسم الرئيسي --"
-          :options="categorySelectOptions"
-          :required="true"
-          @update:model-value="onCategoryChange"
-        />
+        <!-- Main Category Select -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-extrabold text-[#0B0E28] block">
+              الفئة الرئيسية (category_id) <span class="text-rose-500">*</span>
+            </label>
+            <span v-if="isLoadingCategories" class="text-[10px] text-amber-500 font-bold animate-pulse">جاري التحميل...</span>
+          </div>
+          <BaseSelect 
+            v-model="form.category_id"
+            placeholder="-- اختر الفئة الرئيسية --"
+            :options="mainCategorySelectOptions"
+            :required="true"
+            :disabled="isLoadingCategories"
+            @update:model-value="handleMainCategoryChange"
+          />
+        </div>
 
-        <!-- Custom BaseSelect for Sub Category ID -->
-        <BaseSelect 
-          v-model="form.sub_category_id"
-          label="القسم الفرعي (sub_category_id)"
-          placeholder="-- اختر القسم الفرعي --"
-          :options="subCategorySelectOptions"
-          :disabled="availableSubCategories.length === 0"
-        />
+        <!-- Dynamic Subcategory Select (Fetched dynamically per parent_id) -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-extrabold text-[#0B0E28] block">
+              الفئة الفرعية (sub_category_id)
+            </label>
+            <span v-if="isLoadingSubcategories" class="text-[10px] text-amber-500 font-bold animate-pulse">جاري جلب الفئات الفرعية...</span>
+          </div>
+          <BaseSelect 
+            v-model="form.sub_category_id"
+            :placeholder="subCategoryPlaceholder"
+            :options="subCategorySelectOptions"
+            :disabled="!form.category_id || isLoadingSubcategories || subCategoriesList.length === 0"
+          />
+          <p v-if="form.category_id && !isLoadingSubcategories && subCategoriesList.length === 0" class="text-[10px] text-slate-400 font-medium">
+            لا توجد فئات فرعية مسجلة تحت هذا القسم.
+          </p>
+        </div>
 
         <!-- Sub Sub Category ID -->
         <div class="space-y-1.5">
           <label class="text-xs font-extrabold text-[#0B0E28] block">
-            القسم الفرعي الثانوي (sub_sub_category_id)
+            الفئة الفرعية الثانوية (sub_sub_category_id)
           </label>
           <input 
             type="number" 
             v-model="form.sub_sub_category_id"
-            placeholder="رقم القسم الثانوي" 
-            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[#0B0E28] focus:outline-none focus:border-amber-400"
+            placeholder="رقم الفئة الثانوية (اختياري)" 
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-[#0B0E28] focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20"
           />
         </div>
 
-        <!-- Custom BaseSelect for Brand ID -->
-        <BaseSelect 
-          v-model="form.brand_id"
-          label="العلامة التجارية (brand_id)"
-          placeholder="-- اختر العلامة التجارية --"
-          :options="brandSelectOptions"
-        />
+        <!-- Brand Select -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-extrabold text-[#0B0E28] block">
+              العلامة التجارية (brand_id)
+            </label>
+            <span v-if="isLoadingBrands" class="text-[10px] text-amber-500 font-bold animate-pulse">جاري التحميل...</span>
+          </div>
+          <BaseSelect 
+            v-model="form.brand_id"
+            placeholder="-- اختر العلامة التجارية --"
+            :options="brandSelectOptions"
+            :disabled="isLoadingBrands"
+          />
+        </div>
       </div>
     </div>
 
@@ -176,7 +211,7 @@
             step="0.01"
             v-model="form.unit_price"
             placeholder="0.00" 
-            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-amber-400"
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20"
           />
         </div>
 
@@ -189,19 +224,19 @@
             step="0.01"
             v-model="form.purchase_price"
             placeholder="0.00" 
-            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-amber-400"
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20"
           />
         </div>
 
         <div class="space-y-1.5">
           <label class="text-xs font-extrabold text-slate-800 block">
-            المخزون الحالي (current_stock)
+            المخزون الكلي (current_stock)
           </label>
           <input 
             type="number" 
             v-model="form.current_stock"
             placeholder="10" 
-            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-amber-400"
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20"
           />
         </div>
 
@@ -213,14 +248,14 @@
             type="number" 
             v-model="form.minimum_order_qty"
             placeholder="1" 
-            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-amber-400"
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20"
           />
         </div>
       </div>
 
       <!-- Discount Section -->
       <div class="pt-4 border-t border-slate-100 space-y-4">
-        <h4 class="text-sm font-bold text-slate-800">بيانات الخصم (Discount)</h4>
+        <h4 class="text-sm font-bold text-slate-800">بيانات الخصم والعروض الترويجية</h4>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
           <div class="space-y-1.5">
@@ -230,16 +265,17 @@
               step="0.01"
               v-model="form.discount"
               placeholder="0" 
-              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-amber-400"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20"
             />
           </div>
 
-          <!-- Custom BaseSelect for Discount Type -->
-          <BaseSelect 
-            v-model="form.discount_type"
-            label="نوع الخصم (discount_type)"
-            :options="discountTypeSelectOptions"
-          />
+          <div class="space-y-1.5">
+            <label class="text-xs font-extrabold text-slate-800 block">نوع الخصم (discount_type)</label>
+            <BaseSelect 
+              v-model="form.discount_type"
+              :options="discountTypeSelectOptions"
+            />
+          </div>
 
           <div class="space-y-1.5">
             <label class="text-xs font-extrabold text-slate-800 block">تاريخ بداية الخصم</label>
@@ -262,136 +298,308 @@
       </div>
     </div>
 
-    <!-- TAB 4: COLORS & VARIATIONS (Live API Color Selection UI) -->
-    <div v-show="activeTab === 'variations'" class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 space-y-6">
-      <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
-        <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-        الألوان والسمات والمتغيرات (Colors & Variations)
-      </h3>
+    <!-- TAB 4: DYNAMIC COLORS, ATTRIBUTES & VARIATIONS -->
+    <div v-show="activeTab === 'variations'" class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 space-y-8">
+      
+      <!-- 4.1 COLORS SECTION (GET /admin/colors/list + Swatches + Checkboxes) -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div>
+            <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+              1. خيارات الألوان المتاحة (Colors)
+            </h3>
+            <p class="text-xs text-slate-500 mt-0.5">تفعيل الألوان لجلب قائمة الألوان التفاعلية من الـ API وتخصيصها للمنتج.</p>
+          </div>
 
-      <!-- Color Active Toggle -->
-      <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-        <label class="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" v-model="form.colors_active" class="sr-only peer">
-          <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-400"></div>
-        </label>
-        <div>
-          <span class="text-xs font-extrabold text-slate-900 block">تفعيل الألوان (colors_active)</span>
-          <span class="text-[11px] text-slate-500">تمكين تحديد خيارات ألوان متعددة للمنتج</span>
+          <!-- Color Active Toggle -->
+          <label class="flex items-center gap-3 cursor-pointer select-none bg-slate-50 px-4 py-2 rounded-2xl border border-slate-200 hover:bg-slate-100 transition-colors">
+            <div class="relative">
+              <input type="checkbox" v-model="form.colors_active" class="sr-only peer">
+              <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-400"></div>
+            </div>
+            <span class="text-xs font-black text-slate-900">تفعيل الألوان (colors_active)</span>
+          </label>
         </div>
+
+        <!-- Color Selection UI (When colors_active is true) -->
+        <Transition name="fade">
+          <div v-if="form.colors_active" class="space-y-4 pt-2">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-700">اختر من الألوان المتاحة في المتجر:</span>
+                <span class="px-2.5 py-0.5 bg-amber-100 text-amber-900 rounded-full text-[11px] font-black">
+                  تم تحديد {{ (form.colors || []).length }} لون
+                </span>
+              </div>
+
+              <!-- Filter Search for Colors -->
+              <div class="relative w-full sm:w-64">
+                <input 
+                  type="text" 
+                  v-model="colorSearchTerm"
+                  placeholder="بحث في الألوان..."
+                  class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-amber-400"
+                />
+                <svg class="w-4 h-4 text-slate-400 absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+            </div>
+
+            <!-- Loading Colors State -->
+            <div v-if="isLoadingColors" class="flex items-center justify-center p-8 bg-slate-50 rounded-2xl border border-dashed border-slate-200 gap-3">
+              <div class="w-5 h-5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
+              <span class="text-xs font-bold text-slate-600">جاري جلب قائمة الألوان من السيرفر...</span>
+            </div>
+
+            <!-- Swatches Grid -->
+            <div v-else class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              <div
+                v-for="color in filteredColorsList"
+                :key="color.id"
+                @click="toggleColorSelection(color.code || color.name)"
+                class="p-2.5 rounded-2xl border transition-all cursor-pointer flex items-center gap-2.5 select-none"
+                :class="isColorSelected(color.code || color.name) 
+                  ? 'border-amber-400 bg-amber-50/60 shadow-sm ring-2 ring-amber-400/20' 
+                  : 'border-slate-200 bg-slate-50/60 hover:bg-white hover:border-slate-300'"
+              >
+                <!-- Color Swatch Circle -->
+                <div 
+                  class="w-6 h-6 rounded-full border border-slate-300 shrink-0 shadow-inner flex items-center justify-center transition-transform"
+                  :style="{ backgroundColor: normalizeHex(color.code) }"
+                >
+                  <svg v-if="isColorSelected(color.code || color.name)" class="w-3.5 h-3.5 text-white drop-shadow-md" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+
+                <!-- Color Name & Code -->
+                <div class="flex flex-col min-w-0 overflow-hidden">
+                  <span class="text-xs font-extrabold text-[#0B0E28] truncate">{{ color.name }}</span>
+                  <span class="text-[10px] text-slate-400 font-mono">{{ normalizeHex(color.code) }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Selected Colors Pills Bar & Custom Color Input -->
+            <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="text-xs font-bold text-slate-600">الألوان المختارة:</span>
+                <div 
+                  v-for="(c, idx) in form.colors" 
+                  :key="idx" 
+                  class="flex items-center gap-2 bg-[#0B0E28] text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm"
+                >
+                  <span class="w-3.5 h-3.5 rounded-full border border-white/40" :style="{ backgroundColor: normalizeHex(c) }"></span>
+                  <span>#{{ cleanColorCode(c) }}</span>
+                  <button type="button" @click.stop="removeColor(idx)" class="text-amber-400 hover:text-rose-400 font-black cursor-pointer">✕</button>
+                </div>
+              </div>
+
+              <!-- Custom Color Input -->
+              <div class="flex items-center gap-2">
+                <input 
+                  type="text" 
+                  v-model="newColorInput" 
+                  placeholder="كود لون مخصص (FF0000)" 
+                  class="w-40 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-amber-400"
+                  dir="ltr"
+                  @keyup.enter.prevent="addCustomColor"
+                />
+                <button 
+                  type="button" 
+                  @click="addCustomColor"
+                  class="px-3.5 py-1.5 rounded-xl bg-slate-800 text-white font-bold text-xs hover:bg-slate-900 cursor-pointer"
+                >
+                  + إضافة
+                </button>
+              </div>
+            </div>
+          </div>
+        </Transition>
       </div>
 
-      <!-- Color Selection UI (Interactive Color Swatches from API) -->
-      <div v-if="form.colors_active" class="space-y-4">
-        <div class="flex items-center justify-between">
+      <!-- 4.2 ATTRIBUTES & CHOICE OPTIONS SECTION (GET /admin/attributes/list) -->
+      <div class="space-y-4 pt-4 border-t border-slate-100">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div>
+            <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+              2. السمات والخصائص (Attributes & Choice Options)
+            </h3>
+            <p class="text-xs text-slate-500 mt-0.5">اختر السمات المطلوبة (مثل المقاس، الخامة، السعة) وحدد خياراتها للمنتج.</p>
+          </div>
+
+          <span v-if="isLoadingAttributes" class="text-xs font-bold text-amber-500 animate-pulse">جاري جلب السمات...</span>
+        </div>
+
+        <!-- Available Attributes Multi-Selector Bar -->
+        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-3">
           <label class="text-xs font-extrabold text-slate-800 block">
-            قائمة الألوان المتاحة من السيرفر (GET /admin/colors/list)
+            اضغط لتحديد السمات المطبقة على هذا المنتج:
           </label>
-          <span class="text-[11px] font-bold text-slate-400">
-            تم اختيار {{ (form.colors || []).length }} لون
-          </span>
-        </div>
 
-        <!-- Loading State for Colors -->
-        <div v-if="isLoadingColors" class="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl">
-          <div class="w-4 h-4 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
-          <span class="text-xs font-bold text-slate-500">جاري جلب الألوان المتاحة من السيرفر...</span>
-        </div>
-
-        <!-- Color Swatches Grid -->
-        <div v-else class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-          <div
-            v-for="color in colorsList"
-            :key="color.id"
-            @click="toggleColorSelection(color.code)"
-            class="p-2.5 rounded-2xl border transition-all cursor-pointer flex items-center gap-2.5 select-none"
-            :class="isColorSelected(color.code) 
-              ? 'border-amber-400 bg-amber-50/50 shadow-sm ring-2 ring-amber-400/20' 
-              : 'border-slate-200 bg-slate-50/60 hover:bg-white hover:border-slate-300'"
-          >
-            <!-- Color Swatch Circle -->
-            <div 
-              class="w-6 h-6 rounded-full border border-slate-300 shrink-0 shadow-inner flex items-center justify-center"
-              :style="{ backgroundColor: `#${color.code}` }"
+          <div v-if="attributesList.length > 0" class="flex flex-wrap gap-2.5">
+            <button
+              type="button"
+              v-for="attr in attributesList"
+              :key="attr.id"
+              @click="toggleAttributeSelection(attr.id)"
+              class="px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center gap-2 cursor-pointer border"
+              :class="isAttributeSelected(attr.id)
+                ? 'bg-amber-400 border-amber-500 text-[#0B0E28] shadow-sm'
+                : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300'"
             >
-              <svg v-if="isColorSelected(color.code)" class="w-3.5 h-3.5 text-white drop-shadow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+              <svg v-if="isAttributeSelected(attr.id)" class="w-3.5 h-3.5 text-[#0B0E28]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
               </svg>
-            </div>
+              <span>{{ attr.name }}</span>
+            </button>
+          </div>
 
-            <!-- Color Info -->
-            <div class="flex flex-col min-w-0 overflow-hidden">
-              <span class="text-xs font-extrabold text-[#0B0E28] truncate">{{ color.name }}</span>
-              <span class="text-[10px] text-slate-400 font-mono">#{{ color.code }}</span>
-            </div>
+          <div v-else-if="!isLoadingAttributes" class="text-xs text-slate-400 font-bold">
+            لا توجد سمات متاحة مسجلة في المتجر.
           </div>
         </div>
 
-        <!-- Selected Colors Pills Bar & Custom Color Input -->
-        <div class="pt-3 border-t border-slate-100 space-y-3">
-          <label class="text-[11px] font-bold text-slate-600 block">الألوان المختارة (colors[]):</label>
+        <!-- Selected Attributes Choice Options Configuration -->
+        <div v-if="selectedAttributesObjects.length > 0" class="space-y-4 pt-2">
+          <h4 class="text-xs font-black text-slate-800">تحديد خيارات وقيم السمات المختارة (Choice Options):</h4>
 
-          <div class="flex flex-wrap items-center gap-2.5">
-            <div 
-              v-for="(c, idx) in form.colors" 
-              :key="idx" 
-              class="flex items-center gap-2 bg-[#0B0E28] text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm"
-            >
-              <span class="w-3.5 h-3.5 rounded-full border border-white/40" :style="{ backgroundColor: `#${c}` }"></span>
-              <span>#{{ c }}</span>
-              <button type="button" @click="removeColor(idx)" class="text-amber-400 hover:text-rose-400 ms-1 font-black">✕</button>
-            </div>
+          <div 
+            v-for="attr in selectedAttributesObjects" 
+            :key="attr.id"
+            class="p-4 bg-slate-50/80 rounded-2xl border border-slate-200 space-y-3"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-slate-800"></span>
+                <span class="text-xs font-black text-[#0B0E28]">{{ attr.name }}</span>
+                <span class="text-[11px] text-slate-400 font-mono">(ID: {{ attr.id }})</span>
+              </div>
 
-            <div class="flex items-center gap-2 ms-auto">
-              <input 
-                type="text" 
-                v-model="newColorInput" 
-                placeholder="كود يدوي FF0000" 
-                class="w-36 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-amber-400"
-                dir="ltr"
-              />
               <button 
                 type="button" 
-                @click="addColor"
-                class="px-3.5 py-1.5 rounded-xl bg-slate-800 text-white font-bold text-xs hover:bg-slate-900 cursor-pointer"
+                @click="toggleAttributeSelection(attr.id)"
+                class="text-xs font-bold text-rose-500 hover:text-rose-700 cursor-pointer"
               >
-                + إضافة
+                إلغاء السمة
               </button>
+            </div>
+
+            <!-- Choice Options Chips & Input -->
+            <div class="space-y-2">
+              <div class="flex flex-wrap items-center gap-2">
+                <!-- Active Option Chips -->
+                <div 
+                  v-for="(opt, optIdx) in getChoiceOptions(attr.id)" 
+                  :key="optIdx"
+                  class="flex items-center gap-1.5 px-3 py-1 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 shadow-sm"
+                >
+                  <span>{{ opt }}</span>
+                  <button 
+                    type="button" 
+                    @click="removeChoiceOption(attr.id, optIdx)" 
+                    class="text-slate-400 hover:text-rose-500 font-black ms-1"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <!-- Input to add new choice option -->
+                <div class="flex items-center gap-1.5">
+                  <input 
+                    type="text" 
+                    v-model="newOptionInputs[attr.id]"
+                    :placeholder="`أضف خيار لـ ${attr.name}...`"
+                    class="bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-amber-400"
+                    @keyup.enter.prevent="addChoiceOption(attr.id)"
+                  />
+                  <button 
+                    type="button" 
+                    @click="addChoiceOption(attr.id)"
+                    class="px-3 py-1.5 bg-amber-400 hover:bg-amber-500 text-[#0B0E28] rounded-xl text-xs font-black cursor-pointer"
+                  >
+                    + إضافة
+                  </button>
+                </div>
+              </div>
+
+              <!-- Quick Predefined Suggestions if available -->
+              <div v-if="attr.values && attr.values.length > 0" class="flex flex-wrap items-center gap-1.5 pt-1">
+                <span class="text-[10px] font-bold text-slate-400">اقتراحات سريعة:</span>
+                <button
+                  type="button"
+                  v-for="val in attr.values"
+                  :key="val.id"
+                  @click="addQuickOption(attr.id, val.value)"
+                  class="text-[10px] px-2 py-0.5 bg-white border border-slate-200 rounded-lg text-slate-600 hover:border-amber-400 hover:text-[#0B0E28]"
+                >
+                  + {{ val.value }}
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Variations Generator -->
+      <!-- 4.3 VARIATIONS & COMBINATIONS GENERATOR -->
       <div class="pt-4 border-t border-slate-100 space-y-4">
-        <div class="flex items-center justify-between">
-          <h4 class="text-sm font-bold text-slate-800">قائمة المتغيرات الفردية (price_COLOR-OPTION, sku_, qty_)</h4>
-          <button 
-            type="button" 
-            @click="addVariationRow"
-            class="px-4 py-2 rounded-xl bg-indigo-50 text-indigo-600 font-bold text-xs hover:bg-indigo-100 transition-colors"
-          >
-            + إضافة صف متغير
-          </button>
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div>
+            <h4 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+              3. جدول المتغيرات والتوليفات (Product Variations)
+            </h4>
+            <p class="text-xs text-slate-500 mt-0.5">توليد الأسعار والمخزون والـ SKU لكل توليفة من الألوان والسمات المحددة.</p>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button 
+              type="button" 
+              @click="autoGenerateVariations"
+              class="px-4 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 font-black text-xs transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm"
+              title="توليد التوليفات تلقائياً بناءً على الألوان والسمات المختارة"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3" />
+              </svg>
+              <span>توليد المتغيرات تلقائياً</span>
+            </button>
+
+            <button 
+              type="button" 
+              @click="addManualVariationRow"
+              class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs transition-colors cursor-pointer"
+            >
+              + إضافة صف يدوي
+            </button>
+          </div>
         </div>
 
-        <div v-if="form.variations.length === 0" class="p-6 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-xs text-slate-400 font-bold">
-          لا توجد متغيرات مضافة حالياً.
+        <div v-if="(form.variations || []).length === 0" class="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-xs text-slate-400 font-bold">
+          لا توجد متغيرات مضافة حالياً. اضغط "توليد المتغيرات تلقائياً" لإنشاء صفوف التوليفات من الألوان والسمات، أو أضف صفاً يدوياً.
         </div>
 
         <div v-else class="space-y-3">
           <div 
             v-for="(v, idx) in form.variations" 
             :key="idx"
-            class="grid grid-cols-1 sm:grid-cols-4 gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200 relative"
+            class="grid grid-cols-1 sm:grid-cols-4 gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200 relative items-center"
           >
             <div>
-              <label class="text-[11px] font-bold text-slate-600 block">رمز المتغير (code)</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="text-[11px] font-bold text-slate-600 block">رمز المتغير (code)</label>
+                <span v-if="v.color_name" class="text-[10px] font-extrabold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-md">
+                  {{ v.color_name }}
+                </span>
+              </div>
               <input 
                 type="text" 
                 v-model="v.code" 
                 placeholder="FF0000-S"
-                class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold" 
+                class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 font-mono" 
                 dir="ltr"
               />
             </div>
@@ -399,36 +607,37 @@
               <label class="text-[11px] font-bold text-slate-600 block">السعر الخاص</label>
               <input 
                 type="number" 
+                step="0.01"
                 v-model="v.price" 
-                placeholder="250"
-                class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold" 
+                placeholder="0.00"
+                class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800" 
               />
             </div>
             <div>
-              <label class="text-[11px] font-bold text-slate-600 block">الرمز (SKU)</label>
+              <label class="text-[11px] font-bold text-slate-600 block">رمز الـ SKU</label>
               <input 
                 type="text" 
                 v-model="v.sku" 
-                placeholder="SKU-FF0000-S"
-                class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold" 
+                placeholder="SKU-CODE"
+                class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800" 
                 dir="ltr"
               />
             </div>
             <div class="flex items-center gap-2">
               <div class="flex-1">
-                <label class="text-[11px] font-bold text-slate-600 block">الكمية</label>
+                <label class="text-[11px] font-bold text-slate-600 block">الكمية بالمخزن</label>
                 <input 
                   type="number" 
                   v-model="v.qty" 
                   placeholder="10"
-                  class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold" 
+                  class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800" 
                 />
               </div>
               <button 
                 type="button" 
                 @click="removeVariationRow(idx)"
-                class="mt-4 p-2 text-rose-500 hover:bg-rose-50 rounded-lg"
-                title="حذف المتغير"
+                class="mt-4 p-2 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
+                title="حذف هذا المتغير"
               >
                 ✕
               </button>
@@ -438,27 +647,39 @@
       </div>
     </div>
 
-    <!-- TAB 5: FILES & MEDIA (File Objects) -->
+    <!-- TAB 5: FILES & MEDIA (Thumbnail, Gallery & Color Images) -->
     <div v-show="activeTab === 'media'" class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 space-y-6">
       <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
         <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-        الصور والملفات (File Object Attachments)
+        الصور والملفات (Media & Gallery Attachments)
       </h3>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Thumbnail (Required Single File) -->
         <div class="space-y-2">
           <label class="text-xs font-extrabold text-slate-800 block">
-            الصورة المصغرة الرئيسية (thumbnail - ملف إجباري) <span class="text-rose-500">*</span>
+            الصورة المصغرة الرئيسية (thumbnail) <span class="text-rose-500">*</span>
           </label>
-          <div class="p-4 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl text-center">
+          <div class="p-4 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl text-center flex flex-col items-center justify-center gap-3">
+            <div v-if="thumbnailPreview" class="relative w-32 h-32 rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+              <img :src="thumbnailPreview" class="w-full h-full object-cover" />
+              <button 
+                type="button" 
+                @click="removeThumbnail" 
+                class="absolute top-1 end-1 bg-rose-500 text-white p-1 rounded-full text-xs shadow hover:bg-rose-600"
+                title="حذف الصورة"
+              >
+                ✕
+              </button>
+            </div>
+
             <input 
               type="file" 
               accept="image/*"
               @change="onThumbnailSelected"
               class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-amber-400 file:text-[#0B0E28] hover:file:bg-amber-500 cursor-pointer"
             />
-            <p v-if="thumbnailName" class="mt-2 text-xs font-bold text-emerald-600">
+            <p v-if="thumbnailName" class="text-xs font-bold text-emerald-600">
               الملف المحدد: {{ thumbnailName }}
             </p>
           </div>
@@ -467,9 +688,27 @@
         <!-- Multiple Images Gallery -->
         <div class="space-y-2">
           <label class="text-xs font-extrabold text-slate-800 block">
-            معرض الصور المتعددة (images[])
+            معرض صور المنتج الإضافية (images[])
           </label>
-          <div class="p-4 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl text-center">
+          <div class="p-4 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl text-center flex flex-col items-center justify-center gap-3">
+            <!-- Gallery Previews Grid -->
+            <div v-if="galleryPreviews.length > 0" class="flex flex-wrap gap-2 justify-center">
+              <div 
+                v-for="(prev, gIdx) in galleryPreviews" 
+                :key="gIdx" 
+                class="relative w-16 h-16 rounded-xl overflow-hidden border border-slate-200 shadow-sm"
+              >
+                <img :src="prev" class="w-full h-full object-cover" />
+                <button 
+                  type="button" 
+                  @click="removeGalleryImage(gIdx)" 
+                  class="absolute top-0.5 end-0.5 bg-rose-500 text-white w-4 h-4 flex items-center justify-center rounded-full text-[10px] shadow"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
             <input 
               type="file" 
               accept="image/*"
@@ -477,7 +716,7 @@
               @change="onImagesSelected"
               class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-white hover:file:bg-slate-900 cursor-pointer"
             />
-            <p v-if="galleryCount > 0" class="mt-2 text-xs font-bold text-emerald-600">
+            <p v-if="galleryCount > 0" class="text-xs font-bold text-emerald-600">
               عدد الصور المحددة: {{ galleryCount }} صورة
             </p>
           </div>
@@ -485,24 +724,33 @@
       </div>
 
       <!-- Color Images Attachments -->
-      <div v-if="form.colors_active && form.colors.length > 0" class="pt-4 border-t border-slate-100 space-y-3">
-        <h4 class="text-sm font-bold text-slate-800">صور حسب اللون (color_image[COLOR_CODE])</h4>
+      <div v-if="form.colors_active && (form.colors || []).length > 0" class="pt-4 border-t border-slate-100 space-y-3">
+        <h4 class="text-sm font-bold text-slate-800">صور المنتجات حسب اللون المختار (color_image[COLOR_CODE])</h4>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <div 
             v-for="colorCode in form.colors" 
             :key="colorCode"
-            class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2"
+            class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3"
           >
-            <div class="flex items-center gap-2">
-              <span class="w-4 h-4 rounded-full border border-slate-300" :style="{ backgroundColor: `#${colorCode}` }"></span>
-              <span class="text-xs font-bold">#{{ colorCode }}</span>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-4 h-4 rounded-full border border-slate-300 shadow-inner" :style="{ backgroundColor: normalizeHex(colorCode) }"></span>
+                <span class="text-xs font-black text-slate-900">#{{ cleanColorCode(colorCode) }}</span>
+              </div>
+
+              <span v-if="colorImageNames[cleanColorCode(colorCode)]" class="text-[10px] font-bold text-emerald-600">تم الاختيار</span>
             </div>
+
+            <div v-if="colorImagePreviews[cleanColorCode(colorCode)]" class="w-16 h-16 rounded-xl overflow-hidden border border-slate-200">
+              <img :src="colorImagePreviews[cleanColorCode(colorCode)]" class="w-full h-full object-cover" />
+            </div>
+
             <input 
               type="file" 
               accept="image/*"
               @change="onColorImageSelected($event, colorCode)"
-              class="block w-full text-[11px] text-slate-500 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-slate-200 file:text-slate-800 cursor-pointer"
+              class="block w-full text-[11px] text-slate-500 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-[11px] file:font-bold file:bg-slate-200 file:text-slate-800 cursor-pointer"
             />
           </div>
         </div>
@@ -512,19 +760,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import BaseSelect, { type SelectOption } from '~/components/dashboard/ui/BaseSelect.vue'
 import RichTextEditor from '~/components/dashboard/ui/RichTextEditor.vue'
-import { categoryApiService, type CategoryItem } from '~/services/categoryApiService'
-import { brandApiService, type BrandItem } from '~/services/brandApiService'
-import { colorApiService, type ColorItem } from '~/services/colorApiService'
+import { adminCategoriesApiService, type AdminCategoryItem } from '~/services/adminCategoriesApiService'
+import { adminBrandsApiService, type AdminBrandItem } from '~/services/adminBrandsApiService'
+import { adminColorsApiService, type AdminColorItem } from '~/services/adminColorsApiService'
+import { adminAttributesApiService, type AdminAttributeItem } from '~/services/adminAttributesApiService'
 import { useAdminAuth } from '~/composables/useAdminAuth'
-import type { ProductFormDataPayload } from '~/services/adminProductsApiService'
+import type { ProductFormDataPayload, ProductVariationItem } from '~/services/adminProductsApiService'
 
 const props = defineProps<{
   initialData?: Partial<ProductFormDataPayload>;
   isEditMode?: boolean;
   isSubmitting?: boolean;
+  serverError?: string;
 }>()
 
 const emit = defineEmits<{
@@ -532,12 +782,16 @@ const emit = defineEmits<{
   (e: 'cancel'): void;
 }>()
 
-const { adminCookie } = useAdminAuth()
+const { adminCookie, adminToken } = useAdminAuth()
 
 const activeTab = ref('basic')
 const formError = ref('')
 
-// Tabs with Pure SVG Outline Icons
+watch(() => props.serverError, (val) => {
+  if (val) formError.value = val
+})
+
+// Tabs with pure SVG icons
 const tabs = [
   { 
     id: 'basic', 
@@ -585,68 +839,184 @@ const form = reactive<ProductFormDataPayload>({
   discount_type: props.initialData?.discount_type || 'flat',
   discount_start_date: props.initialData?.discount_start_date || '',
   discount_end_date: props.initialData?.discount_end_date || '',
-  colors_active: props.initialData?.colors_active ?? false,
-  colors: props.initialData?.colors || ['FF0000', '000000'],
-  choice_attributes: [],
-  choice_options: {},
-  variations: props.initialData?.variations || [
-    { code: 'FF0000-Default', price: 250, sku: 'SKU-RED', qty: 10 }
-  ],
-  thumbnail: null,
-  images: [],
-  color_images: {}
+  colors_active: Boolean(props.initialData?.colors_active),
+  colors: props.initialData?.colors ? [...props.initialData.colors] : [],
+  choice_attributes: props.initialData?.choice_attributes ? [...props.initialData.choice_attributes] : [],
+  choice_options: props.initialData?.choice_options ? { ...props.initialData.choice_options } : {},
+  variations: props.initialData?.variations ? [...props.initialData.variations] : [],
+  thumbnail: props.initialData?.thumbnail || null,
+  images: props.initialData?.images ? [...props.initialData.images] : [],
+  color_images: props.initialData?.color_images ? { ...props.initialData.color_images } : {}
 })
 
-// File state helpers
-const thumbnailName = ref('')
-const galleryCount = ref(0)
-const newColorInput = ref('')
+// Dynamic Data Lists
+const categoriesList = ref<AdminCategoryItem[]>([])
+const subCategoriesList = ref<AdminCategoryItem[]>([])
+const brandsList = ref<AdminBrandItem[]>([])
+const colorsList = ref<AdminColorItem[]>([])
+const attributesList = ref<AdminAttributeItem[]>([])
 
-// Categories, Brands, & Live API Colors
-const categoriesList = ref<CategoryItem[]>([])
-const brandsList = ref<BrandItem[]>([])
-const colorsList = ref<ColorItem[]>([])
-const isLoadingColors = ref(true)
+// Loading states
+const isLoadingCategories = ref(false)
+const isLoadingSubcategories = ref(false)
+const isLoadingBrands = ref(false)
+const isLoadingColors = ref(false)
+const isLoadingAttributes = ref(false)
+
+// UI Helpers
+const colorSearchTerm = ref('')
+const newColorInput = ref('')
+const newOptionInputs = reactive<Record<string | number, string>>({})
+const thumbnailName = ref('')
+const thumbnailPreview = ref<string>('')
+const galleryCount = ref(0)
+const galleryPreviews = ref<string[]>([])
+const colorImagePreviews = reactive<Record<string, string>>({})
+const colorImageNames = reactive<Record<string, string>>({})
 
 const getToken = (): string => {
+  if (adminToken?.value) return adminToken.value
   if (adminCookie?.value) return adminCookie.value
-  if (process.client) return localStorage.getItem('admin_token') || ''
+  if (process.client) {
+    return localStorage.getItem('admin_token') || localStorage.getItem('auth_token') || ''
+  }
   return ''
 }
 
+// 1. Initial Lifecycle Fetch
 onMounted(async () => {
-  try {
-    categoriesList.value = await categoryApiService.fetchCategories()
-    brandsList.value = await brandApiService.fetchBrands()
-  } catch {}
+  const token = getToken()
 
+  // Pre-fill previews for edit mode
+  if (typeof form.thumbnail === 'string' && form.thumbnail) {
+    thumbnailPreview.value = form.thumbnail
+    thumbnailName.value = 'الصورة المحفوظة'
+  }
+  if (Array.isArray(form.images)) {
+    form.images.forEach(img => {
+      if (typeof img === 'string' && img) {
+        galleryPreviews.value.push(img)
+      }
+    })
+    galleryCount.value = galleryPreviews.value.length
+  }
+
+  // Load Main Categories
+  isLoadingCategories.value = true
   try {
-    isLoadingColors.value = true
-    const token = getToken()
-    colorsList.value = await colorApiService.fetchColors(token)
-  } catch {
-    colorsList.value = []
+    const catRes = await adminCategoriesApiService.fetchCategories(token, '', 1, { position: 0 })
+    if (catRes.success) {
+      categoriesList.value = catRes.data
+    }
+  } catch (err) {
+    console.warn('Error fetching main categories:', err)
+  } finally {
+    isLoadingCategories.value = false
+  }
+
+  // Load Brands
+  isLoadingBrands.value = true
+  try {
+    const brandRes = await adminBrandsApiService.fetchBrands(token, '', 1, 100)
+    if (brandRes.success) {
+      brandsList.value = brandRes.data
+    }
+  } catch (err) {
+    console.warn('Error fetching brands:', err)
+  } finally {
+    isLoadingBrands.value = false
+  }
+
+  // Load Colors
+  isLoadingColors.value = true
+  try {
+    const colorRes = await adminColorsApiService.fetchColors(token, '', 1, 100)
+    if (colorRes.success) {
+      colorsList.value = colorRes.data
+    }
+  } catch (err) {
+    console.warn('Error fetching colors:', err)
   } finally {
     isLoadingColors.value = false
   }
+
+  // Load Attributes
+  isLoadingAttributes.value = true
+  try {
+    const attrRes = await adminAttributesApiService.fetchAttributes(token, '', 1, 100)
+    if (attrRes.success) {
+      attributesList.value = attrRes.data
+    }
+  } catch (err) {
+    console.warn('Error fetching attributes:', err)
+  } finally {
+    isLoadingAttributes.value = false
+  }
+
+  // If editing and category_id is already populated, fetch subcategories
+  if (form.category_id) {
+    await fetchSubcategoriesForCategory(form.category_id)
+  }
 })
 
-const categorySelectOptions = computed<SelectOption[]>(() => {
-  return categoriesList.value.map(c => ({ label: c.name, value: c.id }))
-})
-
-const availableSubCategories = computed(() => {
-  if (!form.category_id) return []
-  const selectedCat = categoriesList.value.find(c => String(c.id) === String(form.category_id))
-  return selectedCat?.subCategories || []
+// 2. Categories & Subcategories Handlers
+const mainCategorySelectOptions = computed<SelectOption[]>(() => {
+  return categoriesList.value.map(c => ({
+    label: c.name,
+    value: c.id
+  }))
 })
 
 const subCategorySelectOptions = computed<SelectOption[]>(() => {
-  return availableSubCategories.value.map(s => ({ label: s.name, value: s.id }))
+  return subCategoriesList.value.map(s => ({
+    label: s.name,
+    value: s.id
+  }))
 })
 
+const subCategoryPlaceholder = computed(() => {
+  if (!form.category_id) return 'اختر الفئة الرئيسية أولاً'
+  if (isLoadingSubcategories.value) return 'جاري جلب الفئات الفرعية...'
+  if (subCategoriesList.value.length === 0) return 'لا توجد فئات فرعية متاحة'
+  return '-- اختر الفئة الفرعية --'
+})
+
+const fetchSubcategoriesForCategory = async (parentId: string | number) => {
+  if (!parentId) {
+    subCategoriesList.value = []
+    return
+  }
+
+  isLoadingSubcategories.value = true
+  const token = getToken()
+
+  try {
+    const res = await adminCategoriesApiService.fetchSubcategories(token, parentId)
+    if (res.success) {
+      subCategoriesList.value = res.data
+    } else {
+      subCategoriesList.value = []
+    }
+  } catch (err) {
+    console.warn('Error fetching subcategories:', err)
+    subCategoriesList.value = []
+  } finally {
+    isLoadingSubcategories.value = false
+  }
+}
+
+const handleMainCategoryChange = async (newCategoryId: string | number) => {
+  form.sub_category_id = ''
+  form.sub_sub_category_id = ''
+  await fetchSubcategoriesForCategory(newCategoryId)
+}
+
+// 3. Brands & Discount Options
 const brandSelectOptions = computed<SelectOption[]>(() => {
-  return brandsList.value.map(b => ({ label: b.name, value: b.id }))
+  return brandsList.value.map(b => ({
+    label: b.name,
+    value: b.id
+  }))
 })
 
 const discountTypeSelectOptions: SelectOption[] = [
@@ -654,32 +1024,49 @@ const discountTypeSelectOptions: SelectOption[] = [
   { label: 'نسبة مئوية (percent %)', value: 'percent' }
 ]
 
-const onCategoryChange = () => {
-  form.sub_category_id = ''
-  form.sub_sub_category_id = ''
+// 4. Color Swatch Helpers
+const cleanColorCode = (code: string | undefined): string => {
+  if (!code) return ''
+  return code.replace(/^#/, '').toUpperCase()
 }
 
-// Color Swatch Selection Helpers
-const isColorSelected = (colorCode: string): boolean => {
-  const clean = colorCode.replace(/^#/, '').toUpperCase()
-  return (form.colors || []).some(c => c.replace(/^#/, '').toUpperCase() === clean)
+const normalizeHex = (code: string | undefined): string => {
+  if (!code) return '#000000'
+  const clean = cleanColorCode(code)
+  return `#${clean}`
 }
 
-const toggleColorSelection = (colorCode: string) => {
-  const clean = colorCode.replace(/^#/, '').toUpperCase()
+const filteredColorsList = computed(() => {
+  if (!colorSearchTerm.value.trim()) return colorsList.value
+  const q = colorSearchTerm.value.trim().toLowerCase()
+  return colorsList.value.filter(c => 
+    c.name.toLowerCase().includes(q) || 
+    (c.code && c.code.toLowerCase().includes(q))
+  )
+})
+
+const isColorSelected = (colorCodeOrName: string): boolean => {
+  const clean = cleanColorCode(colorCodeOrName)
+  return (form.colors || []).some(c => cleanColorCode(c) === clean)
+}
+
+const toggleColorSelection = (colorCodeOrName: string) => {
+  const clean = cleanColorCode(colorCodeOrName)
+  if (!clean) return
   if (!form.colors) form.colors = []
-  
+
   if (isColorSelected(clean)) {
-    form.colors = form.colors.filter(c => c.replace(/^#/, '').toUpperCase() !== clean)
+    form.colors = form.colors.filter(c => cleanColorCode(c) !== clean)
   } else {
     form.colors.push(clean)
   }
 }
 
-const addColor = () => {
-  const clean = newColorInput.value.trim().replace(/^#/, '').toUpperCase()
+const addCustomColor = () => {
+  const clean = cleanColorCode(newColorInput.value)
   if (clean && !isColorSelected(clean)) {
-    form.colors = [...(form.colors || []), clean]
+    if (!form.colors) form.colors = []
+    form.colors.push(clean)
     newColorInput.value = ''
   }
 }
@@ -688,44 +1075,206 @@ const removeColor = (idx: number) => {
   form.colors?.splice(idx, 1)
 }
 
-// Variations methods
-const addVariationRow = () => {
-  form.variations = [
-    ...(form.variations || []),
-    { code: 'VAR-' + (form.variations.length + 1), price: form.unit_price || 100, sku: 'SKU-VAR', qty: 10 }
-  ]
+// 5. Attributes & Choice Options Helpers
+const isAttributeSelected = (attrId: string | number): boolean => {
+  return (form.choice_attributes || []).some(id => String(id) === String(attrId))
+}
+
+const selectedAttributesObjects = computed<AdminAttributeItem[]>(() => {
+  return attributesList.value.filter(attr => isAttributeSelected(attr.id))
+})
+
+const toggleAttributeSelection = (attrId: string | number) => {
+  if (!form.choice_attributes) form.choice_attributes = []
+  if (!form.choice_options) form.choice_options = {}
+
+  if (isAttributeSelected(attrId)) {
+    form.choice_attributes = form.choice_attributes.filter(id => String(id) !== String(attrId))
+    delete form.choice_options[attrId]
+  } else {
+    form.choice_attributes.push(attrId)
+    if (!form.choice_options[attrId]) {
+      form.choice_options[attrId] = []
+    }
+  }
+}
+
+const getChoiceOptions = (attrId: string | number): string[] => {
+  return form.choice_options?.[attrId] || []
+}
+
+const addChoiceOption = (attrId: string | number) => {
+  const val = (newOptionInputs[attrId] || '').trim()
+  if (!val) return
+
+  if (!form.choice_options) form.choice_options = {}
+  if (!form.choice_options[attrId]) form.choice_options[attrId] = []
+
+  if (!form.choice_options[attrId].includes(val)) {
+    form.choice_options[attrId].push(val)
+  }
+  newOptionInputs[attrId] = ''
+}
+
+const addQuickOption = (attrId: string | number, value: string) => {
+  if (!value) return
+  if (!form.choice_options) form.choice_options = {}
+  if (!form.choice_options[attrId]) form.choice_options[attrId] = []
+
+  if (!form.choice_options[attrId].includes(value)) {
+    form.choice_options[attrId].push(value)
+  }
+}
+
+const removeChoiceOption = (attrId: string | number, optIdx: number) => {
+  if (form.choice_options?.[attrId]) {
+    form.choice_options[attrId].splice(optIdx, 1)
+  }
+}
+
+// 6. Variations Auto-Generator
+const getColorNameByCode = (colorCode: string): string => {
+  const clean = cleanColorCode(colorCode)
+  const found = colorsList.value.find(c => cleanColorCode(c.code) === clean || cleanColorCode(c.name) === clean)
+  return found ? found.name : ''
+}
+
+const autoGenerateVariations = () => {
+  const activeColors = form.colors_active && (form.colors || []).length > 0 ? form.colors! : []
+  const choiceAttrIds = form.choice_attributes || []
+  
+  const attrOptionsMatrix: string[][] = []
+  choiceAttrIds.forEach(attrId => {
+    const opts = form.choice_options?.[attrId] || []
+    if (opts.length > 0) {
+      attrOptionsMatrix.push(opts)
+    }
+  })
+
+  // Cartesian Product helper
+  const cartesian = (arrays: string[][]): string[][] => {
+    return arrays.reduce((acc, curr) => {
+      return acc.flatMap(a => curr.map(c => [...a, c]))
+    }, [[]] as string[][])
+  }
+
+  const variationRows: ProductVariationItem[] = []
+  const defaultPrice = form.unit_price || 100
+
+  if (activeColors.length > 0 && attrOptionsMatrix.length > 0) {
+    const attrCombos = cartesian(attrOptionsMatrix)
+    activeColors.forEach(c => {
+      const cleanC = cleanColorCode(c)
+      const colorName = getColorNameByCode(c)
+      attrCombos.forEach(combo => {
+        const comboStr = combo.join('-')
+        variationRows.push({
+          code: `${cleanC}-${comboStr}`,
+          color_name: colorName,
+          price: defaultPrice,
+          sku: `SKU-${cleanC}-${comboStr}`,
+          qty: 10
+        })
+      })
+    })
+  } else if (activeColors.length > 0) {
+    activeColors.forEach(c => {
+      const cleanC = cleanColorCode(c)
+      const colorName = getColorNameByCode(c)
+      variationRows.push({
+        code: cleanC,
+        color_name: colorName,
+        price: defaultPrice,
+        sku: `SKU-${cleanC}`,
+        qty: 10
+      })
+    })
+  } else if (attrOptionsMatrix.length > 0) {
+    const attrCombos = cartesian(attrOptionsMatrix)
+    attrCombos.forEach(combo => {
+      const comboStr = combo.join('-')
+      variationRows.push({
+        code: comboStr,
+        price: defaultPrice,
+        sku: `SKU-${comboStr}`,
+        qty: 10
+      })
+    })
+  }
+
+  // Calculate stock per variation based on total stock
+  const stockPerVar = Math.max(1, Math.floor(Number(form.current_stock || 10) / (variationRows.length || 1)))
+  variationRows.forEach(v => {
+    v.qty = stockPerVar
+  })
+
+  form.variations = variationRows
+}
+
+const addManualVariationRow = () => {
+  if (!form.variations) form.variations = []
+  form.variations.push({
+    code: `VAR-${form.variations.length + 1}`,
+    price: form.unit_price || 100,
+    sku: `SKU-VAR-${form.variations.length + 1}`,
+    qty: 10
+  })
 }
 
 const removeVariationRow = (idx: number) => {
-  form.variations.splice(idx, 1)
+  form.variations?.splice(idx, 1)
 }
 
-// File Handler Methods
+// 7. Media & File Handling
 const onThumbnailSelected = (event: Event) => {
   const target = event.target as HTMLInputElement
   if (target.files && target.files[0]) {
-    form.thumbnail = target.files[0]
-    thumbnailName.value = target.files[0].name
+    const file = target.files[0]
+    form.thumbnail = file
+    thumbnailName.value = file.name
+    thumbnailPreview.value = URL.createObjectURL(file)
   }
+}
+
+const removeThumbnail = () => {
+  form.thumbnail = null
+  thumbnailName.value = ''
+  thumbnailPreview.value = ''
 }
 
 const onImagesSelected = (event: Event) => {
   const target = event.target as HTMLInputElement
   if (target.files && target.files.length > 0) {
-    form.images = Array.from(target.files)
-    galleryCount.value = target.files.length
+    const files = Array.from(target.files)
+    if (!form.images) form.images = []
+    
+    files.forEach(f => {
+      form.images!.push(f)
+      galleryPreviews.value.push(URL.createObjectURL(f))
+    })
+    galleryCount.value = galleryPreviews.value.length
   }
+}
+
+const removeGalleryImage = (idx: number) => {
+  form.images?.splice(idx, 1)
+  galleryPreviews.value.splice(idx, 1)
+  galleryCount.value = galleryPreviews.value.length
 }
 
 const onColorImageSelected = (event: Event, colorCode: string) => {
+  const clean = cleanColorCode(colorCode)
   const target = event.target as HTMLInputElement
   if (target.files && target.files[0]) {
+    const file = target.files[0]
     if (!form.color_images) form.color_images = {}
-    form.color_images[colorCode] = target.files[0]
+    form.color_images[clean] = file
+    colorImagePreviews[clean] = URL.createObjectURL(file)
+    colorImageNames[clean] = file.name
   }
 }
 
-// Form Submission
+// 8. Form Submit & Validation
 const handleSubmit = () => {
   formError.value = ''
 
@@ -745,13 +1294,13 @@ const handleSubmit = () => {
 
   if (!form.category_id) {
     activeTab.value = 'category'
-    formError.value = 'يرجى اختيار القسم الرئيسي للمنتج.'
+    formError.value = 'يرجى اختيار الفئة الرئيسية للمنتج.'
     return
   }
 
   if (!form.unit_price || Number(form.unit_price) <= 0) {
     activeTab.value = 'pricing'
-    formError.value = 'يرجى إدخال سعر بيع المنتج بشكل صحيح.'
+    formError.value = 'يرجى إدخال سعر بيع المنتج بشكل صحيح (أكبر من 0).'
     return
   }
 
@@ -761,7 +1310,33 @@ const handleSubmit = () => {
     return
   }
 
-  emit('submit', { ...form })
+  // Ensure variations are generated if colors or attributes are configured, or cleared if not
+  const hasActiveColors = Boolean(form.colors_active && (form.colors || []).length > 0)
+  const hasActiveAttrs = Boolean((form.choice_attributes || []).length > 0)
+
+  if (hasActiveColors || hasActiveAttrs) {
+    if (!form.variations || form.variations.length === 0) {
+      autoGenerateVariations()
+    }
+  } else {
+    form.variations = []
+  }
+
+  // Filter out any empty attribute choices
+  const cleanedChoiceOptions: Record<string | number, string[]> = {}
+  if (form.choice_attributes && form.choice_attributes.length > 0) {
+    form.choice_attributes.forEach(attrId => {
+      const opts = (form.choice_options?.[attrId] || []).filter(o => o && String(o).trim())
+      if (opts.length > 0) {
+        cleanedChoiceOptions[attrId] = opts
+      }
+    })
+  }
+
+  emit('submit', { 
+    ...form,
+    choice_options: cleanedChoiceOptions
+  })
 }
 </script>
 
@@ -774,4 +1349,14 @@ const handleSubmit = () => {
 .animate-shake {
   animation: shake 0.4s ease-in-out;
 }
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 </style>
+

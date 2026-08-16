@@ -17,6 +17,7 @@
     <ProductFormAdvanced 
       :is-edit-mode="false"
       :is-submitting="isSubmitting"
+      :server-error="errorMessage"
       @submit="handleCreate"
       @cancel="navigateTo('/admin/products')"
     />
@@ -36,7 +37,7 @@ useHead({
   title: 'إضافة منتج جديد | لوحة التحكم'
 })
 
-const { submitForm, isSubmitting } = useAdminProducts()
+const { submitForm, isSubmitting, errorMessage } = useAdminProducts()
 
 const handleCreate = async (payload: ProductFormDataPayload) => {
   const success = await submitForm(payload, false)

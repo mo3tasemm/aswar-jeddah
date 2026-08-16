@@ -146,17 +146,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useAuth } from '~/composables/useAuth'
 import { useLanguage } from '~/composables/useLanguage'
+import { useAuthDrawer } from '~/composables/useAuthDrawer'
 
 const props = defineProps<{
-  isLoginOpen: boolean
+  isLoginOpen?: boolean
 }>()
 
 const emit = defineEmits<{
   (e: 'close'): void
 }>()
+
+const { isLoginOpen: drawerLoginState, closeLogin: drawerCloseLogin } = useAuthDrawer()
+
+const isLoginOpen = computed(() => {
+  if (typeof props.isLoginOpen === 'boolean') {
+    return props.isLoginOpen
+  }
+  return drawerLoginState.value
+})
 
 const { login } = useAuth()
 const { t, layoutDirection } = useLanguage()
@@ -167,6 +177,7 @@ const isLoading = ref(false)
 const errorMsg = ref('')
 
 const closeLogin = () => {
+  drawerCloseLogin()
   emit('close')
 }
 

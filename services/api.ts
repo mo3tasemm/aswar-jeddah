@@ -3,21 +3,35 @@
  * Automatically injects authentication tokens and multi-language localization headers on all HTTP requests.
  */
 
-const getApiHeaders = (): Record<string, string> => {
+export const getCurrentApiLocale = (localeInput?: string): string => {
+  if (localeInput) {
+    const clean = localeInput.trim()
+    if (clean.toUpperCase() === 'EN' || clean.toLowerCase() === 'en') return 'EN'
+    if (clean.toLowerCase() === 'sa' || clean.toLowerCase() === 'ar') return 'sa'
+    return clean
+  }
+  if (process.client) {
+    const saved = localStorage.getItem('aswar_lang')
+    if (saved === 'en') return 'EN'
+  }
+  return 'sa'
+}
+
+const getApiHeaders = (localeInput?: string): Record<string, string> => {
   const token = process.client 
     ? (localStorage.getItem('auth_token') || localStorage.getItem('token') || localStorage.getItem('access_token'))
     : null
 
-  const lang = process.client ? (localStorage.getItem('aswar_lang') || 'ar') : 'ar'
-  const isEn = lang === 'en'
+  const locale = getCurrentApiLocale(localeInput)
+  const isEn = locale === 'EN'
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
     'X-Requested-With': 'XMLHttpRequest',
     'Accept-Language': isEn ? 'en-US,en;q=0.9' : 'ar-SA,ar;q=0.9',
-    'X-localization': isEn ? 'en' : 'sa',
-    'lang': isEn ? 'en' : 'sa',
+    'X-localization': locale,
+    'lang': locale,
     'X-Language': isEn ? 'en' : 'ar'
   }
 
@@ -31,12 +45,22 @@ const getApiHeaders = (): Record<string, string> => {
 export const useApi = () => {
   const config = useRuntimeConfig()
 
-  const request = async <T>(url: string, options?: Parameters<typeof $fetch>[1]) => {
+  const request = async <T>(url: string, options?: Parameters<typeof $fetch>[1] & { locale?: string; guest_id?: string | number }) => {
+    const locale = getCurrentApiLocale(options?.locale)
+    
+    // Automatically inject guest_id and locale params if URL doesn't have them
+    const params = {
+      guest_id: '1',
+      locale,
+      ...(options?.params || {})
+    }
+
     return $fetch<T>(url, {
       baseURL: config.public.apiBase as string,
       ...options,
+      params,
       headers: {
-        ...getApiHeaders(),
+        ...getApiHeaders(locale),
         ...options?.headers,
       },
     })

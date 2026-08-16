@@ -284,33 +284,26 @@
       </nav>
 
     </div>
-
-    <!-- Login Drawer Integration -->
-    <LoginDrawer :is-login-open="isLoginOpen" @close="isLoginOpen = false" />
   </header>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import LanguageSwitcher from '~/components/layout/LanguageSwitcher.vue'
-import LoginDrawer from '~/components/auth/LoginDrawer.vue'
 import { useAuth } from '~/composables/useAuth'
 import { useCart } from '~/composables/useCart'
 import { useLanguage } from '~/composables/useLanguage'
+import { useAuthDrawer } from '~/composables/useAuthDrawer'
 
 const { user, isLoggedIn, logout, userName, userEmail } = useAuth()
 const { cartCount, formattedCartTotal, toggleCart } = useCart()
 const { t, layoutDirection } = useLanguage()
+const { toggleLogin } = useAuthDrawer()
 
 const searchQuery = ref('')
 const isScrolled = ref(false)
 const isMobileMenuOpen = ref(false)
-const isLoginOpen = ref(false)
 const headerImgError = ref(false)
-
-const toggleLogin = () => {
-  isLoginOpen.value = !isLoginOpen.value
-}
 
 const userHeaderAvatarUrl = computed(() => {
   const u = user.value as any
