@@ -25,7 +25,7 @@
             </svg>
           </button>
 
-          <NuxtLink to="/" class="flex items-center gap-2 group">
+          <NuxtLink :to="localePath('/')" class="flex items-center gap-2 group">
             <img 
               src="~/assets/images/Logo.png" 
               alt="أسوار جدة - Aswar Jeddah" 
@@ -98,7 +98,7 @@
             <!-- Authenticated User Profile Link & Avatar -->
             <NuxtLink 
               v-else
-              to="/my-account"
+              :to="localePath('/my-account')"
               class="flex items-center gap-2 group/btn text-start focus:outline-none cursor-pointer"
               :title="t('nav.account')"
             >
@@ -160,7 +160,7 @@
 
                 <!-- Nav Menu Links -->
                 <div class="space-y-1 text-xs font-bold text-slate-700">
-                  <NuxtLink to="/my-account" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 hover:text-[#0B0E28] transition-colors">
+                  <NuxtLink :to="localePath('/my-account')" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 hover:text-[#0B0E28] transition-colors">
                     <svg class="w-4 h-4 text-amber-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h7v7H3z"></path><path d="M14 3h7v7h-7z"></path><path d="M14 14h7v7h-7z"></path><path d="M3 14h7v7H3z"></path></svg>
                     <span>{{ t('nav.account') }}</span>
                   </NuxtLink>
@@ -266,7 +266,7 @@
       <nav class="hidden lg:flex items-center justify-between border-t mt-3 pt-2.5 transition-colors overflow-x-auto no-scrollbar" :class="isScrolled ? 'border-slate-800' : 'border-slate-100'">
         <div class="flex items-center gap-6">
           <NuxtLink 
-            to="/shop" 
+            :to="localePath('/shop')" 
             :class="['text-xs font-extrabold transition-colors py-1 whitespace-nowrap hover:text-amber-500', isScrolled ? 'text-white' : 'text-slate-900']"
           >
             {{ t('nav.shop') }}
@@ -275,7 +275,7 @@
           <NuxtLink 
             v-for="cat in navCategories" 
             :key="cat.url" 
-            :to="cat.url" 
+            :to="localePath(cat.url)" 
             :class="['text-xs font-bold transition-colors py-1 whitespace-nowrap hover:text-amber-500', isScrolled ? 'text-slate-300' : 'text-slate-600']"
           >
             {{ cat.name }}
@@ -297,7 +297,7 @@ import { useAuthDrawer } from '~/composables/useAuthDrawer'
 
 const { user, isLoggedIn, logout, userName, userEmail } = useAuth()
 const { cartCount, formattedCartTotal, toggleCart } = useCart()
-const { t, layoutDirection } = useLanguage()
+const { t, layoutDirection, localePath } = useLanguage()
 const { toggleLogin } = useAuthDrawer()
 
 const searchQuery = ref('')
@@ -365,7 +365,8 @@ const navCategories = computed(() => [
 
 const handleSearch = () => {
   if (!searchQuery.value.trim()) return;
-  navigateTo(`/search?q=${encodeURIComponent(searchQuery.value)}`);
+  const router = useRouter()
+  router.push({ path: localePath('/search'), query: { q: searchQuery.value } })
 };
 </script>
 

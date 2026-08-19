@@ -50,37 +50,15 @@ useHead({
 const route = useRoute()
 const productId = String(route.params.id)
 
-const { fetchProducts, submitForm, isSubmitting, errorMessage } = useAdminProducts()
+const { fetchProductDetails, submitForm, isSubmitting, errorMessage } = useAdminProducts()
 const loading = ref(true)
 const productData = ref<Partial<ProductFormDataPayload>>({})
 
 onMounted(async () => {
   try {
-    const list = await fetchProducts()
-    const found = list.find(p => String(p.id) === productId)
-
-    if (found) {
-      productData.value = {
-        id: found.id,
-        name_ar: found.name_ar || found.name,
-        name_en: found.name_en || '',
-        description_ar: found.description_ar || found.description,
-        description_en: found.description_en || '',
-        category_id: found.category_id || '',
-        sub_category_id: found.sub_category_id || '',
-        sub_sub_category_id: found.sub_sub_category_id || '',
-        brand_id: found.brand_id || '',
-        unit_price: found.unit_price,
-        purchase_price: found.purchase_price || 0,
-        minimum_order_qty: found.minimum_order_qty || 1,
-        current_stock: found.current_stock || 0,
-        discount: found.discount || 0,
-        discount_type: found.discount_type || 'flat',
-        discount_start_date: found.discount_start_date || '',
-        discount_end_date: found.discount_end_date || '',
-        colors_active: Boolean(found.colors_active),
-        colors: found.colors || []
-      }
+    const data = await fetchProductDetails(productId)
+    if (data) {
+      productData.value = data
     } else {
       productData.value = {
         id: productId,
@@ -89,7 +67,8 @@ onMounted(async () => {
         current_stock: 10
       }
     }
-  } catch {
+  } catch (err) {
+    console.error('Error fetching product details in [id].vue:', err)
     productData.value = {
       id: productId,
       name_ar: `منتج رقم #${productId}`,

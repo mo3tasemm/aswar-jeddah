@@ -1,9 +1,11 @@
 /**
  * Centralized Multi-Language (i18n / Locale) Management Composable for Nuxt 3 / Vue 3
  * Provides reactive language state, translation dictionary, LTR/RTL layout syncing, API locale mapping, and Currency Formatting.
+ * Also handles URL locale prefix routing (/en/... for English, no prefix for Arabic).
  */
 import { ref, computed, watch, onMounted } from 'vue'
-import { useState, useHead } from '#imports'
+import { useState, useHead, useRouter, useRoute } from '#imports'
+import { buildLocalePath, parseLocalePath } from '~/middleware/locale.global'
 
 export type LanguageCode = 'ar' | 'en'
 export type ApiLocaleCode = 'sa' | 'EN'
@@ -335,11 +337,25 @@ export const useLanguage = () => {
 
   /**
    * Switch Language Function
+   * Updates global state, HTML attributes, localStorage, AND navigates to the
+   * equivalent URL with/without the locale prefix.
    */
   const setLanguage = (lang: LanguageCode) => {
-    if (currentLanguage.value !== lang) {
-      currentLanguage.value = lang
-      updateHtmlAttributes(lang)
+    if (currentLanguage.value === lang) return
+    currentLanguage.value = lang
+    updateHtmlAttributes(lang)
+
+    if (process.client) {
+      try {
+        const route = useRoute()
+        const router = useRouter()
+        const { cleanPath } = parseLocalePath(route.path)
+        const targetPath = buildLocalePath(lang, cleanPath)
+        // Preserve query string and hash
+        router.push({ path: targetPath, query: route.query, hash: route.hash })
+      } catch (e) {
+        // Router may not be available in all contexts — safe to ignore
+      }
     }
   }
 
@@ -387,15 +403,35 @@ export const useLanguage = () => {
   // Sync on Client Mount
   onMounted(() => {
     if (process.client) {
-      const savedLang = localStorage.getItem('aswar_lang') as LanguageCode | null
-      if (savedLang && (savedLang === 'ar' || savedLang === 'en')) {
-        currentLanguage.value = savedLang
-        updateHtmlAttributes(savedLang)
-      } else {
-        updateHtmlAttributes(currentLanguage.value)
-      }
+      const { locale: urlLocale } = parseLocalePath(window.location.pathname)
+      currentLanguage.value = urlLocale
+      updateHtmlAttributes(urlLocale)
     }
   })
+
+  /**
+   * Returns the localized path for a given clean path in the current (or specified) language.
+   * e.g. localePath('/shop') → '/en/shop' when lang=en, '/shop' when lang=ar
+   */
+  const localePath = (path: string, locale?: LanguageCode): string => {
+    const lang = locale ?? currentLanguage.value
+    return buildLocalePath(lang, path)
+  }
+
+  /**
+   * Returns the current page path translated to the given locale.
+   * Useful for language switcher links.
+   */
+  const switchLocalePath = (targetLocale: LanguageCode): string => {
+    if (process.client) {
+      try {
+        const route = useRoute()
+        const { cleanPath } = parseLocalePath(route.path)
+        return buildLocalePath(targetLocale, cleanPath)
+      } catch (e) {}
+    }
+    return buildLocalePath(targetLocale, '/')
+  }
 
   return {
     currentLanguage,
@@ -406,6 +442,8 @@ export const useLanguage = () => {
     setLanguage,
     toggleLanguage,
     t,
-    formatCurrency
+    formatCurrency,
+    localePath,
+    switchLocalePath
   }
 }

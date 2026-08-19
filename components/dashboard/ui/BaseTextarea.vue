@@ -8,7 +8,7 @@
       <textarea
         :id="id"
         :value="modelValue"
-        @input="$emit('update:modelValue', ($event.target as HTMLTextAreaElement).value)"
+        @input="handleInput"
         :placeholder="placeholder"
         :disabled="disabled"
         :rows="rows"
@@ -52,7 +52,14 @@ withDefaults(defineProps<Props>(), {
   rows: 4
 })
 
-defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue'])
+
+const handleInput = (event: Event) => {
+  const target = event.target as HTMLTextAreaElement | null
+  if (target) {
+    emit('update:modelValue', target.value)
+  }
+}
 
 const id = useId()
 </script>

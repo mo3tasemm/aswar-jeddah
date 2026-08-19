@@ -9,7 +9,7 @@
           <!-- Column 1: Brand Info & Social Media -->
           <div class="space-y-4">
             <!-- Logo -->
-            <NuxtLink to="/" class="inline-block">
+            <NuxtLink :to="localePath('/')" class="inline-block">
               <img 
                 src="~/assets/images/Logo.png" 
                 alt="أسوار جدة - Aswar Jeddah" 
@@ -163,7 +163,7 @@
 import { computed } from 'vue'
 import { useLanguage } from '~/composables/useLanguage'
 
-const { t, layoutDirection } = useLanguage()
+const { t, layoutDirection, localePath } = useLanguage()
 
 const currentYear = computed(() => new Date().getFullYear())
 
@@ -172,17 +172,18 @@ const copyrightText = computed(() => {
 })
 
 const categoryLinks = computed(() => [
-  { name: t('cat.appliances'), url: '/category/appliances' },
-  { name: t('cat.houseware'), url: '/category/houseware' },
-  { name: t('cat.security'), url: '/category/security' },
-  { name: t('cat.laptops'), url: '/category/laptops' },
-  { name: t('cat.networks'), url: '/category/networks' },
+  { name: t('cat.appliances'), url: localePath('/category/appliances') },
+  { name: t('cat.houseware'), url: localePath('/category/houseware') },
+  { name: t('cat.security'), url: localePath('/category/security') },
+  { name: t('cat.laptops'), url: localePath('/category/laptops') },
+  { name: t('cat.networks'), url: localePath('/category/networks') },
 ])
 
 const accountLinks = computed(() => [
-  { name: t('nav.account'), url: '/my-account' },
-  { name: t('product.wishlist'), url: '/my-account/wishlist' },
-  { name: t('product.compare'), url: '/compare' },
-  { name: t('nav.cart'), url: '/cart' },
+  { name: t('nav.account'), url: localePath('/my-account') },
+  { name: t('product.wishlist'), url: localePath('/my-account/wishlist') },
+  { name: t('product.compare'), url: localePath('/compare') },
+  { name: t('nav.cart'), url: localePath('/cart') },
 ])
+
 </script>

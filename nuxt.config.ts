@@ -4,6 +4,45 @@ export default defineNuxtConfig({
   srcDir: '.',
   devtools: { enabled: true },
   modules: ['@nuxtjs/tailwindcss'],
+  hooks: {
+    'pages:extend'(pages) {
+      function cloneChildren(children: any[], prefix: string): any[] {
+        return children.map(child => ({
+          ...child,
+          name: child.name ? `${prefix}-${child.name}` : undefined,
+          children: child.children ? cloneChildren(child.children, prefix) : undefined
+        }))
+      }
+
+      function duplicateRoutesForLocale(routes: any[], prefix: string): any[] {
+        const result: any[] = []
+        for (const route of routes) {
+          if (route.path.startsWith(`/${prefix}`) || route.path === '/:slug(.*)*' || route.path === '/:catchAll(.*)*') {
+            continue
+          }
+
+          let localizedPath = route.path
+          if (localizedPath === '/') {
+            localizedPath = `/${prefix}`
+          } else if (localizedPath.startsWith('/')) {
+            localizedPath = `/${prefix}${localizedPath}`
+          }
+
+          const clonedRoute = {
+            ...route,
+            name: route.name ? `${prefix}-${route.name}` : undefined,
+            path: localizedPath,
+            children: route.children ? cloneChildren(route.children, prefix) : undefined
+          }
+          result.push(clonedRoute)
+        }
+        return result
+      }
+
+      const enRoutes = duplicateRoutesForLocale(pages, 'en')
+      pages.push(...enRoutes)
+    }
+  },
   app: {
     head: {
       titleTemplate: '%s',

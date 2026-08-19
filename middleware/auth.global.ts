@@ -3,10 +3,17 @@
  * Automatically intercepts direct URL entries (e.g. Incognito mode) and navigation for protected routes:
  * - /checkout
  * - /my-account and all /my-account/* sub-routes
+ * Works correctly with locale-prefixed URLs (e.g. /en/checkout, /en/my-account).
  */
+import { parseLocalePath, buildLocalePath } from '~/middleware/locale.global'
+import type { LanguageCode } from '~/composables/useLanguage'
+
 export default defineNuxtRouteMiddleware((to) => {
+  // Strip locale prefix to get the clean path for route matching
+  const { locale, cleanPath } = parseLocalePath(to.path)
+
   const protectedRoutes = ['/checkout', '/my-account']
-  const isProtected = protectedRoutes.some(path => to.path === path || to.path.startsWith(`${path}/`))
+  const isProtected = protectedRoutes.some(path => cleanPath === path || cleanPath.startsWith(`${path}/`))
 
   if (!isProtected) return
 
@@ -32,6 +39,8 @@ export default defineNuxtRouteMiddleware((to) => {
         toast.info('تسجيل الدخول مطلوب', 'يرجى تسجيل الدخول أولاً للوصول إلى هذه الصفحة.')
       } catch (e) {}
     }
-    return navigateTo(`/login?redirect=${encodeURIComponent(to.fullPath)}`)
+    // Redirect to locale-aware login page
+    const loginPath = buildLocalePath(locale as LanguageCode, '/login')
+    return navigateTo(`${loginPath}?redirect=${encodeURIComponent(to.fullPath)}`)
   }
 })

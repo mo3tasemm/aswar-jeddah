@@ -3,9 +3,9 @@
     <!-- VIEW TOGGLE CONTROLLER HEADER -->
     <div class="bg-white p-4 sm:p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
       <div>
-        <h1 class="text-2xl font-black text-slate-900">إدارة المنتجات (Admin Products CRUD)</h1>
+        <h1 class="text-2xl font-black text-slate-900">{{ t('admin.products.title') }}</h1>
         <p class="text-xs sm:text-sm text-slate-500 mt-1 font-medium">
-          {{ activeView === 'list' ? 'استعراض وإدارة منتجات المتجر مع نظام الصفحات التفاعلي.' : (editingProduct ? 'تعديل بيانات المنتج المختار.' : 'نموذج إضافة منتج جديد كـ FormData.') }}
+          {{ activeView === 'list' ? t('admin.products.subtitle') : (editingProduct ? t('admin.products.edit_product') : t('admin.products.add_product')) }}
         </p>
       </div>
 
@@ -13,19 +13,19 @@
         <button 
           v-if="activeView === 'list'"
           @click="openAddForm"
-          class="w-full sm:w-auto px-6 py-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-[#0B0E28] font-black text-sm transition-all shadow-md shadow-amber-400/20 flex items-center justify-center gap-2"
+          class="w-full sm:w-auto px-6 py-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-[#0B0E28] font-black text-sm transition-all shadow-md shadow-amber-400/20 flex items-center justify-center gap-2 cursor-pointer"
         >
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
-          <span>إضافة منتج جديد</span>
+          <span>{{ t('admin.products.add_product') }}</span>
         </button>
 
         <button 
           v-else
           @click="activeView = 'list'"
-          class="w-full sm:w-auto px-5 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-bold text-sm hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
+          class="w-full sm:w-auto px-5 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-bold text-sm hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 cursor-pointer"
         >
           <svg class="w-4 h-4 rtl:-scale-x-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
-          <span>العودة لقائمة المنتجات</span>
+          <span>{{ t('admin.common.back') }}</span>
         </button>
       </div>
     </div>
@@ -36,7 +36,7 @@
       <!-- Toolbar: Search & Refresh -->
       <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row gap-4">
         <div class="flex-1">
-          <BaseInput v-model="searchQuery" placeholder="ابحث باسم المنتج، الصنف، أو الـ SKU...">
+          <BaseInput v-model="searchQuery" :placeholder="t('admin.common.search_placeholder')">
             <template #icon>
               <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
             </template>
@@ -49,7 +49,7 @@
           class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-bold text-xs hover:bg-slate-50 flex items-center gap-2 justify-center cursor-pointer disabled:opacity-50"
         >
           <svg class="w-4 h-4" :class="{ 'animate-spin': isLoading }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-          <span>تحديث القائمة</span>
+          <span>{{ t('admin.common.refresh') }}</span>
         </button>
       </div>
 
@@ -82,22 +82,22 @@
         <!-- Empty State -->
         <div v-else-if="filteredProducts.length === 0" class="p-12 text-center space-y-3">
           <svg class="w-12 h-12 text-slate-300 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
-          <p class="text-sm font-extrabold text-slate-700">لا توجد منتجات مسجلة في النظام.</p>
-          <button @click="openAddForm" class="px-5 py-2 rounded-xl bg-amber-400 text-[#0B0E28] font-bold text-xs">
-            إضافة أول منتج
+          <p class="text-sm font-extrabold text-slate-700">{{ t('admin.common.no_data') }}</p>
+          <button @click="openAddForm" class="px-5 py-2 rounded-xl bg-amber-400 text-[#0B0E28] font-bold text-xs cursor-pointer">
+            {{ t('admin.products.add_product') }}
           </button>
         </div>
 
         <!-- Table Data -->
         <div v-else class="overflow-x-auto w-full">
-          <table class="w-full text-right text-sm whitespace-nowrap">
+          <table class="w-full text-start text-sm whitespace-nowrap">
             <thead class="bg-slate-50 text-slate-500 font-bold border-b border-slate-100">
               <tr>
-                <th class="px-6 py-4 font-bold">المنتج</th>
-                <th class="px-6 py-4 font-bold">التصنيف</th>
-                <th class="px-6 py-4 font-bold">السعر</th>
-                <th class="px-6 py-4 font-bold">المخزون</th>
-                <th class="px-6 py-4 font-bold text-center">الإجراءات</th>
+                <th class="px-6 py-4 font-bold text-start">{{ t('admin.products.product_name') }}</th>
+                <th class="px-6 py-4 font-bold text-start">{{ t('admin.products.category') }}</th>
+                <th class="px-6 py-4 font-bold text-start">{{ t('admin.products.price') }}</th>
+                <th class="px-6 py-4 font-bold text-start">{{ t('admin.products.stock') }}</th>
+                <th class="px-6 py-4 font-bold text-center">{{ t('admin.common.actions') }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100/80">
@@ -117,18 +117,18 @@
                     </div>
                   </div>
                 </td>
-                <td class="px-6 py-4 text-slate-600 font-medium">
+                <td class="px-6 py-4 text-slate-600 font-medium text-start">
                   {{ product.category_name }}
                 </td>
-                <td class="px-6 py-4 font-black text-slate-900">
-                  {{ product.unit_price }} ر.س
+                <td class="px-6 py-4 font-black text-slate-900 text-start">
+                  {{ product.unit_price }} {{ t('admin.common.currency') }}
                 </td>
-                <td class="px-6 py-4">
+                <td class="px-6 py-4 text-start">
                   <span 
                     class="px-2.5 py-1 rounded-md text-xs font-extrabold"
                     :class="product.current_stock > 5 ? 'bg-emerald-50 text-emerald-700' : (product.current_stock > 0 ? 'bg-amber-50 text-amber-700' : 'bg-rose-50 text-rose-700')"
                   >
-                    {{ product.current_stock > 0 ? `متوفر (${product.current_stock})` : 'نفذت الكمية' }}
+                    {{ product.current_stock > 0 ? `${t('admin.products.in_stock')} (${product.current_stock})` : t('admin.products.out_of_stock') }}
                   </span>
                 </td>
                 <td class="px-6 py-4">
@@ -136,7 +136,7 @@
                     <button 
                       @click="openEditForm(product)"
                       class="w-8 h-8 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 flex items-center justify-center transition-colors cursor-pointer"
-                      title="تعديل المنتج"
+                      :title="t('admin.common.edit')"
                     >
                       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                     </button>
@@ -144,7 +144,7 @@
                     <button 
                       @click="handleDelete(product.id)"
                       class="w-8 h-8 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition-colors cursor-pointer" 
-                      title="حذف المنتج"
+                      :title="t('admin.common.delete')"
                     >
                       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                     </button>
@@ -158,7 +158,7 @@
         <!-- PAGINATION CONTROLS BAR -->
         <div v-if="!isLoading && filteredProducts.length > 0" class="p-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-bold text-slate-500">
           <div>
-            عرض المنتجات من {{ startItem }} إلى {{ endItem }} (إجمالي {{ displayTotal }} منتج)
+            {{ startItem }} - {{ endItem }} ({{ t('admin.common.total') }}: {{ displayTotal }})
           </div>
 
           <div class="flex items-center gap-1.5">
@@ -169,7 +169,7 @@
               class="px-3 py-2 rounded-xl border border-slate-200 flex items-center gap-1 hover:bg-slate-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             >
               <svg class="w-4 h-4 rtl:-scale-x-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
-              <span>السابق</span>
+              <span>{{ t('admin.common.back') }}</span>
             </button>
 
             <!-- Page Number Buttons -->
@@ -189,7 +189,7 @@
               :disabled="currentPage >= displayLastPage || isLoading"
               class="px-3 py-2 rounded-xl border border-slate-200 flex items-center gap-1 hover:bg-slate-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             >
-              <span>التالي</span>
+              <span>{{ t('admin.common.view') }}</span>
               <svg class="w-4 h-4 rtl:-scale-x-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
             </button>
           </div>
@@ -217,14 +217,17 @@ import { ref, computed, onMounted } from 'vue'
 import BaseInput from '~/components/dashboard/ui/BaseInput.vue'
 import ProductFormAdvanced from '~/components/dashboard/ProductFormAdvanced.vue'
 import { useAdminProducts } from '~/composables/useAdminProducts'
+import { useAdminLanguage } from '~/composables/useAdminLanguage'
 import type { AdminProductItem, ProductFormDataPayload } from '~/services/adminProductsApiService'
 
 definePageMeta({
   layout: 'dashboard'
 })
 
+const { t } = useAdminLanguage()
+
 useHead({
-  title: 'إدارة المنتجات | لوحة التحكم'
+  title: computed(() => `${t('admin.products.title')} | ${t('admin.sidebar.panel_title')}`)
 })
 
 const { 
@@ -237,6 +240,7 @@ const {
   perPage, 
   totalProducts, 
   fetchProducts, 
+  fetchProductDetails,
   changePage, 
   deleteProduct, 
   submitForm 
@@ -245,6 +249,7 @@ const {
 const activeView = ref<'list' | 'form'>('list')
 const searchQuery = ref('')
 const editingProduct = ref<AdminProductItem | null>(null)
+const editingProductData = ref<Partial<ProductFormDataPayload>>({})
 
 const loadProducts = async (page: number = 1) => {
   await fetchProducts(page, perPage.value)
@@ -296,61 +301,76 @@ const endItem = computed(() => {
 
 const visiblePages = computed(() => {
   const pages: number[] = []
-  const maxPages = displayLastPage.value
-  const start = Math.max(1, currentPage.value - 2)
-  const end = Math.min(maxPages, start + 4)
+  const maxButtons = 5
+  let start = Math.max(1, currentPage.value - Math.floor(maxButtons / 2))
+  let end = Math.min(displayLastPage.value, start + maxButtons - 1)
+
+  if (end - start + 1 < maxButtons) {
+    start = Math.max(1, end - maxButtons + 1)
+  }
+
   for (let i = start; i <= end; i++) {
     pages.push(i)
   }
   return pages
 })
 
-const handlePageChange = async (page: number) => {
-  if (isClientPaginated.value) {
+const handlePageChange = (page: number) => {
+  if (page >= 1 && page <= displayLastPage.value) {
     currentPage.value = page
-  } else {
-    await changePage(page)
+    if (!isClientPaginated.value) {
+      changePage(page)
+    }
   }
 }
 
 const openAddForm = () => {
   editingProduct.value = null
+  editingProductData.value = {}
   activeView.value = 'form'
 }
+const openCreateForm = openAddForm
 
-const openEditForm = (product: AdminProductItem) => {
+const openEditForm = async (product: AdminProductItem) => {
   editingProduct.value = product
-  activeView.value = 'form'
-}
-
-const editingProductData = computed<Partial<ProductFormDataPayload>>(() => {
-  if (!editingProduct.value) return {}
-  const p = editingProduct.value
-  return {
-    id: p.id,
-    name_ar: p.name_ar || p.name,
-    name_en: p.name_en || '',
-    description_ar: p.description_ar || p.description,
-    description_en: p.description_en || '',
-    category_id: p.category_id || '',
-    sub_category_id: p.sub_category_id || '',
-    sub_sub_category_id: p.sub_sub_category_id || '',
-    brand_id: p.brand_id || '',
-    unit_price: p.unit_price,
-    purchase_price: p.purchase_price || 0,
-    minimum_order_qty: p.minimum_order_qty || 1,
-    current_stock: p.current_stock || 0,
-    discount: p.discount || 0,
-    discount_type: p.discount_type || 'flat',
-    discount_start_date: p.discount_start_date || '',
-    discount_end_date: p.discount_end_date || '',
-    colors_active: Boolean(p.colors_active),
-    colors: p.colors || []
+  editingProductData.value = {
+    id: product.id,
+    name_ar: product.name_ar || product.name,
+    name_en: product.name_en || '',
+    description_ar: product.description_ar || product.description,
+    description_en: product.description_en || '',
+    category_id: product.category_id || '',
+    sub_category_id: product.sub_category_id || '',
+    sub_sub_category_id: product.sub_sub_category_id || '',
+    brand_id: product.brand_id || '',
+    unit_price: product.unit_price,
+    purchase_price: product.purchase_price || '',
+    minimum_order_qty: product.minimum_order_qty || 1,
+    current_stock: product.current_stock || 10,
+    discount: product.discount || 0,
+    discount_type: product.discount_type || 'flat',
+    discount_start_date: product.discount_start_date || '',
+    discount_end_date: product.discount_end_date || '',
+    colors_active: Boolean(product.colors_active),
+    colors: product.colors || [],
+    thumbnail: product.thumbnail || null,
+    images: product.images || []
   }
-})
+  activeView.value = 'form'
+
+  // Fetch full details in background to populate variations, choice attributes, color images etc.
+  try {
+    const fullData = await fetchProductDetails(product.id)
+    if (fullData) {
+      editingProductData.value = fullData
+    }
+  } catch (err) {
+    console.warn('Could not fetch complete product details, using list item:', err)
+  }
+}
 
 const handleDelete = async (id: string | number) => {
-  if (confirm('هل أنت متأكد من حذف هذا المنتج نهائياً من النظام؟')) {
+  if (confirm(t('admin.products.delete_product_confirm'))) {
     await deleteProduct(id)
   }
 }

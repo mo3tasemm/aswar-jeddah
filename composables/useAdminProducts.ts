@@ -6,6 +6,7 @@ import { ref } from 'vue'
 import { 
   adminProductsApiService, 
   buildProductFormData, 
+  extractCleanFilename,
   type AdminProductItem, 
   type ProductFormDataPayload,
   type PaginationMeta
@@ -103,9 +104,7 @@ export const useAdminProducts = () => {
   }
 
   /**
-   * 3. SUBMIT Form (Direct Multipart FormData with Binary Files -> POST Add / POST Update)
-   * NOTE: /api/v1/admin/products/upload-images does NOT exist on this server.
-   * Images are sent directly as binary files inside the add/update request.
+   * 3. SUBMIT Form (Two-step flow: Upload images to /upload-images -> send names to /add or /update)
    */
   const submitForm = async (payload: ProductFormDataPayload, isEditMode: boolean = false, productId?: string | number): Promise<boolean> => {
     isSubmitting.value = true
@@ -113,11 +112,60 @@ export const useAdminProducts = () => {
     const token = getToken()
 
     try {
-      const formData = buildProductFormData(payload)
+      const processedPayload: ProductFormDataPayload = { ...payload }
+
+      // Step 1: Upload Images first & receive string filenames
+      // 1.1 Upload Thumbnail
+      if (payload.thumbnail && typeof payload.thumbnail !== 'string' && (payload.thumbnail instanceof File || payload.thumbnail instanceof Blob)) {
+        const thumbRes = await adminProductsApiService.uploadProductImage(payload.thumbnail as File, 'thumbnail', token)
+        if (!thumbRes.success || !thumbRes.imageName) {
+          throw new Error(thumbRes.message || 'فشل رفع صورة الغلاف (Thumbnail).')
+        }
+        processedPayload.thumbnail = thumbRes.imageName
+      } else if (typeof payload.thumbnail === 'string') {
+        processedPayload.thumbnail = extractCleanFilename(payload.thumbnail)
+      }
+
+      // 1.2 Upload Gallery Images
+      if (payload.images && payload.images.length > 0) {
+        const uploadedImages: string[] = []
+        for (const img of payload.images) {
+          if (img && typeof img !== 'string' && (img instanceof File || img instanceof Blob)) {
+            const imgRes = await adminProductsApiService.uploadProductImage(img as File, 'product', token)
+            if (!imgRes.success || !imgRes.imageName) {
+              throw new Error(imgRes.message || 'فشل رفع إحدى صور المنتج.')
+            }
+            uploadedImages.push(imgRes.imageName)
+          } else if (typeof img === 'string' && img.trim()) {
+            uploadedImages.push(extractCleanFilename(img))
+          }
+        }
+        processedPayload.images = uploadedImages
+      }
+
+      // 1.3 Upload Color Images
+      if (payload.color_images && Object.keys(payload.color_images).length > 0) {
+        const uploadedColorImages: Record<string, string> = {}
+        for (const [colorKey, fileOrStr] of Object.entries(payload.color_images)) {
+          if (fileOrStr && typeof fileOrStr !== 'string' && (fileOrStr instanceof File || fileOrStr instanceof Blob)) {
+            const colorImgRes = await adminProductsApiService.uploadProductImage(fileOrStr as File, 'product', token)
+            if (!colorImgRes.success || !colorImgRes.imageName) {
+              throw new Error(colorImgRes.message || `فشل رفع صورة اللون ${colorKey}`)
+            }
+            uploadedColorImages[colorKey] = colorImgRes.imageName
+          } else if (typeof fileOrStr === 'string' && fileOrStr.trim()) {
+            uploadedColorImages[colorKey] = extractCleanFilename(fileOrStr)
+          }
+        }
+        processedPayload.color_images = uploadedColorImages
+      }
+
+      // Step 2: Build FormData with clean text image filenames & post to /add or /update/{id}
+      const formData = buildProductFormData(processedPayload)
 
       let res
-      if (isEditMode && (productId || payload.id)) {
-        const id = productId || payload.id!
+      if (isEditMode && (productId || processedPayload.id)) {
+        const id = productId || processedPayload.id!
         res = await adminProductsApiService.updateProduct(id, formData, token)
       } else {
         res = await adminProductsApiService.addProduct(formData, token)
@@ -136,11 +184,35 @@ export const useAdminProducts = () => {
         return false
       }
     } catch (err: any) {
-      errorMessage.value = err?.data?.message || err?.message || 'حدث خطأ غير متوقع أثناء إرسال البيانات.'
-      toast.error('خطأ في النظام', errorMessage.value)
+      errorMessage.value = err?.data?.message || err?.message || 'حدث خطأ أثناء حفظ بيانات وصور المنتج.'
+      toast.error('خطأ في العملية', errorMessage.value)
       return false
     } finally {
       isSubmitting.value = false
+    }
+  }
+
+  /**
+   * 4. GET Product Details by ID for Edit Form
+   */
+  const fetchProductDetails = async (id: string | number): Promise<ProductFormDataPayload | null> => {
+    isLoading.value = true
+    errorMessage.value = ''
+    const token = getToken()
+
+    try {
+      const res = await adminProductsApiService.fetchProductDetails(id, token)
+      if (res.success && res.data) {
+        return res.data
+      } else {
+        errorMessage.value = res.message || 'تعذر جلب تفاصيل المنتج.'
+        return null
+      }
+    } catch (err: any) {
+      errorMessage.value = 'حدث خطأ في الشبكة أثناء جلب تفاصيل المنتج.'
+      return null
+    } finally {
+      isLoading.value = false
     }
   }
 
@@ -154,6 +226,7 @@ export const useAdminProducts = () => {
     perPage,
     totalProducts,
     fetchProducts,
+    fetchProductDetails,
     changePage,
     deleteProduct,
     submitForm

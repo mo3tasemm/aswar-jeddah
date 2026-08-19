@@ -7,7 +7,7 @@
         
         <!-- HEADER LOGO -->
         <div class="logo-wrapper">
-          <NuxtLink to="/">
+          <NuxtLink :to="localePath('/')">
             <img src="~/assets/images/Logo.png" alt="أسوار جدة" class="store-logo object-contain" />
           </NuxtLink>
         </div>
@@ -41,14 +41,13 @@
 
         <!-- FOOTER LINK -->
         <div class="card-footer">
-          <NuxtLink class="back-link flex items-center justify-center gap-2" to="/login">
+          <NuxtLink class="back-link flex items-center justify-center gap-2" :to="localePath('/login')">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 rtl:-scale-x-100">
               <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
             </svg>
             <span>{{ t('auth.back_to_login') }}</span>
           </NuxtLink>
         </div>
-
       </div>
     </section>
 
@@ -72,7 +71,7 @@ import HomeStoreLocationShowcase from '~/components/home/StoreLocationShowcase.v
 import { useToast } from '~/composables/useToast'
 import { useLanguage } from '~/composables/useLanguage'
 
-const { t, layoutDirection } = useLanguage()
+const { t, layoutDirection, localePath } = useLanguage()
 
 useHead({
   title: computed(() => t('auth.forgot_password_page_title'))

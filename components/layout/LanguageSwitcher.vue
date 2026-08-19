@@ -1,7 +1,7 @@
 <template>
   <button
     type="button"
-    @click="toggleLanguage"
+    @click="handleToggle"
     class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 border shadow-sm cursor-pointer select-none"
     :class="[
       isScrolled 
@@ -23,4 +23,12 @@ defineProps<{
 }>()
 
 const { currentLanguage, toggleLanguage } = useLanguage()
+
+/**
+ * Handles language toggle — setLanguage (inside toggleLanguage) will
+ * automatically update the URL via router.push with the correct locale prefix.
+ */
+const handleToggle = () => {
+  toggleLanguage()
+}
 </script>

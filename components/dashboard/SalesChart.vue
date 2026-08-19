@@ -12,9 +12,10 @@
         <button 
           v-for="period in periods" 
           :key="period.value"
-          @click="activePeriod = period.value"
-          class="px-4 py-1.5 rounded-md text-sm font-bold transition-all"
-          :class="activePeriod === period.value ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'"
+          @click="selectPeriod(period.value)"
+          :disabled="loading"
+          class="px-4 py-1.5 rounded-md text-xs sm:text-sm font-bold transition-all cursor-pointer disabled:opacity-50"
+          :class="currentActivePeriod === period.value ? 'bg-[#0B0E28] text-amber-400 shadow-sm' : 'text-slate-500 hover:text-slate-700'"
         >
           {{ period.label }}
         </button>
@@ -22,7 +23,10 @@
     </div>
 
     <!-- Chart Area -->
-    <div class="flex-1 relative w-full h-full min-h-0">
+    <div class="flex-1 relative w-full h-full min-h-0 flex items-center justify-center">
+      <div v-if="loading" class="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center justify-center z-10">
+        <div class="w-8 h-8 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
       <Line
         v-if="chartData"
         :data="chartData"
@@ -34,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -47,6 +51,7 @@ import {
   Filler
 } from 'chart.js'
 import { Line } from 'vue-chartjs'
+import type { AnalyticsPeriod } from '~/services/adminAnalyticsApiService'
 
 ChartJS.register(
   CategoryScale,
@@ -59,50 +64,78 @@ ChartJS.register(
   Filler
 )
 
-const periods = [
-  { label: 'شهري', value: 'monthly' },
-  { label: 'أسبوعي', value: 'weekly' },
-  { label: 'يومي', value: 'daily' }
-]
-
-const activePeriod = ref('monthly')
-
-// Dummy Data Generators
-const getLabels = (period: string) => {
-  if (period === 'monthly') return ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو']
-  if (period === 'weekly') return ['الأسبوع 1', 'الأسبوع 2', 'الأسبوع 3', 'الأسبوع 4']
-  return ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة']
+interface Props {
+  labels?: string[]
+  sales?: number[]
+  period?: AnalyticsPeriod
+  loading?: boolean
+  currencySymbol?: string
 }
 
-const getData = (period: string) => {
-  if (period === 'monthly') return [65000, 59000, 80000, 81000, 56000, 95000, 110000]
-  if (period === 'weekly') return [25000, 32000, 28000, 45000]
-  return [5000, 4000, 6000, 8000, 7500, 12000, 15000]
+const props = withDefaults(defineProps<Props>(), {
+  labels: () => [],
+  sales: () => [],
+  period: 'this_month',
+  loading: false,
+  currencySymbol: 'ر.س'
+})
+
+const emit = defineEmits<{
+  (e: 'update:period', val: AnalyticsPeriod): void
+  (e: 'change-period', val: AnalyticsPeriod): void
+}>()
+
+const periods = [
+  { label: 'شهري', value: 'this_month' as AnalyticsPeriod },
+  { label: 'أسبوعي', value: 'this_week' as AnalyticsPeriod },
+  { label: 'يومي', value: 'today' as AnalyticsPeriod }
+]
+
+const internalPeriod = ref<AnalyticsPeriod>(props.period || 'this_month')
+
+watch(() => props.period, (newVal) => {
+  if (newVal) internalPeriod.value = newVal
+})
+
+const currentActivePeriod = computed(() => props.period || internalPeriod.value)
+
+const selectPeriod = (val: AnalyticsPeriod) => {
+  internalPeriod.value = val
+  emit('update:period', val)
+  emit('change-period', val)
 }
 
 const chartData = computed(() => {
+  const customLabels = props.labels && props.labels.length > 0 
+    ? props.labels 
+    : (currentActivePeriod.value === 'today' ? ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'] : ['1', '5', '10', '15', '20', '25', '30'])
+  
+  const customSales = props.sales && props.sales.length > 0 
+    ? props.sales 
+    : [0, 0, 0, 0, 0, 0, 0]
+
   return {
-    labels: getLabels(activePeriod.value),
+    labels: customLabels,
     datasets: [
       {
-        label: 'إجمالي المبيعات (ر.س)',
-        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+        label: `إجمالي المبيعات (${props.currencySymbol})`,
+        backgroundColor: 'rgba(99, 102, 241, 0.12)',
         borderColor: '#4f46e5',
-        borderWidth: 3,
+        borderWidth: 2.5,
         pointBackgroundColor: '#ffffff',
         pointBorderColor: '#4f46e5',
         pointBorderWidth: 2,
-        pointRadius: 4,
+        pointRadius: 3.5,
         pointHoverRadius: 6,
         fill: true,
-        tension: 0.4,
-        data: getData(activePeriod.value)
+        tension: 0.35,
+        data: customSales
       }
     ]
   }
 })
 
-const chartOptions = {
+const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
@@ -111,44 +144,45 @@ const chartOptions = {
     },
     tooltip: {
       backgroundColor: '#0B0E28',
-      titleFont: { family: 'Tajawal', size: 14, weight: 'bold' },
-      bodyFont: { family: 'Tajawal', size: 13 },
-      padding: 12,
+      titleFont: { family: 'Tajawal', size: 13, weight: 'bold' },
+      bodyFont: { family: 'Tajawal', size: 12 },
+      padding: 10,
       displayColors: false,
       rtl: true,
-      textDirection: 'rtl'
+      textDirection: 'rtl',
+      callbacks: {
+        label: (ctx: any) => `${ctx.dataset.label}: ${Number(ctx.raw).toLocaleString()} ${props.currencySymbol}`
+      }
     }
   },
   scales: {
     y: {
       beginAtZero: true,
       grid: {
-        color: '#f1f5f9',
-        drawBorder: false,
+        color: '#f1f5f9'
       },
       ticks: {
         color: '#94a3b8',
-        font: { family: 'Tajawal', size: 12 },
+        font: { family: 'Tajawal', size: 11 },
         callback: function(value: any) {
-          if (value >= 1000) return value / 1000 + 'k'
+          if (value >= 1000) return (value / 1000).toFixed(0) + 'k'
           return value
         }
       }
     },
     x: {
       grid: {
-        display: false,
-        drawBorder: false
+        display: false
       },
       ticks: {
         color: '#64748b',
-        font: { family: 'Tajawal', size: 12, weight: 'bold' }
+        font: { family: 'Tajawal', size: 11, weight: 'bold' }
       }
     }
   },
   interaction: {
     intersect: false,
-    mode: 'index',
-  },
-}
+    mode: 'index' as const,
+  }
+}))
 </script>

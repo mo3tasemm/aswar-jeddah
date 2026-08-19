@@ -18,14 +18,14 @@
 
       <div class="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
         <NuxtLink 
-          to="/" 
+          :to="localePath('/')" 
           class="w-full sm:w-auto px-6 py-3 bg-[#0B0E28] hover:bg-slate-800 text-white text-xs font-black rounded-xl shadow-md transition-all cursor-pointer"
         >
           {{ layoutDirection === 'ltr' ? 'Back to Home' : 'الرئيسية' }}
         </NuxtLink>
 
         <NuxtLink 
-          to="/shop" 
+          :to="localePath('/shop')" 
           class="w-full sm:w-auto px-6 py-3 bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs font-black rounded-xl shadow-md transition-all cursor-pointer"
         >
           {{ layoutDirection === 'ltr' ? 'Browse Shop' : 'تصفح المتجر' }}
@@ -38,7 +38,7 @@
 <script setup lang="ts">
 import { useLanguage } from '~/composables/useLanguage'
 
-const { layoutDirection } = useLanguage()
+const { layoutDirection, localePath } = useLanguage()
 
 useHead({
   title: '404 - الصفحة غير موجودة | أسوار جدة'

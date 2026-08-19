@@ -9,7 +9,7 @@
         :id="id"
         :type="type"
         :value="modelValue"
-        @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
+        @input="handleInput"
         :placeholder="placeholder"
         :disabled="disabled"
         :class="[
@@ -56,7 +56,14 @@ withDefaults(defineProps<Props>(), {
   disabled: false
 })
 
-defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue'])
+
+const handleInput = (event: Event) => {
+  const target = event.target as HTMLInputElement | null
+  if (target) {
+    emit('update:modelValue', target.value)
+  }
+}
 
 const id = useId()
 </script>

@@ -4,12 +4,12 @@
       <input 
         type="checkbox" 
         :checked="modelValue"
-        @change="$emit('update:modelValue', ($event.target as HTMLInputElement).checked)"
+        @change="handleChange"
         class="sr-only peer"
         :disabled="disabled"
       >
       <div 
-        class="w-11 h-6 bg-rose-500 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all rtl:peer-checked:after:-translate-x-full"
+        class="w-11 h-6 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all rtl:peer-checked:after:-translate-x-full"
         :class="[
           modelValue ? 'bg-emerald-500' : 'bg-rose-500',
           disabled ? 'opacity-50 cursor-not-allowed' : ''
@@ -27,7 +27,14 @@ defineProps<{
   disabled?: boolean
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   'update:modelValue': [value: boolean]
 }>()
+
+const handleChange = (event: Event) => {
+  const target = event.target as HTMLInputElement | null
+  if (target) {
+    emit('update:modelValue', target.checked)
+  }
+}
 </script>

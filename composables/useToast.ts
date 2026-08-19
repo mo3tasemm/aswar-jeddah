@@ -50,9 +50,19 @@ export const useToast = () => {
     addToast({ title, message, type: 'warning', duration })
   }
 
+  const showToast = (options: { type?: ToastType; title?: string; message: string; duration?: number }) => {
+    addToast({
+      title: options.title || (options.type === 'success' ? 'نجاح' : options.type === 'error' ? 'خطأ' : 'تنبيه'),
+      message: options.message || '',
+      type: options.type || 'info',
+      duration: options.duration || 3500
+    })
+  }
+
   return {
     toasts,
     addToast,
+    showToast,
     removeToast,
     success,
     error,
@@ -60,4 +70,3 @@ export const useToast = () => {
     warning
   }
 }
-

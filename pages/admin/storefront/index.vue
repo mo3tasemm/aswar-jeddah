@@ -1,24 +1,24 @@
 <template>
-  <div class="space-y-6 pb-24 lg:pb-6 relative" dir="rtl">
+  <div class="space-y-6 pb-24 lg:pb-6 relative" :dir="adminDir">
     
     <!-- Page Header -->
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
       <div>
         <h1 class="text-2xl font-black text-slate-800 flex items-center gap-2.5">
           <i class="fa-solid fa-cubes-stacked text-indigo-600 text-xl"></i>
-          إدارة الواجهة الرئيسية
+          {{ t('admin.storefront.title') }}
         </h1>
-        <p class="text-sm text-slate-500 mt-1">السيطرة والتحكم الكامل في كافة أقسام المتجر، السكاشن الفرعية، الصور والروابط.</p>
+        <p class="text-sm text-slate-500 mt-1">{{ t('admin.storefront.subtitle') }}</p>
       </div>
 
       <div class="flex items-center gap-3 w-full sm:w-auto">
         <button
           type="button"
           @click="isAddModalOpen = true"
-          class="flex-1 sm:flex-initial px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-sm rounded-xl transition-colors flex items-center justify-center gap-2 border border-indigo-200/60 shadow-sm"
+          class="flex-1 sm:flex-initial px-4 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-sm rounded-xl transition-colors flex items-center justify-center gap-2 border border-indigo-200/60 shadow-sm cursor-pointer"
         >
           <i class="fa-solid fa-plus text-xs"></i>
-          إضافة سكشن جديد
+          {{ t('admin.storefront.add_section') }}
         </button>
 
         <BaseButton 
@@ -28,7 +28,7 @@
           @click="saveLayout"
         >
           <i class="fa-solid fa-floppy-disk text-xs ml-1.5"></i>
-          حفظ التغييرات
+          {{ t('admin.common.save') }}
         </BaseButton>
       </div>
     </div>
@@ -615,16 +615,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import BaseInput from '~/components/dashboard/ui/BaseInput.vue'
 import BaseButton from '~/components/dashboard/ui/BaseButton.vue'
 import ImageUploader from '~/components/dashboard/ui/ImageUploader.vue'
 import BaseModal from '~/components/dashboard/ui/BaseModal.vue'
 import { fetchHomeLayout, saveHomeLayout, type HomeSection } from '~/services/homeLayoutService'
 import { useToast } from '~/composables/useToast'
+import { useAdminLanguage } from '~/composables/useAdminLanguage'
 
 definePageMeta({
   layout: 'dashboard'
+})
+
+const { t, adminDir } = useAdminLanguage()
+
+useHead({
+  title: computed(() => `${t('admin.storefront.title')} | ${t('admin.sidebar.panel_title')}`)
 })
 
 const { success } = useToast()

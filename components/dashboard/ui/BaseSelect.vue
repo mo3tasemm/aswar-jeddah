@@ -9,7 +9,7 @@
       <select
         :id="id"
         :value="modelValue"
-        @change="$emit('update:modelValue', ($event.target as HTMLSelectElement).value)"
+        @change="handleChange"
         :disabled="disabled"
         :class="[
           'w-full px-4 py-3 pe-10 rounded-xl border text-sm font-bold outline-none transition-all duration-200 appearance-none cursor-pointer',
@@ -62,20 +62,28 @@ interface Props {
   error?: string
   placeholder?: string
   options: SelectOption[]
-  disabled?: boolean
   required?: boolean
+  disabled?: boolean
 }
 
 withDefaults(defineProps<Props>(), {
   modelValue: '',
   label: '',
   error: '',
-  placeholder: 'اختر...',
-  disabled: false,
-  required: false
+  placeholder: '',
+  options: () => [],
+  required: false,
+  disabled: false
 })
 
-defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue'])
+
+const handleChange = (event: Event) => {
+  const target = event.target as HTMLSelectElement | null
+  if (target) {
+    emit('update:modelValue', target.value)
+  }
+}
 
 const id = useId()
 </script>

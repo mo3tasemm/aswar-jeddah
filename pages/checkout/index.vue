@@ -4,7 +4,7 @@
     <!-- Header -->
     <header class="bg-white border-b border-slate-100 py-4 mb-8">
       <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-        <NuxtLink to="/" class="flex items-center gap-2">
+        <NuxtLink :to="localePath('/')" class="flex items-center gap-2">
           <!-- Logo -->
           <img src="~/assets/images/Logo.png" alt="أسوار" class="h-10 object-contain" />
         </NuxtLink>
@@ -150,7 +150,7 @@ import { cartApiService } from '~/services/cartApiService'
 import { useToast } from '~/composables/useToast'
 import { useLanguage } from '~/composables/useLanguage'
 
-const { t, layoutDirection } = useLanguage()
+const { t, layoutDirection, localePath } = useLanguage()
 
 useHead({
   title: computed(() => t('checkout.title'))
