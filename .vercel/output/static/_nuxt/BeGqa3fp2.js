@@ -1,0 +1,1 @@
+import{$ as e,E as t,F as n}from"./BcpgHYxp.js";import{t as r}from"./QDY-EOZC2.js";var i=n({__name:`[id]`,setup(n){return(n,i)=>(e(),t(r))}});export{i as default};

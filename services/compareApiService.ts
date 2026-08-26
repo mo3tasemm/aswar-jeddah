@@ -9,7 +9,7 @@
 import type { Product } from '~/types/product'
 import { mapApiProductToProduct } from '~/types/product'
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://wedgetstore.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
 
 const getAuthToken = (): string | null => {
   if (process.client) {

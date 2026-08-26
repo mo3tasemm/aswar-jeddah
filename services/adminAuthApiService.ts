@@ -5,7 +5,7 @@
  * - POST /api/v1/admin/auth/logout
  */
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://wedgetstore.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
 
 export interface AdminLoginPayload {
   email: string;
@@ -55,10 +55,10 @@ export const adminAuthApiService = {
           timeout: 10000
         })
 
-        const token = response?.token || 
-                      response?.access_token || 
-                      response?.data?.token || 
-                      response?.data?.access_token
+        const token = response?.token ||
+          response?.access_token ||
+          response?.data?.token ||
+          response?.data?.access_token
 
         let adminObj = response?.admin || response?.user || response?.data?.admin || response?.data?.user || response?.data
 

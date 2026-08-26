@@ -4,7 +4,7 @@
  * scalar types (strings, numbers, booleans), and nested configuration mappings.
  */
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://wedgetstore.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
 
 export interface AdminSettingsState {
   // 1. General & SEO
@@ -242,7 +242,7 @@ export const adminSettingsApiService = {
     // 1. Append scalar state fields
     Object.entries(state).forEach(([key, val]) => {
       if (val === undefined || val === null) return
-      
+
       // Convert booleans to 1 / 0
       if (typeof val === 'boolean') {
         formData.append(key, val ? '1' : '0')
@@ -585,12 +585,12 @@ export const adminSettingsApiService = {
     const computedActiveGateways: string[] = state.active_gateways && Array.isArray(state.active_gateways)
       ? state.active_gateways
       : [
-          ...(codEnabled ? ['cash_on_delivery'] : []),
-          ...(onlinePaymentEnabled ? ['paymob_accept'] : []),
-          ...(tamaraEnabled ? ['tamara'] : []),
-          ...(tabbyEnabled ? ['tabby'] : []),
-          ...(state.moyasar_enabled ? ['moyasar'] : [])
-        ]
+        ...(codEnabled ? ['cash_on_delivery'] : []),
+        ...(onlinePaymentEnabled ? ['paymob_accept'] : []),
+        ...(tamaraEnabled ? ['tamara'] : []),
+        ...(tabbyEnabled ? ['tabby'] : []),
+        ...(state.moyasar_enabled ? ['moyasar'] : [])
+      ]
 
     // Format 1: Preferred Nested Array / Object (FormData & JSON)
     formData.append('payment_gateways[cash_on_delivery]', codEnabled ? '1' : '0')
@@ -840,7 +840,7 @@ export const adminSettingsApiService = {
         if (directPayment.startsWith('{') || directPayment.startsWith('[')) {
           directPayment = JSON.parse(directPayment)
         }
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // Deep recursive flattener
@@ -864,7 +864,7 @@ export const adminSettingsApiService = {
                   if (parsed && typeof parsed === 'object') {
                     flatten(parsed, key)
                   }
-                } catch (e) {}
+                } catch (e) { }
               } else if (item.value && typeof item.value === 'object') {
                 flatten(item.value, key)
               }
@@ -942,9 +942,9 @@ export const adminSettingsApiService = {
     const tabbyValue = parseBool(paymentObj.tabby ?? paymentObj.tabby_enabled ?? findVal('payment_gateways.tabby', 'tabby', 'payment_gateways.tabby_enabled', 'tabby_enabled', 'payments.tabby_enabled', 'tabby_status'), true)
     const tamaraValue = parseBool(paymentObj.tamara ?? paymentObj.tamara_enabled ?? findVal('payment_gateways.tamara', 'tamara', 'payment_gateways.tamara_enabled', 'tamara_enabled', 'payments.tamara_enabled', 'tamara_status'), true)
     const moyasarValue = parseBool(paymentObj.moyasar ?? paymentObj.moyasar_enabled ?? findVal('payment_gateways.moyasar_enabled', 'moyasar_enabled', 'payments.moyasar_enabled', 'moyasar_status', 'moyasar'), false)
-    
+
     const isSandboxMode = parseBool(paymentObj.sandbox_mode ?? findVal('payment_gateways.sandbox_mode', 'sandbox_mode'), false) || (paymentObj.payment_mode === 'sandbox' || findVal('payment_gateways.payment_mode', 'payment_mode') === 'sandbox')
-    
+
     const paymobKey = String(paymentObj.paymob_api_key ?? findVal('payment_gateways.paymob_api_key', 'paymob_api_key', 'payments.paymob_api_key', 'paymob_secret_key', 'api_key') ?? '')
     const paymobInteg = String(paymentObj.paymob_integration_id ?? findVal('payment_gateways.paymob_integration_id', 'paymob_integration_id', 'payments.paymob_integration_id', 'integration_id') ?? '')
     const paymobIframe = String(paymentObj.paymob_iframe_id ?? findVal('payment_gateways.paymob_iframe_id', 'paymob_iframe_id', 'payments.paymob_iframe_id', 'iframe_id') ?? '')

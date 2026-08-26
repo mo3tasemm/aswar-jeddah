@@ -16,7 +16,7 @@
 import type { CartItem, Product } from '~/types/product'
 import { mapApiProductToProduct } from '~/types/product'
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://wedgetstore.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
 
 // Module-level cached cart_group_id
 let cachedCartGroupId: string | null = null
@@ -31,12 +31,12 @@ export const getAuthToken = (): string | null => {
       if (nuxtCookie && typeof nuxtCookie === 'string' && nuxtCookie.trim() && nuxtCookie !== 'null' && nuxtCookie !== 'undefined') {
         return nuxtCookie.replace(/^"(.*)"$/, '$1').trim()
       }
-    } catch (e) {}
+    } catch (e) { }
 
-    const localToken = localStorage.getItem('auth_token') || 
-                       localStorage.getItem('token') || 
-                       localStorage.getItem('access_token') || 
-                       localStorage.getItem('user_token')
+    const localToken = localStorage.getItem('auth_token') ||
+      localStorage.getItem('token') ||
+      localStorage.getItem('access_token') ||
+      localStorage.getItem('user_token')
     if (localToken && typeof localToken === 'string' && localToken.trim() && localToken !== 'null' && localToken !== 'undefined') {
       return localToken.replace(/^"(.*)"$/, '$1').trim()
     }
@@ -130,7 +130,7 @@ export const cartApiService = {
       })
 
       const rawItems = Array.isArray(response) ? response : (response?.data || response?.cart || [])
-      
+
       return rawItems.map((item: any) => {
         const prod = item.product || item
         const mappedProduct = mapApiProductToProduct(prod)
@@ -166,8 +166,8 @@ export const cartApiService = {
    * Payload Keys: { id: productId, quantity: qty }
    */
   async addToCart(
-    productId: string | number, 
-    quantity: number = 1, 
+    productId: string | number,
+    quantity: number = 1,
     options: { variant?: string; color?: string } = {}
   ): Promise<{ success: boolean; message?: string }> {
     try {
@@ -217,7 +217,7 @@ export const cartApiService = {
    * Payload Keys: { key: cartItemKey, quantity: qty }
    */
   async updateQuantity(
-    cartItemKey: string | number, 
+    cartItemKey: string | number,
     quantity: number
   ): Promise<{ success: boolean; message?: string }> {
     try {

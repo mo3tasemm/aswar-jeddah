@@ -1,9 +1,9 @@
 /**
  * Admin Color API Service
- * Endpoint: GET https://wedgetstore.com/api/v1/admin/colors/list
+ * Endpoint: GET https:/ai-agunt.elbakry2.com/api/v1/admin/colors/list
  */
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://wedgetstore.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
 
 export interface ColorItem {
   id: number | string;

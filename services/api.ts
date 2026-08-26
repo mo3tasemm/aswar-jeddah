@@ -18,8 +18,8 @@ export const getCurrentApiLocale = (localeInput?: string): string => {
 }
 
 const getApiHeaders = (localeInput?: string): Record<string, string> => {
-  const token = process.client 
-    ? (localStorage.getItem('auth_token') || localStorage.getItem('token') || localStorage.getItem('access_token'))
+  const token = process.client
+    ? (localStorage.getItem('admin_token') || localStorage.getItem('auth_token') || localStorage.getItem('token') || localStorage.getItem('access_token'))
     : null
 
   const locale = getCurrentApiLocale(localeInput)
@@ -43,11 +43,31 @@ const getApiHeaders = (localeInput?: string): Record<string, string> => {
 }
 
 export const useApi = () => {
-  const config = useRuntimeConfig()
+  let apiBase = 'https:/ai-agunt.elbakry2.com/api/v1'
+  try {
+    const config = useRuntimeConfig()
+    if (config?.public?.apiBase) {
+      apiBase = config.public.apiBase as string
+    }
+  } catch (e) {
+    if (process.env.NUXT_PUBLIC_API_BASE) {
+      apiBase = process.env.NUXT_PUBLIC_API_BASE
+    }
+  }
+
+  apiBase = apiBase.replace(/\/+$/, '')
 
   const request = async <T>(url: string, options?: Parameters<typeof $fetch>[1] & { locale?: string; guest_id?: string | number }) => {
     const locale = getCurrentApiLocale(options?.locale)
-    
+
+    // Normalize endpoint URL to prevent double /api/v1 prefix
+    let cleanUrl = url
+    if (apiBase.endsWith('/api/v1') && cleanUrl.startsWith('/api/v1/')) {
+      cleanUrl = cleanUrl.substring(7) // remove leading /api/v1
+    } else if (apiBase.endsWith('/api/v1') && cleanUrl === '/api/v1') {
+      cleanUrl = '/'
+    }
+
     // Automatically inject guest_id and locale params if URL doesn't have them
     const params = {
       guest_id: '1',
@@ -55,8 +75,8 @@ export const useApi = () => {
       ...(options?.params || {})
     }
 
-    return $fetch<T>(url, {
-      baseURL: config.public.apiBase as string,
+    return $fetch<T>(cleanUrl, {
+      baseURL: apiBase,
       ...options,
       params,
       headers: {

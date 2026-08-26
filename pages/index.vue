@@ -1,89 +1,33 @@
 <template>
-  <div dir="rtl" class="font-sans text-luxury-black bg-luxury-cream">
+  <div dir="rtl" class="font-sans text-luxury-black bg-luxury-cream min-h-screen">
+    
+    <!-- Home Sections Skeleton Loading State -->
+    <div v-if="loading && (!sections || sections.length === 0)" class="space-y-8 py-4">
+      <HomeHeroSkeleton />
+      <div class="max-w-[1550px] mx-auto px-4 lg:px-6 space-y-4">
+        <div class="h-6 bg-slate-200/80 rounded-xl w-48 animate-pulse"></div>
+        <ProductGridSkeleton :count="4" />
+      </div>
+    </div>
 
-    <template v-for="(section, index) in layoutSections" :key="section.id">
-      
-      <!-- Hero Slider -->
-      <HomeHeroBanner 
-        v-if="section.type === 'hero'" 
-        :slides="section.slides" 
-      />
-
-      <!-- Categories Slider -->
-      <HomeCategorySlider 
-        v-else-if="section.type === 'category_slider'" 
-      />
-
-      <!-- Brand Showcases -->
-      <HomeBrandShowcase 
-        v-else-if="section.type === 'brand_showcase'"
-        :brandName="section.brandName"
-        :title="section.title"
-        :subtitle="section.subtitle"
-        :brandLogo="section.brandLogo"
-        :viewAllUrl="section.viewAllUrl"
-        :bgColor="section.bgColor"
-        :btnColor="section.btnColor"
-        :products="getProductsByBrand(section.brandName)"
-        class="mb-8"
-      />
-
-      <!-- New Arrivals -->
-      <HomeNewArrivalsShowcase 
-        v-else-if="section.type === 'new_arrivals'"
-        :products="getNewArrivalProducts()"
-        :shopUrl="section.shopUrl"
-        class="mb-8"
-      />
-
-      <!-- Brand Campaign Section -->
-      <HomeBrandCampaignSection
-        v-else-if="section.type === 'brand_campaign'"
-        :title="section.title"
-        :btnText="section.btnText"
-        :targetUrl="section.targetUrl"
-        :bannerImage="section.bannerImage"
-        :products="getProductsByCategory(section.category).slice(0, section.limit)"
-      />
-
-      <!-- Side Banner Slider -->
-      <HomeSideBannerSliderShowcase 
-        v-else-if="section.type === 'side_banner'"
-        :sideBannerImage="section.sideBannerImage"
-        :sideBannerImages="section.sideBannerImages"
-        :sideBannerSlides="section.sideBannerSlides || section.slides"
-        :sideBannerUrl="section.sideBannerUrl"
-        :products="section.brandName ? getProductsByBrand(section.brandName).slice(0, section.limit) : getProductsByCategory(section.category).slice(0, section.limit)"
-        class="mb-12"
-      />
-
-      <!-- Store Features -->
-      <HomeStoreFeaturesBar 
-        v-else-if="section.type === 'store_features'" 
-      />
-
-      <!-- Brands Ticker -->
-      <HomeBrandsTickerShowcase 
-        v-else-if="section.type === 'brands_ticker'" 
-      />
-
-      <!-- Store Guarantees -->
-      <HomeStoreGuaranteesBar 
-        v-else-if="section.type === 'store_guarantees'" 
-      />
-
-      <!-- Store Location -->
-      <HomeStoreLocationShowcase 
-        v-else-if="section.type === 'store_location'" 
-      />
-
+    <!-- Dynamic Component Renderer for Home Sections -->
+    <template v-else>
+      <template v-for="section in sections" :key="section.id || section.type">
+        <component 
+          v-if="getSectionComponent(section.type)"
+          :is="getSectionComponent(section.type)" 
+          :config="section.data || section"
+        />
+      </template>
     </template>
 
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { onMounted } from 'vue'
+import HomeHeroSkeleton from '~/components/ui/HomeHeroSkeleton.vue'
+import ProductGridSkeleton from '~/components/ui/ProductGridSkeleton.vue'
 import HomeHeroBanner from '~/components/home/HeroBanner.vue'
 import HomeCategorySlider from '~/components/home/CategorySlider.vue'
 import HomeBrandShowcase from '~/components/home/BrandShowcase.vue'
@@ -94,14 +38,31 @@ import HomeStoreFeaturesBar from '~/components/home/StoreFeaturesBar.vue'
 import HomeBrandsTickerShowcase from '~/components/home/BrandsTickerShowcase.vue'
 import HomeStoreGuaranteesBar from '~/components/home/StoreGuaranteesBar.vue'
 import HomeStoreLocationShowcase from '~/components/home/StoreLocationShowcase.vue'
-import { getProductsByCategory, getProductsByBrand, getNewArrivalProducts } from '~/services/productService'
-import { fetchHomeLayout, type HomeSection } from '~/services/homeLayoutService'
+import { useHomeSections } from '~/composables/useHomeSections'
 
-const layoutSections = ref<HomeSection[]>([])
+const { sections, loading, error, loadHomeSections } = useHomeSections()
 
-onMounted(async () => {
-  // Fetch dynamic layout structure
-  layoutSections.value = await fetchHomeLayout()
+// Map approved section types to their respective Vue components
+const componentMap: Record<string, any> = {
+  hero_slider: HomeHeroBanner,
+  hero: HomeHeroBanner,
+  category_slider: HomeCategorySlider,
+  brand_showcase: HomeBrandShowcase,
+  new_arrivals: HomeNewArrivalsShowcase,
+  brand_campaign: HomeBrandCampaignSection,
+  side_banner: HomeSideBannerSliderShowcase,
+  store_features: HomeStoreFeaturesBar,
+  brands_ticker: HomeBrandsTickerShowcase,
+  store_guarantees: HomeStoreGuaranteesBar,
+  store_location: HomeStoreLocationShowcase
+}
+
+const getSectionComponent = (type: string) => {
+  return componentMap[type] || null
+}
+
+onMounted(() => {
+  loadHomeSections()
 })
 
 useHead({

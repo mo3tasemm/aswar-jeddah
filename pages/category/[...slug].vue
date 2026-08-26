@@ -121,6 +121,10 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({
+  name: 'category-catchall'
+})
+
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProducts } from '~/composables/useProducts'

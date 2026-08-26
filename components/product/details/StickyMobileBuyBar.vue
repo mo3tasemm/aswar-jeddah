@@ -67,18 +67,3 @@ onMounted(() => {
   })
 })
 </script>
-
-<style scoped>
-.slide-up-enter-active,
-.slide-up-leave-active {
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
-}
-.slide-up-enter-from,
-.slide-up-leave-to {
-  transform: translateY(100%);
-  opacity: 0;
-}
-.pb-safe {
-  padding-bottom: calc(1rem + env(safe-area-inset-bottom));
-}
-</style>

@@ -14,6 +14,12 @@
       "settings": "الإعدادات",
       "staff": "المشرفين والصلاحيات",
       "storefront": "الواجهة الرئيسية",
+      "navbar": "شريط التنقل والقوائم",
+      "about_us": "صفحة من نحن",
+      "return_policy": "سياسة الاستبدال والاسترجاع",
+      "privacy_policy": "سياسة الخصوصية والشروط",
+      "contact_messages": "رسائل الزوار",
+      "contact_settings": "إعدادات التواصل",
       "view_store": "عرض المتجر",
       "logout": "تسجيل الخروج",
       "panel_title": "لوحة تحكم أسوار جدة"
@@ -273,6 +279,34 @@
       "display_order": "ترتيب العرض",
       "visible": "ظاهر بالصفحة الرئيسية",
       "hidden": "مخفي"
+    },
+    "contact_messages": {
+      "title": "رسائل واستفسارات العملاء",
+      "subtitle": "استعراض وإدارة كافة الرسائل والاستفسارات الواردة من صفحة تواصل معنا.",
+      "total_messages": "رسالة",
+      "unread_messages": "رسائل غير مقروءة",
+      "all_messages": "كافة الرسائل",
+      "unread": "غير مقروءة",
+      "read": "مقروءة",
+      "sender_name": "اسم المرسل",
+      "sender_email": "البريد الإلكتروني",
+      "sender_phone": "رقم الهاتف",
+      "subject": "الموضوع",
+      "message": "نص الرسالة",
+      "sent_date": "تاريخ الإرسال",
+      "status": "حالة القراءة",
+      "details_title": "تفاصيل رسالة العميل",
+      "sender_details": "بيانات المرسل",
+      "message_content": "محتوى الرسالة",
+      "reply_email": "الرد عبر البريد",
+      "chat_whatsapp": "مراسلة عبر واتساب",
+      "delete_message": "حذف الرسالة",
+      "bulk_delete": "حذف المحدد",
+      "confirm_delete_single": "هل أنت متأكد من رغبتك في حذف هذه الرسالة نهائياً؟",
+      "confirm_delete_bulk": "هل أنت متأكد من حذف {count} رسالة محددة؟",
+      "back_to_list": "العودة لقائمة الرسائل",
+      "search_placeholder": "ابحث باسم المرسل، البريد، الهاتف أو الموضوع...",
+      "no_messages": "لا توجد رسائل مطابقة حالياً"
     }
   }
 }

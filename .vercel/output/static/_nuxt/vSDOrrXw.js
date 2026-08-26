@@ -1,0 +1,1 @@
+import{a as e}from"./BcpgHYxp.js";var t=(()=>{try{let t=e();if(t?.public?.apiBase&&typeof t.public.apiBase==`string`)return t.public.apiBase.replace(/\/+$/,``)}catch{}return typeof process<`u`&&{}.NUXT_PUBLIC_API_BASE?{}.NUXT_PUBLIC_API_BASE.replace(/\/+$/,``):`https://ai-agunt.elbakry2.com/api/v1`})();export{t};

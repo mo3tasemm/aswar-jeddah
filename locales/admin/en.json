@@ -14,6 +14,12 @@
       "settings": "Settings",
       "staff": "Staff & Roles",
       "storefront": "Storefront Manager",
+      "navbar": "Navbar & Menus",
+      "about_us": "About Us Page",
+      "return_policy": "Return & Refund Policy",
+      "privacy_policy": "Privacy Policy & Terms",
+      "contact_messages": "Visitor Messages",
+      "contact_settings": "Contact Settings",
       "view_store": "View Store",
       "logout": "Logout",
       "panel_title": "Aswar Jeddah Admin"
@@ -273,6 +279,34 @@
       "display_order": "Display Order",
       "visible": "Visible on Home Page",
       "hidden": "Hidden"
+    },
+    "contact_messages": {
+      "title": "Customer Inquiries & Messages",
+      "subtitle": "View and manage all customer inquiries received from the Contact Us page.",
+      "total_messages": "messages",
+      "unread_messages": "unread messages",
+      "all_messages": "All Messages",
+      "unread": "Unread",
+      "read": "Read",
+      "sender_name": "Sender Name",
+      "sender_email": "Email Address",
+      "sender_phone": "Phone Number",
+      "subject": "Subject",
+      "message": "Message Content",
+      "sent_date": "Sent Date",
+      "status": "Read Status",
+      "details_title": "Customer Message Details",
+      "sender_details": "Sender Details",
+      "message_content": "Message Content",
+      "reply_email": "Reply via Email",
+      "chat_whatsapp": "Chat on WhatsApp",
+      "delete_message": "Delete Message",
+      "bulk_delete": "Delete Selected",
+      "confirm_delete_single": "Are you sure you want to permanently delete this message?",
+      "confirm_delete_bulk": "Are you sure you want to delete {count} selected messages?",
+      "back_to_list": "Back to Messages",
+      "search_placeholder": "Search by sender name, email, phone or subject...",
+      "no_messages": "No matching messages found"
     }
   }
 }

@@ -1,11 +1,8 @@
 <template>
   <div class="w-full bg-slate-50/50 min-h-screen pb-24 md:pb-16 selection:bg-amber-500 selection:text-white" :dir="layoutDirection">
     
-    <!-- 1. LOADING STATE: Skeleton & Spinner -->
-    <div v-if="pending" class="container mx-auto px-4 max-w-7xl pt-12 text-center space-y-6">
-      <div class="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-      <p class="text-sm font-bold text-slate-500">{{ t('common.loading') }}</p>
-    </div>
+    <!-- 1. LOADING STATE: Interactive Skeleton Loader -->
+    <ProductDetailsSkeleton v-if="pending" />
 
     <!-- 2. ERROR STATE: Product Not Available -->
     <div v-else-if="error || !product" class="container mx-auto px-4 max-w-xl pt-16 text-center space-y-4">
@@ -93,6 +90,7 @@ import { useProducts } from '~/composables/useProducts'
 import { useLanguage } from '~/composables/useLanguage'
 
 // Import components
+import ProductDetailsSkeleton from '~/components/ui/ProductDetailsSkeleton.vue'
 import Breadcrumbs from '~/components/common/Breadcrumbs.vue'
 import ShopBreadcrumb from '~/components/Shop/ShopBreadcrumb.vue'
 import ProductCard from '~/components/product/ProductCard.vue'

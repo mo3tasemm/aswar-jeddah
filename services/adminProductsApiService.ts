@@ -10,7 +10,7 @@
  * Images MUST be sent directly as binary files inside the add/update FormData request.
  */
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://wedgetstore.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
 
 export interface AdminProductItem {
   id: number | string;
@@ -104,7 +104,7 @@ export function normalizeProductImageUrl(raw: any, isThumbnail: boolean = false)
     if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed
     if (trimmed.startsWith('data:image/') || trimmed.startsWith('blob:')) return trimmed
     if (trimmed.startsWith('/')) return `https://wedgetstore.com${trimmed}`
-    
+
     // Clean filename
     const cleanName = extractCleanFilename(trimmed)
     if (isThumbnail) {
@@ -221,7 +221,7 @@ export function mapRawProductToFormData(p: any): ProductFormDataPayload {
         if (parsedCatIds[1]?.id) subCategoryId = parsedCatIds[1].id
         if (parsedCatIds[2]?.id) subSubCategoryId = parsedCatIds[2].id
       }
-    } catch {}
+    } catch { }
   }
 
   // 2. Parse Colors
@@ -251,7 +251,7 @@ export function mapRawProductToFormData(p: any): ProductFormDataPayload {
       try {
         let parsed = JSON.parse(val)
         if (typeof parsed === 'string') {
-          try { parsed = JSON.parse(parsed) } catch {}
+          try { parsed = JSON.parse(parsed) } catch { }
         }
         return parsed
       } catch {
@@ -378,7 +378,7 @@ export function mapRawProductToFormData(p: any): ProductFormDataPayload {
           qty: v.qty ?? v.quantity ?? v.stock ?? 10
         }))
       }
-    } catch {}
+    } catch { }
   }
 
   // 6. Parse Gallery Images
@@ -431,7 +431,7 @@ export function mapRawProductToFormData(p: any): ProductFormDataPayload {
           if (color && img) colorImages[color] = img
         })
       }
-    } catch {}
+    } catch { }
   }
 
   const thumb = extractCleanFilename(p.thumbnail_full_url?.path || p.thumbnail_full_url?.key || p.thumbnail || p.image || imagesList[0] || '')
@@ -611,8 +611,8 @@ export function buildProductFormData(payload: ProductFormDataPayload): FormData 
 
   // 8. Files & Media Attachments (Sent as text image names in FormData)
   if (payload.thumbnail) {
-    const thumbVal = typeof payload.thumbnail === 'string' 
-      ? extractCleanFilename(payload.thumbnail) 
+    const thumbVal = typeof payload.thumbnail === 'string'
+      ? extractCleanFilename(payload.thumbnail)
       : payload.thumbnail
     if (thumbVal) {
       formData.append('image', thumbVal)
@@ -651,8 +651,8 @@ export const adminProductsApiService = {
    * 1. GET Admin Products List with Pagination & Multi-lang formatting
    */
   async fetchProducts(
-    token: string, 
-    page: number = 1, 
+    token: string,
+    page: number = 1,
     limit: number = 10
   ): Promise<{ success: boolean; data: AdminProductItem[]; pagination: PaginationMeta; message?: string }> {
     try {
@@ -777,8 +777,8 @@ export const adminProductsApiService = {
    * Endpoint: POST /api/v1/admin/products/upload-images
    */
   async uploadProductImage(
-    file: File, 
-    type: 'thumbnail' | 'product' = 'product', 
+    file: File,
+    type: 'thumbnail' | 'product' = 'product',
     token: string
   ): Promise<{ success: boolean; imageName: string; message?: string }> {
     try {
@@ -804,14 +804,14 @@ export const adminProductsApiService = {
       if (typeof response === 'string') {
         imageName = response
       } else if (response && typeof response === 'object') {
-        imageName = 
-          response.image_name || 
+        imageName =
+          response.image_name ||
           response.img_name ||
           response.imageName ||
-          response.file_name || 
-          response.name || 
-          response.data?.image_name || 
-          response.data?.name || 
+          response.file_name ||
+          response.name ||
+          response.data?.image_name ||
+          response.data?.name ||
           (Array.isArray(response.data) ? response.data[0] : (typeof response.data === 'string' ? response.data : '')) ||
           (Array.isArray(response.images) ? response.images[0] : response.images) ||
           (Array.isArray(response.image) ? response.image[0] : response.image) ||
@@ -824,16 +824,16 @@ export const adminProductsApiService = {
       }
 
       if (imageName) {
-        return { 
-          success: true, 
-          imageName: extractCleanFilename(String(imageName)), 
-          message: 'تم رفع الصورة بنجاح.' 
+        return {
+          success: true,
+          imageName: extractCleanFilename(String(imageName)),
+          message: 'تم رفع الصورة بنجاح.'
         }
       } else {
-        return { 
-          success: false, 
-          imageName: '', 
-          message: 'لم يتم استلام اسم الصورة من السيرفر بعد الرفع.' 
+        return {
+          success: false,
+          imageName: '',
+          message: 'لم يتم استلام اسم الصورة من السيرفر بعد الرفع.'
         }
       }
     } catch (err: any) {

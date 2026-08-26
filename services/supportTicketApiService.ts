@@ -6,7 +6,7 @@
  * Mandatory Header: Authorization: Bearer <token>
  */
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://wedgetstore.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
 
 const getAuthToken = (): string | null => {
   if (process.client) {

@@ -2,28 +2,32 @@
   <div class="cart-page selection:bg-amber-500 selection:text-white bg-[#F8F9FA] min-h-screen pb-20" :dir="layoutDirection">
     
     <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <!-- Breadcrumbs -->
-      <Breadcrumbs :items="breadcrumbItems" />
+      <!-- Loading Skeleton -->
+      <CartPageSkeleton v-if="isLoading" />
 
-      <div class="flex items-center justify-between mb-8 mt-4">
-        <div class="flex items-center gap-3">
-          <h1 class="text-2xl lg:text-3xl font-black text-[#0B0E28]">{{ t('cart.title') }}</h1>
-          <span v-if="cart.length > 0" class="bg-amber-100 text-amber-600 text-sm font-bold px-3 py-1 rounded-full">
-            {{ cartCount }} {{ layoutDirection === 'ltr' ? 'Items' : 'منتجات' }}
-          </span>
+      <template v-else>
+        <!-- Breadcrumbs -->
+        <Breadcrumbs :items="breadcrumbItems" />
+
+        <div class="flex items-center justify-between mb-8 mt-4">
+          <div class="flex items-center gap-3">
+            <h1 class="text-2xl lg:text-3xl font-black text-[#0B0E28]">{{ t('cart.title') }}</h1>
+            <span v-if="cart.length > 0" class="bg-amber-100 text-amber-600 text-sm font-bold px-3 py-1 rounded-full">
+              {{ cartCount }} {{ layoutDirection === 'ltr' ? 'Items' : 'منتجات' }}
+            </span>
+          </div>
+
+          <button 
+            v-if="cart.length > 0"
+            @click="clearCart"
+            class="text-xs font-bold text-slate-400 hover:text-rose-500 transition-colors flex items-center gap-1.5 cursor-pointer"
+          >
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            {{ layoutDirection === 'ltr' ? 'Clear Cart' : 'تفريغ السلة' }}
+          </button>
         </div>
 
-        <button 
-          v-if="cart.length > 0"
-          @click="clearCart"
-          class="text-xs font-bold text-slate-400 hover:text-rose-500 transition-colors flex items-center gap-1.5 cursor-pointer"
-        >
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-          {{ layoutDirection === 'ltr' ? 'Clear Cart' : 'تفريغ السلة' }}
-        </button>
-      </div>
-
-      <div v-if="cart.length > 0" class="flex flex-col md:flex-row gap-8 items-start">
+        <div v-if="cart.length > 0" class="flex flex-col md:flex-row gap-8 items-start">
         
         <!-- Main Content: Cart Table & Promo Code -->
         <main class="w-full md:w-3/5 lg:w-2/3 xl:w-3/4 space-y-6">
@@ -188,7 +192,8 @@
         >
           {{ t('cart.back_to_shop') }}
         </NuxtLink>
-      </div>
+        </div>
+      </template>
 
     </div>
 
@@ -201,14 +206,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import Breadcrumbs from '~/components/common/Breadcrumbs.vue'
+import CartPageSkeleton from '~/components/ui/CartPageSkeleton.vue'
 import HomeStoreFeaturesBar from '~/components/home/StoreFeaturesBar.vue'
 import { useCart } from '~/composables/useCart'
 import { useLanguage } from '~/composables/useLanguage'
 
 const { t, formatCurrency, layoutDirection } = useLanguage()
-const { cart, cartCount, formattedCartTotal, updateQuantity, removeFromCart, clearCart } = useCart()
+const { cart, cartCount, formattedCartTotal, updateQuantity, removeFromCart, clearCart, isLoading } = useCart()
 
 const breadcrumbItems = computed(() => [
   { label: layoutDirection.value === 'ltr' ? 'Home' : 'الرئيسية', to: '/' },

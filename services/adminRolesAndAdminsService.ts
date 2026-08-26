@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://wedgetstore.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
 
 /**
  * Standard Admin Modules for Permissions
@@ -171,7 +171,7 @@ export const adminRolesAndAdminsService = {
 
         const mapped: AdminRoleItem[] = rawList.map((item: any) => {
           if (!item) return null
-          
+
           let parsedModules: string[] = []
           if (Array.isArray(item.modules)) {
             parsedModules = item.modules.map(String)
@@ -203,7 +203,7 @@ export const adminRolesAndAdminsService = {
           roles: mapped,
           available_modules: raw.available_modules || raw.modules || AVAILABLE_MODULES
         }
-      } catch (err) {}
+      } catch (err) { }
     }
 
     return {
@@ -269,7 +269,7 @@ export const adminRolesAndAdminsService = {
             }
           }
         }
-      } catch (err) {}
+      } catch (err) { }
     }
 
     // Fallback: search in list
@@ -279,7 +279,7 @@ export const adminRolesAndAdminsService = {
       if (found) {
         return { success: true, role: found }
       }
-    } catch {}
+    } catch { }
 
     return {
       success: false,
@@ -334,7 +334,7 @@ export const adminRolesAndAdminsService = {
         }
 
         parsed = parseServerApiError(json, res.status, 'فشل في إضافة الدور')
-        
+
         // If validation errors exist on fields, return immediately
         if (res.status === 422 || (parsed.errors && Object.keys(parsed.errors).length > 0)) {
           return { success: false, message: parsed.message, errors: parsed.errors }
@@ -436,7 +436,7 @@ export const adminRolesAndAdminsService = {
             message: json.message || 'تم حذف الدور بنجاح!'
           }
         }
-      } catch (e) {}
+      } catch (e) { }
     }
 
     return { success: false, message: 'فشل في حذف الدور الوظيفي' }
@@ -537,7 +537,7 @@ export const adminRolesAndAdminsService = {
           admins: mapped,
           total: totalCount || mapped.length
         }
-      } catch (err) {}
+      } catch (err) { }
     }
 
     return {
@@ -608,7 +608,7 @@ export const adminRolesAndAdminsService = {
             }
           }
         }
-      } catch (err) {}
+      } catch (err) { }
     }
 
     // Fallback: search in list
@@ -618,7 +618,7 @@ export const adminRolesAndAdminsService = {
       if (found) {
         return { success: true, admin: found }
       }
-    } catch {}
+    } catch { }
 
     return {
       success: false,
@@ -829,7 +829,7 @@ export const adminRolesAndAdminsService = {
             message: json.message || 'تم تحديث حالة المشرف بنجاح!'
           }
         }
-      } catch (e) {}
+      } catch (e) { }
     }
 
     return { success: false, message: 'فشل في تحديث حالة المشرف' }
@@ -865,7 +865,7 @@ export const adminRolesAndAdminsService = {
             message: json.message || 'تم حذف المشرف بنجاح!'
           }
         }
-      } catch (e) {}
+      } catch (e) { }
     }
 
     return { success: false, message: 'فشل في حذف المشرف' }

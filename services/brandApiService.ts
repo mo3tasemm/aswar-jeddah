@@ -1,9 +1,9 @@
 /**
  * Brand API Service Layer
- * Endpoint: GET https://wedgetstore.com/api/v1/brands?guest_id=1&locale=sa
+ * Endpoint: GET https:/ai-agunt.elbakry2.com/api/v1/brands?guest_id=1&locale=sa
  */
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://wedgetstore.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
 
 export interface BrandItem {
   id: number | string;
@@ -154,14 +154,23 @@ export const brandApiService = {
         const brandNameEn = extractBrandName(b, 'en')
         const altText = b.image_alt_text || b.alt_text || ''
 
+        const resolvedLogo = (typeof b.image_full_url === 'string' ? b.image_full_url : (b.image_full_url?.path || b.image_full_url?.url))
+          || (typeof b.logo_full_url === 'string' ? b.logo_full_url : (b.logo_full_url?.path || b.logo_full_url?.url))
+          || (typeof b.image === 'string' ? b.image : (b.image?.path || b.image?.url))
+          || (typeof b.logo === 'string' ? b.logo : (b.logo?.path || b.logo?.url))
+          || ''
+
         return {
           id: b.id,
           name: brandName,
           name_ar: brandNameAr,
           name_en: brandNameEn,
+          slug: (brandNameEn || brandName || String(b.id)).toLowerCase().replace(/\s+/g, '-'),
           alt_text: altText,
-          image: b.image_full_url?.path || b.image || '',
-          productCount: b.brand_products_count || 0
+          image: resolvedLogo,
+          logo: resolvedLogo,
+          image_full_url: resolvedLogo,
+          productCount: b.brand_products_count || b.product_count || b.products_count || 0
         }
       })
     } catch (err: any) {

@@ -1,0 +1,684 @@
+{
+  "version": 3,
+  "overrides": {},
+  "routes": [
+    {
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable"
+      },
+      "src": "/_nuxt/builds/meta/(.*)"
+    },
+    {
+      "headers": {
+        "cache-control": "public, max-age=1, immutable"
+      },
+      "src": "/_nuxt/builds/(.*)"
+    },
+    {
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable"
+      },
+      "src": "/_nuxt/(.*)"
+    },
+    {
+      "src": "/_nuxt/builds/meta(.*)",
+      "headers": {
+        "cache-control": "public,max-age=31536000,immutable"
+      },
+      "continue": true
+    },
+    {
+      "src": "/_nuxt/builds(.*)",
+      "headers": {
+        "cache-control": "public,max-age=31536000,immutable"
+      },
+      "continue": true
+    },
+    {
+      "src": "/_nuxt(.*)",
+      "headers": {
+        "cache-control": "public,max-age=31536000,immutable"
+      },
+      "continue": true
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "(?<__isr_route>/__nuxt_error)",
+      "dest": "/__fallback"
+    },
+    {
+      "src": "/wishlist",
+      "dest": "/wishlist"
+    },
+    {
+      "src": "/shop",
+      "dest": "/shop"
+    },
+    {
+      "src": "/search",
+      "dest": "/search"
+    },
+    {
+      "src": "/return-policy",
+      "dest": "/return-policy"
+    },
+    {
+      "src": "/privacy-policy",
+      "dest": "/privacy-policy"
+    },
+    {
+      "src": "/new-arrivals",
+      "dest": "/new-arrivals"
+    },
+    {
+      "src": "/my-account/wishlist",
+      "dest": "/my-account/wishlist"
+    },
+    {
+      "src": "/my-account/support-tickets",
+      "dest": "/my-account/support-tickets"
+    },
+    {
+      "src": "/my-account/orders",
+      "dest": "/my-account/orders"
+    },
+    {
+      "src": "/my-account/details",
+      "dest": "/my-account/details"
+    },
+    {
+      "src": "/my-account/coupons",
+      "dest": "/my-account/coupons"
+    },
+    {
+      "src": "/my-account/compare",
+      "dest": "/my-account/compare"
+    },
+    {
+      "src": "/my-account/addresses",
+      "dest": "/my-account/addresses"
+    },
+    {
+      "src": "/my-account",
+      "dest": "/my-account"
+    },
+    {
+      "src": "/login",
+      "dest": "/login"
+    },
+    {
+      "src": "/forgot-password",
+      "dest": "/forgot-password"
+    },
+    {
+      "src": "/en/wishlist",
+      "dest": "/en/wishlist"
+    },
+    {
+      "src": "/en/shop",
+      "dest": "/en/shop"
+    },
+    {
+      "src": "/en/search",
+      "dest": "/en/search"
+    },
+    {
+      "src": "/en/return-policy",
+      "dest": "/en/return-policy"
+    },
+    {
+      "src": "/en/privacy-policy",
+      "dest": "/en/privacy-policy"
+    },
+    {
+      "src": "/en/new-arrivals",
+      "dest": "/en/new-arrivals"
+    },
+    {
+      "src": "/en/my-account/wishlist",
+      "dest": "/en/my-account/wishlist"
+    },
+    {
+      "src": "/en/my-account/support-tickets",
+      "dest": "/en/my-account/support-tickets"
+    },
+    {
+      "src": "/en/my-account/orders",
+      "dest": "/en/my-account/orders"
+    },
+    {
+      "src": "/en/my-account/details",
+      "dest": "/en/my-account/details"
+    },
+    {
+      "src": "/en/my-account/coupons",
+      "dest": "/en/my-account/coupons"
+    },
+    {
+      "src": "/en/my-account/compare",
+      "dest": "/en/my-account/compare"
+    },
+    {
+      "src": "/en/my-account/addresses",
+      "dest": "/en/my-account/addresses"
+    },
+    {
+      "src": "/en/my-account",
+      "dest": "/en/my-account"
+    },
+    {
+      "src": "/en/login",
+      "dest": "/en/login"
+    },
+    {
+      "src": "/en/forgot-password",
+      "dest": "/en/forgot-password"
+    },
+    {
+      "src": "/en/contact-us",
+      "dest": "/en/contact-us"
+    },
+    {
+      "src": "/en/compare",
+      "dest": "/en/compare"
+    },
+    {
+      "src": "/en/checkout",
+      "dest": "/en/checkout"
+    },
+    {
+      "src": "/en/cart",
+      "dest": "/en/cart"
+    },
+    {
+      "src": "/en/blog",
+      "dest": "/en/blog"
+    },
+    {
+      "src": "/en/admin/storefront",
+      "dest": "/en/admin/storefront"
+    },
+    {
+      "src": "/en/admin/staff/create",
+      "dest": "/en/admin/staff/create"
+    },
+    {
+      "src": "/en/admin/staff",
+      "dest": "/en/admin/staff"
+    },
+    {
+      "src": "/en/admin/settings",
+      "dest": "/en/admin/settings"
+    },
+    {
+      "src": "/en/admin/roles/create",
+      "dest": "/en/admin/roles/create"
+    },
+    {
+      "src": "/en/admin/roles",
+      "dest": "/en/admin/roles"
+    },
+    {
+      "src": "/en/admin/return-policy",
+      "dest": "/en/admin/return-policy"
+    },
+    {
+      "src": "/en/admin/products/create",
+      "dest": "/en/admin/products/create"
+    },
+    {
+      "src": "/en/admin/products",
+      "dest": "/en/admin/products"
+    },
+    {
+      "src": "/en/admin/privacy-policy",
+      "dest": "/en/admin/privacy-policy"
+    },
+    {
+      "src": "/en/admin/orders",
+      "dest": "/en/admin/orders"
+    },
+    {
+      "src": "/en/admin/navbar/create",
+      "dest": "/en/admin/navbar/create"
+    },
+    {
+      "src": "/en/admin/navbar",
+      "dest": "/en/admin/navbar"
+    },
+    {
+      "src": "/en/admin/login",
+      "dest": "/en/admin/login"
+    },
+    {
+      "src": "/en/admin/customers",
+      "dest": "/en/admin/customers"
+    },
+    {
+      "src": "/en/admin/custom-role",
+      "dest": "/en/admin/custom-role"
+    },
+    {
+      "src": "/en/admin/coupons/create",
+      "dest": "/en/admin/coupons/create"
+    },
+    {
+      "src": "/en/admin/coupons",
+      "dest": "/en/admin/coupons"
+    },
+    {
+      "src": "/en/admin/contact-settings",
+      "dest": "/en/admin/contact-settings"
+    },
+    {
+      "src": "/en/admin/contact-messages",
+      "dest": "/en/admin/contact-messages"
+    },
+    {
+      "src": "/en/admin/colors/create",
+      "dest": "/en/admin/colors/create"
+    },
+    {
+      "src": "/en/admin/colors",
+      "dest": "/en/admin/colors"
+    },
+    {
+      "src": "/en/admin/categories/create",
+      "dest": "/en/admin/categories/create"
+    },
+    {
+      "src": "/en/admin/categories",
+      "dest": "/en/admin/categories"
+    },
+    {
+      "src": "/en/admin/brands/create",
+      "dest": "/en/admin/brands/create"
+    },
+    {
+      "src": "/en/admin/brands",
+      "dest": "/en/admin/brands"
+    },
+    {
+      "src": "/en/admin/attributes/create",
+      "dest": "/en/admin/attributes/create"
+    },
+    {
+      "src": "/en/admin/attributes",
+      "dest": "/en/admin/attributes"
+    },
+    {
+      "src": "/en/admin/analytics",
+      "dest": "/en/admin/analytics"
+    },
+    {
+      "src": "/en/admin/admins/create",
+      "dest": "/en/admin/admins/create"
+    },
+    {
+      "src": "/en/admin/admins",
+      "dest": "/en/admin/admins"
+    },
+    {
+      "src": "/en/admin/about-us",
+      "dest": "/en/admin/about-us"
+    },
+    {
+      "src": "/en/admin",
+      "dest": "/en/admin"
+    },
+    {
+      "src": "/en/about-us",
+      "dest": "/en/about-us"
+    },
+    {
+      "src": "/en",
+      "dest": "/en"
+    },
+    {
+      "src": "/contact-us",
+      "dest": "/contact-us"
+    },
+    {
+      "src": "/compare",
+      "dest": "/compare"
+    },
+    {
+      "src": "/checkout",
+      "dest": "/checkout"
+    },
+    {
+      "src": "/cart",
+      "dest": "/cart"
+    },
+    {
+      "src": "/blog",
+      "dest": "/blog"
+    },
+    {
+      "src": "/admin/storefront",
+      "dest": "/admin/storefront"
+    },
+    {
+      "src": "/admin/staff/create",
+      "dest": "/admin/staff/create"
+    },
+    {
+      "src": "/admin/staff",
+      "dest": "/admin/staff"
+    },
+    {
+      "src": "/admin/settings",
+      "dest": "/admin/settings"
+    },
+    {
+      "src": "/admin/roles/create",
+      "dest": "/admin/roles/create"
+    },
+    {
+      "src": "/admin/roles",
+      "dest": "/admin/roles"
+    },
+    {
+      "src": "/admin/return-policy",
+      "dest": "/admin/return-policy"
+    },
+    {
+      "src": "/admin/products/create",
+      "dest": "/admin/products/create"
+    },
+    {
+      "src": "/admin/products",
+      "dest": "/admin/products"
+    },
+    {
+      "src": "/admin/privacy-policy",
+      "dest": "/admin/privacy-policy"
+    },
+    {
+      "src": "/admin/orders",
+      "dest": "/admin/orders"
+    },
+    {
+      "src": "/admin/navbar/create",
+      "dest": "/admin/navbar/create"
+    },
+    {
+      "src": "/admin/navbar",
+      "dest": "/admin/navbar"
+    },
+    {
+      "src": "/admin/login",
+      "dest": "/admin/login"
+    },
+    {
+      "src": "/admin/customers",
+      "dest": "/admin/customers"
+    },
+    {
+      "src": "/admin/custom-role",
+      "dest": "/admin/custom-role"
+    },
+    {
+      "src": "/admin/coupons/create",
+      "dest": "/admin/coupons/create"
+    },
+    {
+      "src": "/admin/coupons",
+      "dest": "/admin/coupons"
+    },
+    {
+      "src": "/admin/contact-settings",
+      "dest": "/admin/contact-settings"
+    },
+    {
+      "src": "/admin/contact-messages",
+      "dest": "/admin/contact-messages"
+    },
+    {
+      "src": "/admin/colors/create",
+      "dest": "/admin/colors/create"
+    },
+    {
+      "src": "/admin/colors",
+      "dest": "/admin/colors"
+    },
+    {
+      "src": "/admin/categories/create",
+      "dest": "/admin/categories/create"
+    },
+    {
+      "src": "/admin/categories",
+      "dest": "/admin/categories"
+    },
+    {
+      "src": "/admin/brands/create",
+      "dest": "/admin/brands/create"
+    },
+    {
+      "src": "/admin/brands",
+      "dest": "/admin/brands"
+    },
+    {
+      "src": "/admin/attributes/create",
+      "dest": "/admin/attributes/create"
+    },
+    {
+      "src": "/admin/attributes",
+      "dest": "/admin/attributes"
+    },
+    {
+      "src": "/admin/analytics",
+      "dest": "/admin/analytics"
+    },
+    {
+      "src": "/admin/admins/create",
+      "dest": "/admin/admins/create"
+    },
+    {
+      "src": "/admin/admins",
+      "dest": "/admin/admins"
+    },
+    {
+      "src": "/admin/about-us",
+      "dest": "/admin/about-us"
+    },
+    {
+      "src": "/admin",
+      "dest": "/admin"
+    },
+    {
+      "src": "/about-us",
+      "dest": "/about-us"
+    },
+    {
+      "src": "/__nuxt_error",
+      "dest": "/__nuxt_error"
+    },
+    {
+      "src": "/",
+      "dest": "/index"
+    },
+    {
+      "src": "/product/(?<slug>[^/]+)",
+      "dest": "/product/[slug]"
+    },
+    {
+      "src": "/product/(?<id>[^/]+)",
+      "dest": "/product/[id]"
+    },
+    {
+      "src": "/en/product/(?<slug>[^/]+)",
+      "dest": "/en/product/[slug]"
+    },
+    {
+      "src": "/en/product/(?<id>[^/]+)",
+      "dest": "/en/product/[id]"
+    },
+    {
+      "src": "/en/blog/(?<slug>[^/]+)",
+      "dest": "/en/blog/[slug]"
+    },
+    {
+      "src": "/en/admin/staff/(?<id>[^/]+)/edit",
+      "dest": "/en/admin/staff/[id]/edit"
+    },
+    {
+      "src": "/en/admin/staff/(?<id>[^/]+)",
+      "dest": "/en/admin/staff/[id]"
+    },
+    {
+      "src": "/en/admin/roles/(?<id>[^/]+)/edit",
+      "dest": "/en/admin/roles/[id]/edit"
+    },
+    {
+      "src": "/en/admin/roles/(?<id>[^/]+)",
+      "dest": "/en/admin/roles/[id]"
+    },
+    {
+      "src": "/en/admin/products/(?<id>[^/]+)",
+      "dest": "/en/admin/products/[id]"
+    },
+    {
+      "src": "/en/admin/orders/(?<id>[^/]+)",
+      "dest": "/en/admin/orders/[id]"
+    },
+    {
+      "src": "/en/admin/navbar/(?<id>[^/]+)",
+      "dest": "/en/admin/navbar/[id]"
+    },
+    {
+      "src": "/en/admin/customers/(?<id>[^/]+)",
+      "dest": "/en/admin/customers/[id]"
+    },
+    {
+      "src": "/en/admin/coupons/(?<id>[^/]+)",
+      "dest": "/en/admin/coupons/[id]"
+    },
+    {
+      "src": "/en/admin/contact-messages/(?<id>[^/]+)",
+      "dest": "/en/admin/contact-messages/[id]"
+    },
+    {
+      "src": "/en/admin/colors/(?<id>[^/]+)",
+      "dest": "/en/admin/colors/[id]"
+    },
+    {
+      "src": "/en/admin/categories/(?<id>[^/]+)",
+      "dest": "/en/admin/categories/[id]"
+    },
+    {
+      "src": "/en/admin/brands/(?<id>[^/]+)",
+      "dest": "/en/admin/brands/[id]"
+    },
+    {
+      "src": "/en/admin/attributes/(?<id>[^/]+)",
+      "dest": "/en/admin/attributes/[id]"
+    },
+    {
+      "src": "/en/admin/admins/(?<id>[^/]+)/edit",
+      "dest": "/en/admin/admins/[id]/edit"
+    },
+    {
+      "src": "/en/admin/admins/(?<id>[^/]+)",
+      "dest": "/en/admin/admins/[id]"
+    },
+    {
+      "src": "/blog/(?<slug>[^/]+)",
+      "dest": "/blog/[slug]"
+    },
+    {
+      "src": "/admin/staff/(?<id>[^/]+)/edit",
+      "dest": "/admin/staff/[id]/edit"
+    },
+    {
+      "src": "/admin/staff/(?<id>[^/]+)",
+      "dest": "/admin/staff/[id]"
+    },
+    {
+      "src": "/admin/roles/(?<id>[^/]+)/edit",
+      "dest": "/admin/roles/[id]/edit"
+    },
+    {
+      "src": "/admin/roles/(?<id>[^/]+)",
+      "dest": "/admin/roles/[id]"
+    },
+    {
+      "src": "/admin/products/(?<id>[^/]+)",
+      "dest": "/admin/products/[id]"
+    },
+    {
+      "src": "/admin/orders/(?<id>[^/]+)",
+      "dest": "/admin/orders/[id]"
+    },
+    {
+      "src": "/admin/navbar/(?<id>[^/]+)",
+      "dest": "/admin/navbar/[id]"
+    },
+    {
+      "src": "/admin/customers/(?<id>[^/]+)",
+      "dest": "/admin/customers/[id]"
+    },
+    {
+      "src": "/admin/coupons/(?<id>[^/]+)",
+      "dest": "/admin/coupons/[id]"
+    },
+    {
+      "src": "/admin/contact-messages/(?<id>[^/]+)",
+      "dest": "/admin/contact-messages/[id]"
+    },
+    {
+      "src": "/admin/colors/(?<id>[^/]+)",
+      "dest": "/admin/colors/[id]"
+    },
+    {
+      "src": "/admin/categories/(?<id>[^/]+)",
+      "dest": "/admin/categories/[id]"
+    },
+    {
+      "src": "/admin/brands/(?<id>[^/]+)",
+      "dest": "/admin/brands/[id]"
+    },
+    {
+      "src": "/admin/attributes/(?<id>[^/]+)",
+      "dest": "/admin/attributes/[id]"
+    },
+    {
+      "src": "/admin/admins/(?<id>[^/]+)/edit",
+      "dest": "/admin/admins/[id]/edit"
+    },
+    {
+      "src": "/admin/admins/(?<id>[^/]+)",
+      "dest": "/admin/admins/[id]"
+    },
+    {
+      "src": "/en/category/?(?<slug>.+)",
+      "dest": "/en/category/[...slug]"
+    },
+    {
+      "src": "/en/brand/?(?<slug>.+)",
+      "dest": "/en/brand/[...slug]"
+    },
+    {
+      "src": "/category/?(?<slug>.+)",
+      "dest": "/category/[...slug]"
+    },
+    {
+      "src": "/brand/?(?<slug>.+)",
+      "dest": "/brand/[...slug]"
+    },
+    {
+      "src": "/?(?<slug>.+)",
+      "dest": "/[...slug]"
+    },
+    {
+      "src": "/__nuxt_island/(?:.*)",
+      "dest": "/__nuxt_island/[...]"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/__fallback"
+    }
+  ]
+}

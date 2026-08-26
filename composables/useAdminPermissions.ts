@@ -20,7 +20,13 @@ export const ROUTE_PERMISSION_MAP: Record<string, string[]> = {
   '/admin/roles': ['employee_management', 'employees', 'staff', 'admin_management', 'custom_role', 'roles'],
   '/admin/custom-role': ['employee_management', 'employees', 'staff', 'admin_management', 'custom_role', 'roles'],
   '/admin/settings': ['system_settings', 'settings', 'business_settings'],
-  '/admin/storefront': ['system_settings', 'settings', 'storefront']
+  '/admin/storefront': ['system_settings', 'settings', 'storefront'],
+  '/admin/navbar': ['system_settings', 'settings', 'storefront', 'navbar'],
+  '/admin/about-us': ['system_settings', 'settings', 'storefront', 'about_us'],
+  '/admin/return-policy': ['system_settings', 'settings', 'storefront', 'return_policy'],
+  '/admin/privacy-policy': ['system_settings', 'settings', 'storefront', 'privacy_policy'],
+  '/admin/contact-messages': ['system_settings', 'settings', 'support_tickets', 'contact_messages', 'messages'],
+  '/admin/contact-settings': ['system_settings', 'settings', 'business_settings', 'contact_settings']
 }
 
 export const useAdminPermissions = () => {

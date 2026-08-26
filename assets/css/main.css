@@ -1,0 +1,99 @@
+@import './auth.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Unified Utilities */
+.shadow-2xs {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+}
+
+.shadow-xs {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Unified Policy & Document Prose Styling */
+.policy-prose h2,
+.policy-prose h3 {
+  font-size: 1.125rem;
+  font-weight: 900;
+  color: #0B0E28;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.policy-prose p {
+  margin-bottom: 0.75rem;
+  line-height: 1.75;
+  color: #475569;
+}
+
+.policy-prose strong {
+  color: #0B0E28;
+  font-weight: 800;
+}
+
+.policy-prose ul {
+  list-style-type: disc;
+  margin-inline-start: 1.5rem;
+  margin-bottom: 1rem;
+  color: #475569;
+}
+
+.policy-prose li {
+  margin-bottom: 0.35rem;
+  line-height: 1.6;
+}
+
+/* Unified Story Prose */
+.story-prose p {
+  margin-bottom: 0.75rem;
+  line-height: 1.7;
+  color: #475569;
+}
+
+.story-prose strong {
+  color: #0B0E28;
+  font-weight: 800;
+}
+
+.story-prose ul {
+  list-style-type: disc;
+  margin-inline-start: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: #475569;
+}
+
+.story-prose li {
+  margin-bottom: 0.25rem;
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Mobile Safe Area & Transition Utilities */
+.pb-safe {
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+}
+
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+}
+
+.slide-up-enter-from,
+.slide-up-leave-to {
+  transform: translateY(100%);
+  opacity: 0;
+}

@@ -77,12 +77,45 @@ class="relative w-full overflow-hidden group aspect-[16/9] sm:aspect-[21/9] lg:a
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useHero } from '~/composables/useHero'
 import type { HeroSlide } from '~/types/hero'
 
+const defaultSlides: HeroSlide[] = [
+  {
+    id: 1,
+    imageUrl: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1600&q=80',
+    mobileImageUrl: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80',
+    linkUrl: '/category/ac',
+    altText: 'أقوى التخفيضات على المكيفات',
+  },
+  {
+    id: 2,
+    imageUrl: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=1600&q=80',
+    mobileImageUrl: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=800&q=80',
+    linkUrl: '/category/kitchen-appliances',
+    altText: 'جدد مطبخك بأحدث الأجهزة',
+  },
+  {
+    id: 3,
+    imageUrl: 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=1600&q=80',
+    mobileImageUrl: 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=800&q=80',
+    linkUrl: '/category/screens',
+    altText: 'شاشات ذكية بدقة 4K',
+  }
+]
+
 const props = defineProps<{
-  slides: HeroSlide[]
+  slides?: HeroSlide[]
+  config?: { slides?: HeroSlide[]; items?: HeroSlide[] }
 }>()
+
+const initialSlides = computed<HeroSlide[]>(() => {
+  if (props.config?.slides && props.config.slides.length > 0) return props.config.slides
+  if (props.config?.items && props.config.items.length > 0) return props.config.items
+  if (props.slides && props.slides.length > 0) return props.slides
+  return defaultSlides
+})
 
 const { 
   slides, 
@@ -92,5 +125,5 @@ const {
   goToSlide, 
   startAutoplay, 
   stopAutoplay 
-} = useHero(props.slides)
+} = useHero(initialSlides.value)
 </script>

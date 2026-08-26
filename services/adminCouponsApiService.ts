@@ -9,7 +9,7 @@
  * - DELETE /api/v1/admin/coupon/delete/{id} or DELETE /api/v1/admin/coupon/{id}
  */
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://wedgetstore.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
 
 export interface AdminCouponItem {
   id: string | number;
@@ -148,7 +148,7 @@ export const adminCouponsApiService = {
   ): Promise<AdminCouponsListResponse> {
     const limit = filters.limit || 10
     const offset = filters.offset !== undefined ? filters.offset : (filters.page || 1)
-    
+
     const params = new URLSearchParams()
     params.append('limit', String(limit))
     params.append('offset', String(offset))
@@ -190,10 +190,10 @@ export const adminCouponsApiService = {
           totalCount = raw.length
         } else if (raw && typeof raw === 'object') {
           totalCount = Number(
-            raw.total_size ?? 
-            raw.total ?? 
-            raw.coupons?.total ?? 
-            raw.data?.total ?? 
+            raw.total_size ??
+            raw.total ??
+            raw.coupons?.total ??
+            raw.data?.total ??
             0
           )
 
@@ -221,7 +221,7 @@ export const adminCouponsApiService = {
 
           const statusVal = item.status === 1 || item.status === '1' || item.status === true || item.is_active === 1 || item.is_active === true
           const expDate = item.expire_date ? String(item.expire_date).split('T')[0] : (item.end_date ? String(item.end_date).split('T')[0] : '')
-          
+
           let isExp = false
           if (item.is_expired !== undefined) {
             isExp = item.is_expired === 1 || item.is_expired === true || item.is_expired === '1'
@@ -266,7 +266,7 @@ export const adminCouponsApiService = {
           limit,
           offset
         }
-      } catch (err) {}
+      } catch (err) { }
     }
 
     return {
@@ -311,7 +311,7 @@ export const adminCouponsApiService = {
         if (item && (item.id || item.code)) {
           const statusVal = item.status === 1 || item.status === '1' || item.status === true || item.is_active === 1 || item.is_active === true
           const expDate = item.expire_date ? String(item.expire_date).split('T')[0] : (item.end_date ? String(item.end_date).split('T')[0] : '')
-          
+
           let isExp = false
           if (item.is_expired !== undefined) {
             isExp = item.is_expired === 1 || item.is_expired === true || item.is_expired === '1'
@@ -348,7 +348,7 @@ export const adminCouponsApiService = {
             coupon: mapped
           }
         }
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // Fallback: search in list
@@ -358,7 +358,7 @@ export const adminCouponsApiService = {
       if (found) {
         return { success: true, coupon: found }
       }
-    } catch {}
+    } catch { }
 
     return {
       success: false,
@@ -417,7 +417,7 @@ export const adminCouponsApiService = {
         }
 
         parsedResult = parseServerApiError(json, res.status, 'فشل في إضافة الكوبون')
-        
+
         // If it's a 403 or validation error, don't try fallback, return immediately
         if (res.status === 403 || res.status === 422 || parsedResult.errors.code) {
           return {
@@ -554,7 +554,7 @@ export const adminCouponsApiService = {
             message: json.message || 'تم تغيير حالة الكوبون بنجاح!'
           }
         }
-      } catch (e) {}
+      } catch (e) { }
     }
 
     return {
@@ -592,7 +592,7 @@ export const adminCouponsApiService = {
             message: json.message || 'تم حذف الكوبون بنجاح!'
           }
         }
-      } catch (e) {}
+      } catch (e) { }
     }
 
     return {

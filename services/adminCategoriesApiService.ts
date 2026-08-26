@@ -7,7 +7,7 @@
  * 4. DELETE /api/v1/admin/categories/delete/{id}
  */
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://wedgetstore.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
 
 export interface AdminCategoryItem {
   id: number | string;
@@ -151,7 +151,7 @@ export const adminCategoriesApiService = {
    * 1. GET Admin Categories List with filters (searchValue, page, parent_id, position)
    */
   async fetchCategories(
-    token: string, 
+    token: string,
     searchValue: string = '',
     page: number = 1,
     options?: { parent_id?: string | number; position?: number }

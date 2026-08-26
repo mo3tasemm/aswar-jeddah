@@ -4,7 +4,7 @@
  * GET /api/v1/admin/analytics/dashboard?period={today|this_week|this_month|this_year}
  */
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://wedgetstore.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
 
 export type AnalyticsPeriod = 'today' | 'this_week' | 'this_month' | 'this_year'
 

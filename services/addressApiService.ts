@@ -9,19 +9,19 @@
  * Mandatory Header: Authorization: Bearer <token>
  */
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://wedgetstore.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
 
 const getAuthToken = (): string | null => {
   if (process.client) {
     try {
       const nuxtCookie = useCookie('auth_token').value
       if (nuxtCookie) return String(nuxtCookie).replace(/^"(.*)"$/, '$1')
-    } catch (e) {}
+    } catch (e) { }
 
-    let localToken = localStorage.getItem('auth_token') || 
-                     localStorage.getItem('token') || 
-                     localStorage.getItem('access_token') || 
-                     localStorage.getItem('user_token')
+    let localToken = localStorage.getItem('auth_token') ||
+      localStorage.getItem('token') ||
+      localStorage.getItem('access_token') ||
+      localStorage.getItem('user_token')
     if (localToken) return localToken.replace(/^"(.*)"$/, '$1')
 
     const cookies = document.cookie.split(';')

@@ -14,19 +14,19 @@
  *    - GET  /api/v1/order/cancel-order
  */
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://wedgetstore.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
 
 const getAuthToken = (): string | null => {
   if (process.client) {
     try {
       const nuxtCookie = useCookie('auth_token').value
       if (nuxtCookie) return String(nuxtCookie).replace(/^"(.*)"$/, '$1')
-    } catch (e) {}
+    } catch (e) { }
 
-    let localToken = localStorage.getItem('auth_token') || 
-                     localStorage.getItem('token') || 
-                     localStorage.getItem('access_token') || 
-                     localStorage.getItem('user_token')
+    let localToken = localStorage.getItem('auth_token') ||
+      localStorage.getItem('token') ||
+      localStorage.getItem('access_token') ||
+      localStorage.getItem('user_token')
     if (localToken) return localToken.replace(/^"(.*)"$/, '$1')
 
     const cookies = document.cookie.split(';')
@@ -182,8 +182,8 @@ export const orderApiService = {
         headers: buildHeaders()
       })
 
-      const list = Array.isArray(response) 
-        ? response 
+      const list = Array.isArray(response)
+        ? response
         : (response?.orders || response?.data || response?.list || [])
 
       return Array.isArray(list) ? list : []
@@ -209,8 +209,8 @@ export const orderApiService = {
         headers: buildHeaders()
       })
 
-      const detailsList = Array.isArray(response) 
-        ? response 
+      const detailsList = Array.isArray(response)
+        ? response
         : (response?.details || response?.order_details || response?.data || [])
 
       const orderInfo = response?.order || response?.order_info || (Array.isArray(response) && response[0]?.order ? response[0].order : null)

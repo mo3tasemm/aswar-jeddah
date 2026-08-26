@@ -6,9 +6,9 @@
       <div class="w-full lg:w-1/2 p-8 lg:p-14 flex flex-col justify-center space-y-8">
         <div>
           <span class="text-xs font-bold uppercase tracking-wider text-amber-600 bg-amber-50 px-3 py-1 rounded-full inline-block mb-3">
-            فرعنا الرئيسي
+            {{ resolvedBadge }}
           </span>
-          <h2 class="text-2xl md:text-3xl font-bold text-slate-900">تفضل بزيارة معرضنا الرئيسي</h2>
+          <h2 class="text-2xl md:text-3xl font-bold text-slate-900">{{ resolvedTitle }}</h2>
         </div>
 
         <div class="space-y-6">
@@ -23,7 +23,7 @@
             </div>
             <div>
               <h3 class="text-sm font-bold text-slate-400 mb-1">العنوان</h3>
-              <p class="text-slate-800 font-medium leading-relaxed">دمياط الجديدة، منتصف شارع أبو الخير، المجاورة 14، بلوك 214</p>
+              <p class="text-slate-800 font-medium leading-relaxed">{{ resolvedAddress }}</p>
             </div>
           </div>
 
@@ -37,7 +37,7 @@
             </div>
             <div>
               <h3 class="text-sm font-bold text-slate-400 mb-1">رقم الهاتف</h3>
-              <a href="tel:01286000037" class="text-slate-800 font-bold hover:text-amber-600 transition-colors dir-ltr inline-block">01286000037</a>
+              <a :href="`tel:${resolvedPhone}`" class="text-slate-800 font-bold hover:text-amber-600 transition-colors dir-ltr inline-block">{{ resolvedPhone }}</a>
             </div>
           </div>
 
@@ -51,7 +51,7 @@
             </div>
             <div>
               <h3 class="text-sm font-bold text-slate-400 mb-1">مواعيد العمل</h3>
-              <p class="text-slate-800 font-medium">يومياً من 10 صباحاً حتى 11 مساءً</p>
+              <p class="text-slate-800 font-medium">{{ resolvedWorkingHours }}</p>
             </div>
           </div>
         </div>
@@ -59,7 +59,7 @@
         <!-- Google Maps Button -->
         <div>
           <a 
-            href="https://maps.google.com/?q=New+Damietta" 
+            :href="resolvedMapsUrl" 
             target="_blank" 
             rel="noopener noreferrer"
             class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-colors w-fit font-medium mt-4 shadow-sm"
@@ -76,12 +76,12 @@
       <!-- Left Side (Interactive Google Map) -->
       <div class="w-full lg:w-1/2 min-h-[350px] lg:min-h-[450px] relative overflow-hidden bg-slate-100 group/map">
         <iframe
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d13626.862414777598!2d31.6669966!3d31.4357497!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14f9e31d5b32524f%3A0x63a9254d39f4ecbf!2sNew%20Damietta%2C%20Damietta%20Governorate!5e0!3m2!1sen!2seg!4v1700000000000!5m2!1sen!2seg"
+          :src="resolvedMapEmbedUrl"
           class="absolute inset-0 w-full h-full border-0 filter contrast-[1.05] grayscale-[25%] hover:grayscale-0 transition-all duration-500"
           allowfullscreen
           loading="lazy"
           referrerpolicy="no-referrer-when-downgrade"
-          title="موقع معرض مكة ستور - دمياط الجديدة"
+          title="موقع معرض أسوار جدة"
         ></iframe>
 
         <!-- Floating Luxury Pin Card Overlay -->
@@ -92,8 +92,8 @@
             </svg>
           </div>
           <div>
-            <p class="text-xs font-bold text-slate-100">معرض مكة ستور الرئيسي</p>
-            <p class="text-[11px] text-amber-400 font-medium mt-0.5">دمياط الجديدة - شارع أبو الخير</p>
+            <p class="text-xs font-bold text-slate-100">معرض أسوار جدة الرئيسي</p>
+            <p class="text-[11px] text-amber-400 font-medium mt-0.5">{{ resolvedAddress }}</p>
           </div>
         </div>
       </div>
@@ -103,5 +103,49 @@
 </template>
 
 <script setup lang="ts">
-// Component logic (presentational)
+import { computed } from 'vue'
+
+const props = defineProps<{
+  config?: {
+    badge?: string
+    branch_badge?: string
+    title?: string
+    address?: string
+    phone?: string
+    workingHours?: string
+    working_hours?: string
+    mapsUrl?: string
+    maps_url?: string
+    mapEmbedUrl?: string
+    map_embed_url?: string
+  }
+}>()
+
+const resolvedBadge = computed(() => {
+  return props.config?.branch_badge || props.config?.badge || 'فرعنا الرئيسي'
+})
+
+const resolvedTitle = computed(() => {
+  return props.config?.title || 'تفضل بزيارة معرضنا الرئيسي'
+})
+
+const resolvedAddress = computed(() => {
+  return props.config?.address || 'جدة، المملكة العربية السعودية'
+})
+
+const resolvedPhone = computed(() => {
+  return props.config?.phone || '01286000037'
+})
+
+const resolvedWorkingHours = computed(() => {
+  return props.config?.working_hours || props.config?.workingHours || 'يومياً من 10 صباحاً حتى 11 مساءً'
+})
+
+const resolvedMapsUrl = computed(() => {
+  return props.config?.maps_url || props.config?.mapsUrl || 'https://maps.google.com/?q=Jeddah'
+})
+
+const resolvedMapEmbedUrl = computed(() => {
+  return props.config?.map_embed_url || props.config?.mapEmbedUrl || 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d118830.2492582855!2d39.1601664!3d21.5433334!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x15c3d01fb1137e59%3A0xe059579737b118db!2sJeddah%20Saudi%20Arabia!5e0!3m2!1sen!2ssa!4v1700000000000!5m2!1sen!2ssa'
+})
 </script>

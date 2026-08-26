@@ -7,7 +7,7 @@
  * 4. POST /api/v1/admin/orders/update-payment-status (body: { order_id, payment_status })
  */
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://wedgetstore.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
 
 export interface AdminOrderCustomer {
   id?: number | string;
@@ -178,7 +178,7 @@ export const adminOrdersApiService = {
   ): Promise<AdminOrdersListResponse> {
     const limit = filters.limit || 10
     const offset = filters.offset !== undefined ? filters.offset : (filters.page || 1)
-    
+
     const params = new URLSearchParams()
     params.append('limit', String(limit))
     params.append('offset', String(offset))
@@ -219,10 +219,10 @@ export const adminOrdersApiService = {
       } else if (raw && typeof raw === 'object') {
         // Total size
         totalCount = Number(
-          raw.total_size ?? 
-          raw.total ?? 
-          raw.orders?.total ?? 
-          raw.data?.total ?? 
+          raw.total_size ??
+          raw.total ??
+          raw.orders?.total ??
+          raw.data?.total ??
           0
         )
 
@@ -267,7 +267,7 @@ export const adminOrdersApiService = {
         if (item.customer && typeof item.customer === 'object') {
           parsedCustomer = item.customer
         } else if (item.customer && typeof item.customer === 'string') {
-          try { parsedCustomer = JSON.parse(item.customer) } catch {}
+          try { parsedCustomer = JSON.parse(item.customer) } catch { }
         } else if (item.customer_id) {
           parsedCustomer = {
             id: item.customer_id,
@@ -277,11 +277,11 @@ export const adminOrdersApiService = {
           }
         }
 
-        const fallbackCustomerName = item.customer_name || 
-                                     (item.customer ? `${item.customer.f_name || ''} ${item.customer.l_name || ''}`.trim() : '') ||
-                                     shippingAddr?.contact_person_name ||
-                                     billingAddr?.contact_person_name ||
-                                     'عميل غير مسجل'
+        const fallbackCustomerName = item.customer_name ||
+          (item.customer ? `${item.customer.f_name || ''} ${item.customer.l_name || ''}`.trim() : '') ||
+          shippingAddr?.contact_person_name ||
+          billingAddr?.contact_person_name ||
+          'عميل غير مسجل'
 
         const custName = formatCustomerFullName(parsedCustomer, fallbackCustomerName)
         const custPhone = item.customer_phone || parsedCustomer?.phone || shippingAddr?.phone || billingAddr?.phone || item.phone || ''
@@ -367,7 +367,7 @@ export const adminOrdersApiService = {
         if (raw.length > 0 && raw[0].order) {
           orderObj = raw[0].order
         }
-      } 
+      }
       // 2. Object response
       else if (raw && typeof raw === 'object') {
         // Extract details array from all possible keys
@@ -413,7 +413,7 @@ export const adminOrdersApiService = {
           if (found) {
             orderObj = found
           }
-        } catch {}
+        } catch { }
       }
 
       const mappedDetails: AdminOrderItemDetail[] = detailsList.map((d: any) => {

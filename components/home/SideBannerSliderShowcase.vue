@@ -27,8 +27,22 @@
 
     <!-- Products Slider Portion -->
     <div class="flex-1 min-w-0 relative -mx-2 sm:-mx-4 lg:-mx-6 -my-4 lg:my-0">
+      <!-- Loading Skeleton State -->
+      <div v-if="isLoading && displayProducts.length === 0" class="flex gap-3 sm:gap-6 overflow-hidden py-4 px-4">
+        <div 
+          v-for="i in 3" 
+          :key="i"
+          class="shrink-0 w-[calc(50%-6px)] sm:w-[260px] lg:w-[280px] h-[340px] bg-slate-100 rounded-2xl animate-pulse p-4 space-y-3 border border-slate-200"
+        >
+          <div class="w-full h-44 bg-slate-200 rounded-xl"></div>
+          <div class="h-4 bg-slate-200 rounded w-3/4"></div>
+          <div class="h-4 bg-slate-200 rounded w-1/2"></div>
+        </div>
+      </div>
+
       <HomeProductsSliderShowcase 
-        :products="products"
+        v-else
+        :products="displayProducts"
       />
     </div>
 
@@ -36,8 +50,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import HomeProductsSliderShowcase from '~/components/home/ProductsSliderShowcase.vue'
+import { productApiService } from '~/services/productApiService'
+import { getProductsByCategory, getProductsByBrand, getNewArrivalProducts } from '~/services/productService'
 import type { Product } from '~/types'
 
 const props = defineProps<{
@@ -45,31 +61,66 @@ const props = defineProps<{
   sideBannerImages?: (string | { image?: string; imageUrl?: string; url?: string; linkUrl?: string })[]
   sideBannerSlides?: { imageUrl?: string; image?: string; linkUrl?: string; url?: string }[]
   sideBannerUrl?: string
-  products: Product[]
+  products?: Product[]
+  config?: {
+    sideBannerImage?: string
+    side_banner_image?: string
+    sideBannerImages?: (string | { image?: string; imageUrl?: string; url?: string; linkUrl?: string })[]
+    side_banner_images?: (string | { image?: string; imageUrl?: string; url?: string; linkUrl?: string })[]
+    sideBannerSlides?: { imageUrl?: string; image?: string; linkUrl?: string; url?: string }[]
+    sideBannerUrl?: string
+    side_banner_url?: string
+    category_id?: number | string
+    categoryId?: number | string
+    category?: string
+    sub_category_id?: number | string
+    subCategoryId?: number | string
+    subCategory?: string
+    sub_category?: string
+    brandName?: string
+    brand_name?: string
+    brand_id?: number | string
+    brandId?: number | string
+    products?: Product[]
+    limit?: number
+  }
 }>()
 
 const currentIndex = ref(0)
 let timer: ReturnType<typeof setInterval> | null = null
+const apiProducts = ref<Product[]>([])
+const isLoading = ref(false)
+
+const resolvedSideBannerUrl = computed(() => {
+  return props.config?.sideBannerUrl || props.config?.side_banner_url || props.sideBannerUrl || '#'
+})
+
+const resolvedLimit = computed(() => {
+  return Number(props.config?.limit) || 5
+})
 
 const banners = computed(() => {
-  if (props.sideBannerSlides && props.sideBannerSlides.length > 0) {
-    return props.sideBannerSlides.map((slide) => ({
+  const cfgSlides = props.config?.sideBannerSlides || props.sideBannerSlides
+  if (cfgSlides && cfgSlides.length > 0) {
+    return cfgSlides.map((slide) => ({
       image: slide.imageUrl || slide.image || '',
-      url: slide.linkUrl || slide.url || props.sideBannerUrl || '#'
+      url: slide.linkUrl || slide.url || resolvedSideBannerUrl.value
     }))
   }
 
-  if (props.sideBannerImages && props.sideBannerImages.length > 0) {
-    return props.sideBannerImages.map((img) => 
+  const cfgImages = props.config?.sideBannerImages || props.config?.side_banner_images || props.sideBannerImages
+  if (cfgImages && cfgImages.length > 0) {
+    return cfgImages.map((img) => 
       typeof img === 'string' 
-        ? { image: img, url: props.sideBannerUrl || '#' } 
-        : { image: img.imageUrl || img.image || '', url: img.linkUrl || img.url || props.sideBannerUrl || '#' }
+        ? { image: img, url: resolvedSideBannerUrl.value } 
+        : { image: img.imageUrl || img.image || '', url: img.linkUrl || img.url || resolvedSideBannerUrl.value }
     )
   }
 
-  if (props.sideBannerImage) {
+  const singleImg = props.config?.sideBannerImage || props.config?.side_banner_image || props.sideBannerImage
+  if (singleImg) {
     return [
-      { image: props.sideBannerImage, url: props.sideBannerUrl || '#' },
+      { image: singleImg, url: resolvedSideBannerUrl.value },
       { image: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=800&q=80', url: '/category/kitchen-appliances' },
       { image: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=800&q=80', url: '/brand/philips' },
     ]
@@ -77,33 +128,151 @@ const banners = computed(() => {
 
   return [
     { image: 'https://images.unsplash.com/photo-1590725140246-20acdee442be?q=80&w=800&auto=format&fit=crop', url: '/brand/smeg' },
-    { image: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=800&q=80', url: '/brand/philips' }
+    { image: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=800&q=80', url: '/category/kitchen-appliances' },
+    { image: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=800&q=80', url: '/brand/philips' },
   ]
 })
 
-const startAutoPlay = () => {
-  stopAutoPlay()
-  if (banners.value.length > 1) {
-    timer = setInterval(() => {
-      currentIndex.value = (currentIndex.value + 1) % banners.value.length
-    }, 3500)
+const fetchSideProducts = async () => {
+  if (props.config?.products && props.config.products.length > 0) {
+    apiProducts.value = props.config.products
+    return
+  }
+  if (props.products && props.products.length > 0) {
+    apiProducts.value = props.products
+    return
+  }
+
+  isLoading.value = true
+  try {
+    const limit = resolvedLimit.value
+    let fetched: Product[] = []
+
+    const brandId = props.config?.brand_id || props.config?.brandId
+    const brandName = props.config?.brandName || props.config?.brand_name
+    const targetCatId = props.config?.sub_category_id || props.config?.subCategoryId || props.config?.category_id || props.config?.categoryId
+    const catName = props.config?.subCategory || props.config?.sub_category || props.config?.category
+
+    // 1. If both Category and Brand are specified, query searchProducts with multi-params
+    if (targetCatId && (brandId || brandName)) {
+      const res = await productApiService.searchProducts({
+        category_id: targetCatId,
+        brand_id: brandId || undefined,
+        keyword: brandName || undefined,
+        limit
+      })
+      if (Array.isArray(res.products) && res.products.length > 0) {
+        fetched = res.products.slice(0, limit)
+      }
+    }
+
+    // 2. If subcategory or category ID specified
+    if (fetched.length === 0 && targetCatId) {
+      const res = await productApiService.fetchFilteredProducts({
+        category_id: targetCatId,
+        brand_id: brandId || undefined,
+        limit
+      })
+      if (Array.isArray(res.products) && res.products.length > 0) {
+        fetched = res.products.slice(0, limit)
+      }
+    }
+
+    // 3. If brand specified
+    if (fetched.length === 0 && (brandId || brandName)) {
+      if (brandId) {
+        const res = await productApiService.fetchFilteredProducts({ brand_id: brandId, limit })
+        if (Array.isArray(res.products) && res.products.length > 0) {
+          fetched = res.products.slice(0, limit)
+        }
+      } else if (brandName) {
+        const res = await productApiService.searchProducts({ keyword: brandName, name: brandName, limit })
+        if (Array.isArray(res.products) && res.products.length > 0) {
+          fetched = res.products.slice(0, limit)
+        }
+      }
+    }
+
+    // 4. Fallbacks
+    if (fetched.length === 0) {
+      if (brandName) {
+        const byBrand = getProductsByBrand(brandName)
+        if (byBrand.length > 0) fetched = byBrand.slice(0, limit)
+      }
+      if (fetched.length === 0 && catName) {
+        const byCat = getProductsByCategory(catName)
+        if (byCat.length > 0) fetched = byCat.slice(0, limit)
+      }
+      if (fetched.length === 0) {
+        const latestRes = await productApiService.fetchFilteredProducts({ limit })
+        if (Array.isArray(latestRes.products) && latestRes.products.length > 0) {
+          fetched = latestRes.products.slice(0, limit)
+        } else {
+          fetched = getNewArrivalProducts().slice(0, limit)
+        }
+      }
+    }
+
+    apiProducts.value = fetched
+  } catch (e) {
+    console.warn('[SideBannerSliderShowcase] Error fetching side products:', e)
+    apiProducts.value = getNewArrivalProducts().slice(0, resolvedLimit.value)
+  } finally {
+    isLoading.value = false
   }
 }
 
-const stopAutoPlay = () => {
+const displayProducts = computed<Product[]>(() => {
+  if (apiProducts.value.length > 0) return apiProducts.value
+  const limit = resolvedLimit.value
+  const brandName = props.config?.brandName || props.config?.brand_name
+  const catName = props.config?.subCategory || props.config?.sub_category || props.config?.category
+  
+  if (brandName) {
+    return getProductsByBrand(brandName).slice(0, limit)
+  }
+  if (catName) {
+    return getProductsByCategory(catName).slice(0, limit)
+  }
+  return getNewArrivalProducts().slice(0, limit)
+})
+
+const startAutoPlay = () => {
+  if (timer) clearInterval(timer)
+  if (banners.value.length > 1) {
+    timer = setInterval(() => {
+      currentIndex.value = (currentIndex.value + 1) % banners.value.length
+    }, 4000)
+  }
+}
+
+const pauseAutoPlay = () => {
   if (timer) {
     clearInterval(timer)
     timer = null
   }
 }
 
-const pauseAutoPlay = () => stopAutoPlay()
-
 onMounted(() => {
   startAutoPlay()
+  fetchSideProducts()
 })
 
 onUnmounted(() => {
-  stopAutoPlay()
+  pauseAutoPlay()
 })
+
+watch(
+  () => [
+    props.config?.brandName, 
+    props.config?.brand_id,
+    props.config?.category_id,
+    props.config?.category, 
+    props.config?.sub_category_id,
+    props.config?.subCategory,
+    props.config?.limit
+  ],
+  () => fetchSideProducts(),
+  { deep: true }
+)
 </script>

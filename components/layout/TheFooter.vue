@@ -8,18 +8,26 @@
           
           <!-- Column 1: Brand Info & Social Media -->
           <div class="space-y-4">
-            <!-- Logo -->
+            <!-- Logo from Admin Settings -->
             <NuxtLink :to="localePath('/')" class="inline-block">
               <img 
+                v-if="resolvedFooterLogo && !logoError"
+                :src="resolvedFooterLogo" 
+                @error="logoError = true"
+                :alt="storeName || 'أسوار جدة - Aswar Jeddah'" 
+                class="h-12 lg:h-14 w-auto object-contain" 
+              />
+              <img 
+                v-else
                 src="~/assets/images/Logo.png" 
                 alt="أسوار جدة - Aswar Jeddah" 
                 class="h-12 lg:h-14 w-auto object-contain" 
               />
             </NuxtLink>
 
-            <!-- Description -->
+            <!-- Description from Admin Settings -->
             <p class="text-slate-400 text-sm leading-relaxed mt-4 mb-6">
-              {{ t('footer.about') }}
+              {{ storeDescription || t('footer.about') }}
             </p>
 
             <!-- Social Media Title -->
@@ -27,11 +35,12 @@
               {{ t('footer.follow_us') }}
             </h4>
 
-            <!-- Social Media Icons -->
-            <div class="flex items-center gap-3">
+            <!-- Social Media Icons from Admin Settings -->
+            <div class="flex items-center gap-3 flex-wrap">
               <!-- Facebook -->
               <a 
-                href="https://facebook.com" 
+                v-if="socialLinks.facebook"
+                :href="socialLinks.facebook" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 class="w-10 h-10 rounded-full bg-slate-800/80 hover:bg-slate-700 text-white flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-sm"
@@ -44,7 +53,8 @@
 
               <!-- Instagram -->
               <a 
-                href="https://instagram.com" 
+                v-if="socialLinks.instagram"
+                :href="socialLinks.instagram" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 class="w-10 h-10 rounded-full bg-slate-800/80 hover:bg-slate-700 text-white flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-sm"
@@ -57,7 +67,8 @@
 
               <!-- TikTok -->
               <a 
-                href="https://tiktok.com" 
+                v-if="socialLinks.tiktok"
+                :href="socialLinks.tiktok" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 class="w-10 h-10 rounded-full bg-slate-800/80 hover:bg-slate-700 text-white flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-sm"
@@ -67,10 +78,46 @@
                   <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.82.57-1.34 1.56-1.35 2.56-.03 1.18.63 2.34 1.64 2.92.93.55 2.1.62 3.09.23 1.05-.41 1.83-1.38 2.01-2.5.07-.63.05-1.27.05-1.91V.02z"/>
                 </svg>
               </a>
+
+              <!-- Twitter / X -->
+              <a 
+                v-if="socialLinks.twitter"
+                :href="socialLinks.twitter" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                class="w-10 h-10 rounded-full bg-slate-800/80 hover:bg-slate-700 text-white flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-sm"
+                title="Twitter / X"
+              >
+                <i class="fa-brands fa-x-twitter text-sm"></i>
+              </a>
+
+              <!-- Snapchat -->
+              <a 
+                v-if="socialLinks.snapchat"
+                :href="socialLinks.snapchat" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                class="w-10 h-10 rounded-full bg-slate-800/80 hover:bg-slate-700 text-white flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-sm"
+                title="Snapchat"
+              >
+                <i class="fa-brands fa-snapchat text-sm"></i>
+              </a>
+
+              <!-- WhatsApp -->
+              <a 
+                v-if="socialLinks.whatsapp"
+                :href="socialLinks.whatsapp" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                class="w-10 h-10 rounded-full bg-slate-800/80 hover:bg-emerald-600 text-white flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-sm"
+                title="WhatsApp"
+              >
+                <i class="fa-brands fa-whatsapp text-sm"></i>
+              </a>
             </div>
           </div>
 
-          <!-- Column 2: Top Categories -->
+          <!-- Column 2: Top Categories & Store Links (From Live Navbar) -->
           <div>
             <h3 class="text-white font-bold text-lg mb-4 relative pb-2 after:content-[''] after:absolute after:start-0 after:bottom-0 after:w-8 after:h-0.5 after:bg-slate-600">
               {{ t('nav.categories') }}
@@ -78,7 +125,7 @@
             <ul class="space-y-1">
               <li v-for="link in categoryLinks" :key="link.name">
                 <NuxtLink 
-                  :to="link.url" 
+                  :to="localePath(link.url)" 
                   class="transition-all duration-300 hover:text-white hover:translate-x-1.5 rtl:hover:-translate-x-1.5 block py-1.5 text-sm text-slate-400"
                 >
                   {{ link.name }}
@@ -87,7 +134,7 @@
             </ul>
           </div>
 
-          <!-- Column 3: My Account -->
+          <!-- Column 3: My Account & Quick Links -->
           <div>
             <h3 class="text-white font-bold text-lg mb-4 relative pb-2 after:content-[''] after:absolute after:start-0 after:bottom-0 after:w-8 after:h-0.5 after:bg-slate-600">
               {{ t('nav.account') }}
@@ -104,7 +151,7 @@
             </ul>
           </div>
 
-          <!-- Column 4: Contact & Hotline -->
+          <!-- Column 4: Contact & Hotline (From Admin Settings) -->
           <div class="space-y-4">
             <h3 class="text-white font-bold text-lg mb-4 relative pb-2 after:content-[''] after:absolute after:start-0 after:bottom-0 after:w-8 after:h-0.5 after:bg-slate-600">
               {{ t('footer.contact_us') }}
@@ -116,21 +163,21 @@
                   <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <span>{{ t('footer.address') }}</span>
+                <span>{{ address || t('footer.address') }}</span>
               </li>
 
               <li class="flex items-center gap-3">
                 <svg class="w-5 h-5 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1.001 1.001 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
-                <a href="tel:01286000037" class="hover:text-amber-400 transition-colors font-bold dir-ltr">01286000037</a>
+                <a :href="`tel:${hotline}`" class="hover:text-amber-400 transition-colors font-bold dir-ltr">{{ hotline }}</a>
               </li>
 
               <li class="flex items-center gap-3">
                 <svg class="w-5 h-5 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
-                <a href="mailto:info@aswarjeddah.com" class="hover:text-amber-400 transition-colors font-medium">info@aswarjeddah.com</a>
+                <a :href="`mailto:${email}`" class="hover:text-amber-400 transition-colors font-medium">{{ email }}</a>
               </li>
             </ul>
           </div>
@@ -143,10 +190,10 @@
     <div class="bg-[#07091B] text-slate-400 text-xs py-6 border-t border-slate-900">
       <div class="max-w-[1550px] mx-auto px-4 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
         <p class="font-medium text-center md:text-start">
-          {{ copyrightText }}
+          {{ copyright }}
         </p>
 
-        <!-- Payment Badges Placeholder -->
+        <!-- Payment Badges -->
         <div class="flex items-center gap-3">
           <span class="px-3 py-1 bg-slate-900 rounded border border-slate-800 text-[10px] font-bold text-slate-300">mada</span>
           <span class="px-3 py-1 bg-slate-900 rounded border border-slate-800 text-[10px] font-bold text-slate-300">VISA</span>
@@ -160,30 +207,66 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useLanguage } from '~/composables/useLanguage'
+import { useStoreSettings } from '~/composables/useStoreSettings'
+import { usePublicNavbar } from '~/composables/usePublicNavbar'
 
-const { t, layoutDirection, localePath } = useLanguage()
+const { t, layoutDirection, localePath, currentLanguage } = useLanguage()
+const { 
+  storeName, 
+  storeDescription, 
+  footerLogoUrl, 
+  logoUrl, 
+  hotline, 
+  email, 
+  address, 
+  socialLinks, 
+  copyright,
+  fetchStoreSettings 
+} = useStoreSettings()
 
-const currentYear = computed(() => new Date().getFullYear())
+const { navItems, fetchPublicNavbar } = usePublicNavbar()
 
-const copyrightText = computed(() => {
-  return t('footer.rights').replace('{year}', String(currentYear.value))
+const logoError = ref(false)
+
+const resolvedFooterLogo = computed(() => {
+  if (footerLogoUrl.value && typeof footerLogoUrl.value === 'string' && footerLogoUrl.value.trim().length > 0) {
+    return footerLogoUrl.value
+  }
+  if (logoUrl.value && typeof logoUrl.value === 'string' && logoUrl.value.trim().length > 0) {
+    return logoUrl.value
+  }
+  return ''
 })
 
-const categoryLinks = computed(() => [
-  { name: t('cat.appliances'), url: localePath('/category/appliances') },
-  { name: t('cat.houseware'), url: localePath('/category/houseware') },
-  { name: t('cat.security'), url: localePath('/category/security') },
-  { name: t('cat.laptops'), url: localePath('/category/laptops') },
-  { name: t('cat.networks'), url: localePath('/category/networks') },
-])
+onMounted(() => {
+  fetchStoreSettings()
+  fetchPublicNavbar()
+})
+
+const categoryLinks = computed(() => {
+  if (navItems.value.length > 0) {
+    return navItems.value.slice(0, 6).map(item => ({
+      name: item.name,
+      url: item.url
+    }))
+  }
+  return [
+    { name: t('cat.appliances'), url: '/category/appliances' },
+    { name: t('cat.houseware'), url: '/category/houseware' },
+    { name: t('cat.security'), url: '/category/security' },
+    { name: t('cat.laptops'), url: '/category/laptops' },
+    { name: t('cat.networks'), url: '/category/networks' },
+  ]
+})
 
 const accountLinks = computed(() => [
   { name: t('nav.account'), url: localePath('/my-account') },
   { name: t('product.wishlist'), url: localePath('/my-account/wishlist') },
   { name: t('product.compare'), url: localePath('/compare') },
   { name: t('nav.cart'), url: localePath('/cart') },
+  { name: currentLanguage?.value === 'en' ? 'Return & Refund Policy' : 'سياسة الاستبدال والاسترجاع', url: localePath('/return-policy') },
+  { name: currentLanguage?.value === 'en' ? 'Privacy Policy & Terms' : 'سياسة الخصوصية والشروط', url: localePath('/privacy-policy') },
 ])
-
 </script>

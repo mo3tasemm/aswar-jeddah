@@ -9,20 +9,20 @@
 import type { Product } from '~/types/product'
 import { mapApiProductToProduct } from '~/types/product'
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://wedgetstore.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
 
 const getAuthToken = (): string | null => {
   if (process.client) {
-    const tokenFromStorage = localStorage.getItem('auth_token') || 
-                             localStorage.getItem('token') || 
-                             localStorage.getItem('user_token') ||
-                             localStorage.getItem('access_token')
+    const tokenFromStorage = localStorage.getItem('auth_token') ||
+      localStorage.getItem('token') ||
+      localStorage.getItem('user_token') ||
+      localStorage.getItem('access_token')
     if (tokenFromStorage) return tokenFromStorage
 
     try {
       const match = document.cookie.match(new RegExp('(^| )' + 'auth_token' + '=([^;]+)'))
       if (match) return match[2]
-    } catch {}
+    } catch { }
   }
   return null
 }

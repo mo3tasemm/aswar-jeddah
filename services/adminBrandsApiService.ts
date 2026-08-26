@@ -7,7 +7,7 @@
  * 4. POST /api/v1/admin/brands/update/{id}
  */
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://wedgetstore.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
 
 export interface AdminBrandItem {
   id: number | string;
@@ -102,7 +102,7 @@ export const adminBrandsApiService = {
    * 1. GET Admin Brands List (with Accept-Language: ar, pagination, anti-cache & searchValue)
    */
   async fetchBrands(
-    token: string, 
+    token: string,
     searchValue: string = '',
     page: number = 1,
     limit: number = 10
@@ -145,7 +145,7 @@ export const adminBrandsApiService = {
         pagination.last_page = Math.ceil(response.length / limit) || 1
       } else if (response && typeof response === 'object') {
         rawList = response.brands || response.data || response.list || []
-        
+
         const meta = response.meta || response.pagination || response
         pagination.current_page = Number(meta.current_page || meta.page || page)
         pagination.per_page = Number(meta.per_page || meta.limit || limit)

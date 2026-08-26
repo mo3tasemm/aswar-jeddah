@@ -19,6 +19,9 @@
 
     <!-- Global Floating Actions -->
     <ScrollToTop />
+
+    <!-- Global Splash & Page Loading Screen -->
+    <GlobalLoadingScreen />
   </div>
 </template>
 
@@ -29,6 +32,7 @@ import CartDrawer from '~/components/cart/CartDrawer.vue'
 import LoginDrawer from '~/components/auth/LoginDrawer.vue'
 import TheToast from '~/components/dashboard/ui/TheToast.vue'
 import ScrollToTop from '~/components/common/ScrollToTop.vue'
+import GlobalLoadingScreen from '~/components/common/GlobalLoadingScreen.vue'
 import { useLanguage } from '~/composables/useLanguage'
 
 const { dir } = useLanguage()

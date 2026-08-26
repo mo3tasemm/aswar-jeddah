@@ -7,19 +7,19 @@
  * Mandatory Header: Authorization: Bearer <token>
  */
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://wedgetstore.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
 
 const getAuthToken = (): string | null => {
   if (process.client) {
     try {
       const nuxtCookie = useCookie('auth_token').value
       if (nuxtCookie) return String(nuxtCookie).replace(/^"(.*)"$/, '$1')
-    } catch (e) {}
+    } catch (e) { }
 
-    let localToken = localStorage.getItem('auth_token') || 
-                     localStorage.getItem('token') || 
-                     localStorage.getItem('access_token') || 
-                     localStorage.getItem('user_token')
+    let localToken = localStorage.getItem('auth_token') ||
+      localStorage.getItem('token') ||
+      localStorage.getItem('access_token') ||
+      localStorage.getItem('user_token')
     if (localToken) return localToken.replace(/^"(.*)"$/, '$1')
 
     const cookies = document.cookie.split(';')
@@ -76,12 +76,12 @@ export const couponApiService = {
   /**
    * Apply Coupon Code via API (POST /api/v1/coupon/apply)
    */
-  async applyCoupon(code: string): Promise<{ 
-    success: boolean; 
-    discount?: number; 
+  async applyCoupon(code: string): Promise<{
+    success: boolean;
+    discount?: number;
     discountType?: string;
-    coupon?: any; 
-    message?: string 
+    coupon?: any;
+    message?: string
   }> {
     const token = getAuthToken()
     const guestId = getGuestId()
@@ -111,17 +111,17 @@ export const couponApiService = {
         timeout: 8000
       })
 
-      const rawDiscount = response?.discount || 
-                          response?.discount_amount || 
-                          response?.data?.discount_amount || 
-                          response?.data?.discount || 
-                          response?.coupon?.discount || 
-                          0
+      const rawDiscount = response?.discount ||
+        response?.discount_amount ||
+        response?.data?.discount_amount ||
+        response?.data?.discount ||
+        response?.coupon?.discount ||
+        0
 
-      const rawType = response?.discount_type || 
-                      response?.data?.discount_type || 
-                      response?.coupon?.discount_type || 
-                      'amount'
+      const rawType = response?.discount_type ||
+        response?.data?.discount_type ||
+        response?.coupon?.discount_type ||
+        'amount'
 
       return {
         success: response?.status === 1 || response?.success === true || true,

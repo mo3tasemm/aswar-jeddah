@@ -6,7 +6,7 @@
  * - POST /api/v1/admin/customers/status-update (or /update-status)
  */
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://wedgetstore.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
 
 export interface AdminCustomerAddress {
   id?: string | number;
@@ -142,7 +142,7 @@ export const adminCustomersApiService = {
   ): Promise<AdminCustomersListResponse> {
     const limit = filters.limit || 10
     const offset = filters.offset !== undefined ? filters.offset : (filters.page || 1)
-    
+
     const params = new URLSearchParams()
     params.append('limit', String(limit))
     params.append('offset', String(offset))
@@ -178,10 +178,10 @@ export const adminCustomersApiService = {
         totalCount = raw.length
       } else if (raw && typeof raw === 'object') {
         totalCount = Number(
-          raw.total_size ?? 
-          raw.total ?? 
-          raw.customers?.total ?? 
-          raw.data?.total ?? 
+          raw.total_size ??
+          raw.total ??
+          raw.customers?.total ??
+          raw.data?.total ??
           0
         )
 
@@ -209,17 +209,17 @@ export const adminCustomersApiService = {
 
         const fullName = getCustomerFullName(item)
         const avatar = normalizeCustomerAvatar(item.image_url || item.image || '')
-        
+
         const ordersCount = Number(
-          item.orders_count ?? 
-          item.total_orders ?? 
+          item.orders_count ??
+          item.total_orders ??
           (Array.isArray(item.orders) ? item.orders.length : 0)
         )
 
         const totalSpent = Number(
-          item.total_spent ?? 
-          item.orders_sum_order_amount ?? 
-          item.total_order_amount ?? 
+          item.total_spent ??
+          item.orders_sum_order_amount ??
+          item.total_order_amount ??
           0
         )
 
@@ -325,7 +325,7 @@ export const adminCustomersApiService = {
           if (found) {
             customerObj = found
           }
-        } catch {}
+        } catch { }
       }
 
       const fullName = getCustomerFullName(customerObj)

@@ -1,31 +1,30 @@
 /**
  * Products API Service Layer
  * Connects directly to WedgetStore Live API Endpoints:
- * 1. Category Products: GET https://wedgetstore.com/api/v1/categories/products/{category_id}?guest_id=1&locale=sa
- * 2. Brand Products: GET https://wedgetstore.com/api/v1/brands/products/{brand_id}?guest_id=1&locale=sa
- * 3. Search Products: GET https://wedgetstore.com/api/v1/products/search?name={keyword}&guest_id=1&locale=sa
- * 4. Latest Products: GET https://wedgetstore.com/api/v1/products/latest?guest_id=1&locale=sa
- * 5. Product Details: GET https://wedgetstore.com/api/v1/products/details/{slug}?guest_id=1&locale=sa
- * 6. Product Reviews: GET https://wedgetstore.com/api/v1/products/reviews/{productId}?locale=sa
- * 7. Submit Review: POST https://wedgetstore.com/api/v1/products/reviews/submit (via FormData with fileUpload[])
- * 8. Like Review: POST https://wedgetstore.com/api/v1/products/review/like
+ * 1. Category Products: GET https:/ai-agunt.elbakry2.com/api/v1/categories/products/{category_id}?guest_id=1&locale=sa
+ * 2. Brand Products: GET https:/ai-agunt.elbakry2.com/api/v1/brands/products/{brand_id}?guest_id=1&locale=sa
+ * 3. Search Products: GET https:/ai-agunt.elbakry2.com/api/v1/products/search?name={keyword}&guest_id=1&locale=sa
+ * 4. Latest Products: GET https:/ai-agunt.elbakry2.com/api/v1/products/latest?guest_id=1&locale=sa
+ * 5. Product Details: GET https:/ai-agunt.elbakry2.com/api/v1/products/details/{slug}?guest_id=1&locale=sa
+ * 6. Product Reviews: GET https:/ai-agunt.elbakry2.com/api/v1/products/reviews/{productId}?locale=sa
+ * 7. Submit Review: POST https:/ai-agunt.elbakry2.com/api/v1/products/reviews/submit (via FormData with fileUpload[])
+ * 8. Like Review: POST https:/ai-agunt.elbakry2.com/api/v1/products/review/like
  */
 import type { ApiProduct, ApiProductsResponse, ProductFetchParams, Product } from '~/types/product'
 import { mapApiProductToProduct } from '~/types/product'
-
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://wedgetstore.com/api/v1'
+import { API_BASE_URL } from '~/services/apiConfig'
 
 const getAuthToken = (): string | null => {
   if (process.client) {
     try {
       const nuxtCookie = useCookie('auth_token').value
       if (nuxtCookie) return String(nuxtCookie).replace(/^"(.*)"$/, '$1')
-    } catch (e) {}
+    } catch (e) { }
 
-    let localToken = localStorage.getItem('auth_token') || 
-                     localStorage.getItem('token') || 
-                     localStorage.getItem('access_token') || 
-                     localStorage.getItem('user_token')
+    let localToken = localStorage.getItem('auth_token') ||
+      localStorage.getItem('token') ||
+      localStorage.getItem('access_token') ||
+      localStorage.getItem('user_token')
     if (localToken) return localToken.replace(/^"(.*)"$/, '$1')
 
     const cookies = document.cookie.split(';')
@@ -92,21 +91,22 @@ export const productApiService = {
     const locale = getCurrentApiLocale(params.locale)
     let endpoint = ''
 
+    const queryParams = new URLSearchParams()
+    queryParams.append('guest_id', String(guestId))
+    queryParams.append('locale', String(locale))
+    if (params.limit) queryParams.append('limit', String(params.limit))
+    if (params.offset) queryParams.append('offset', String(params.offset))
+    if (params.page) queryParams.append('page', String(params.page))
+    if (params.search) queryParams.append('search', params.search)
+    if (params.sort_by) queryParams.append('sort_by', params.sort_by)
+
     if (params.category_id) {
-      endpoint = `${API_BASE_URL}/categories/products/${params.category_id}?guest_id=${guestId}&locale=${locale}`
+      endpoint = `${API_BASE_URL}/categories/products/${params.category_id}?${queryParams.toString()}`
     }
     else if (params.brand_id) {
-      endpoint = `${API_BASE_URL}/brands/products/${params.brand_id}?guest_id=${guestId}&locale=${locale}`
+      endpoint = `${API_BASE_URL}/brands/products/${params.brand_id}?${queryParams.toString()}`
     }
     else {
-      const queryParams = new URLSearchParams()
-      queryParams.append('guest_id', String(guestId))
-      queryParams.append('locale', String(locale))
-
-      if (params.limit) queryParams.append('limit', String(params.limit))
-      if (params.offset) queryParams.append('offset', String(params.offset))
-      if (params.search) queryParams.append('search', params.search)
-
       endpoint = `${API_BASE_URL}/products/latest?${queryParams.toString()}`
     }
 
@@ -160,7 +160,7 @@ export const productApiService = {
 
   /**
    * Search and filter products via API
-   * Endpoint: GET https://wedgetstore.com/api/v1/products/search?name={keyword}
+   * Endpoint: GET https:/ai-agunt.elbakry2.com/api/v1/products/search?name={keyword}
    */
   async searchProducts(params: {
     name?: string;
@@ -276,7 +276,7 @@ export const productApiService = {
 
   /**
    * Fetch Product Reviews
-   * GET https://wedgetstore.com/api/v1/products/reviews/{product_id}
+   * GET https:/ai-agunt.elbakry2.com/api/v1/products/reviews/{product_id}
    */
   async fetchProductReviews(productId: number | string, guestId?: string, localeInput?: string): Promise<ProductReviewItem[]> {
     try {
@@ -307,7 +307,7 @@ export const productApiService = {
 
   /**
    * Submit Review via FormData
-   * POST https://wedgetstore.com/api/v1/products/reviews/submit
+   * POST https:/ai-agunt.elbakry2.com/api/v1/products/reviews/submit
    */
   async submitReview(data: {
     product_id: number | string;
@@ -382,7 +382,7 @@ export const productApiService = {
 
   /**
    * Like a Product Review
-   * POST https://wedgetstore.com/api/v1/products/review/like
+   * POST https:/ai-agunt.elbakry2.com/api/v1/products/review/like
    */
   async likeProductReview(reviewId: number | string): Promise<{ success: boolean }> {
     try {

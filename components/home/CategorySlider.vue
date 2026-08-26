@@ -3,7 +3,7 @@
     
     <!-- Header -->
     <div class="flex items-center justify-between mb-8 px-2">
-      <h2 class="text-2xl font-bold text-luxury-black">{{ layoutDirection === 'ltr' ? 'Shop by Category' : 'تسوق حسب القسم' }}</h2>
+      <h2 class="text-2xl font-bold text-luxury-black">{{ displayTitle }}</h2>
     </div>
 
     <!-- Right Arrow (Scroll Right in RTL) -->
@@ -24,7 +24,7 @@
     >
       <!-- Category Cards with Dynamic Slug Link -->
       <NuxtLink 
-        v-for="category in categories" 
+        v-for="category in displayCategories" 
         :key="category.id"
         :to="`/category/${category.slug || category.id}`"
         class="flex-none w-[calc(50%-6px)] sm:w-[160px] md:w-[200px] h-[180px] sm:h-[220px] rounded-2xl overflow-hidden relative group/card snap-start shadow-sm hover:shadow-md transition-all duration-300 border border-slate-100 flex flex-col bg-white"
@@ -61,13 +61,36 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useCategories } from '~/composables/useCategories'
 import { useLanguage } from '~/composables/useLanguage'
 
-const { categories } = useCategories()
+const props = defineProps<{
+  title?: string
+  config?: { title?: string; limit?: number; categories?: any[] }
+}>()
+
+const { categories: fetchedCategories } = useCategories()
 const { layoutDirection } = useLanguage()
 const sliderRef = ref<HTMLElement | null>(null)
+
+const displayTitle = computed(() => {
+  if (props.config?.title) return props.config.title
+  if (props.title) return props.title
+  return layoutDirection.value === 'ltr' ? 'Shop by Category' : 'تسوق حسب القسم'
+})
+
+const displayCategories = computed(() => {
+  const list = props.config?.categories && props.config.categories.length > 0
+    ? props.config.categories
+    : fetchedCategories.value
+
+  const limit = props.config?.limit
+  if (limit && Number(limit) > 0) {
+    return list.slice(0, Number(limit))
+  }
+  return list
+})
 
 const scrollAmount = 400 // Smooth scroll amount for desktop
 

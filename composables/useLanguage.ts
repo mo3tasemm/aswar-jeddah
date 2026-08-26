@@ -23,6 +23,8 @@ const translations: TranslationDictionary = {
   'nav.login': { ar: 'تسجيل الدخول', en: 'Login / Register' },
   'nav.hotline': { ar: 'الخط الساخن', en: 'Hotline' },
   'nav.cart': { ar: 'السلة', en: 'Cart' },
+  'nav.about_us': { ar: 'من نحن', en: 'About Us' },
+  'nav.contact_us': { ar: 'تواصل معنا', en: 'Contact Us' },
 
   // Footer
   'footer.about': { 
