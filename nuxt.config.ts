@@ -6,9 +6,10 @@ export default defineNuxtConfig({
   modules: ['@nuxtjs/tailwindcss'],
   css: ['~/assets/css/main.css'],
   
-  // إعدادات Nitro متوافقة مع Vercel
+  // تحويل الموقع بالكامل إلى Static لتجنب حدود الدوال نهائياً
+  ssr: false,
   nitro: {
-    preset: 'vercel'
+    preset: 'static'
   },
 
   runtimeConfig: {
