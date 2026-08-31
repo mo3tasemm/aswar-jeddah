@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Admin Products API Service Layer with Multi-language Translation Support
  * Live API Endpoints:
  * 1. GET  /api/v1/admin/products/list?page={page}&limit={limit}
@@ -10,7 +10,7 @@
  * Images MUST be sent directly as binary files inside the add/update FormData request.
  */
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://ai-agunt.elbakry2.com/api/v1'
 
 export interface AdminProductItem {
   id: number | string;
@@ -966,3 +966,4 @@ export const adminProductsApiService = {
     }
   }
 }
+

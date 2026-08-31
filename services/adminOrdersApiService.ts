@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Admin Orders API Service Layer
  * Live API Endpoints:
  * 1. GET  /api/v1/admin/orders/list?limit={limit}&offset={offset}&order_status={order_status}&payment_status={payment_status}&search={search}
@@ -7,7 +7,7 @@
  * 4. POST /api/v1/admin/orders/update-payment-status (body: { order_id, payment_status })
  */
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://ai-agunt.elbakry2.com/api/v1'
 
 export interface AdminOrderCustomer {
   id?: number | string;
@@ -598,3 +598,4 @@ export const adminOrdersApiService = {
     }
   }
 }
+

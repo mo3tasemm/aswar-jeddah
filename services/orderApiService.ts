@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Production-ready Order Placement & Management API Service Layer for WedgetStore Live API
  * Official Endpoint Specification:
  * 1. Customer Orders:
@@ -14,7 +14,7 @@
  *    - GET  /api/v1/order/cancel-order
  */
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://ai-agunt.elbakry2.com/api/v1'
 
 const getAuthToken = (): string | null => {
   if (process.client) {
@@ -368,3 +368,4 @@ export const orderApiService = {
     }
   }
 }
+

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Admin Attributes API Service Layer with Multi-language (AR & EN) Support
  * Live API Endpoints:
  * 1. GET /api/v1/admin/attributes/list?searchValue={searchValue}&page={page}&limit={limit}&_t={timestamp}
@@ -7,7 +7,7 @@
  * 4. DELETE /api/v1/admin/attributes/delete/{id}
  */
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://ai-agunt.elbakry2.com/api/v1'
 
 export interface AdminAttributeItem {
   id: number | string;
@@ -270,3 +270,4 @@ export const adminAttributesApiService = {
     }
   }
 }
+

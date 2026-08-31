@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Admin Coupons API Service Layer
  * Supported Endpoints:
  * - GET /api/v1/admin/coupon/list or /api/v1/admin/coupons/list
@@ -9,7 +9,7 @@
  * - DELETE /api/v1/admin/coupon/delete/{id} or DELETE /api/v1/admin/coupon/{id}
  */
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://ai-agunt.elbakry2.com/api/v1'
 
 export interface AdminCouponItem {
   id: string | number;
@@ -601,3 +601,4 @@ export const adminCouponsApiService = {
     }
   }
 }
+

@@ -42,20 +42,10 @@ const getApiHeaders = (localeInput?: string): Record<string, string> => {
   return headers
 }
 
-export const useApi = () => {
-  let apiBase = 'https:/ai-agunt.elbakry2.com/api/v1'
-  try {
-    const config = useRuntimeConfig()
-    if (config?.public?.apiBase) {
-      apiBase = config.public.apiBase as string
-    }
-  } catch (e) {
-    if (process.env.NUXT_PUBLIC_API_BASE) {
-      apiBase = process.env.NUXT_PUBLIC_API_BASE
-    }
-  }
+import { getApiBaseUrl, sanitizeApiUrl } from './apiConfig'
 
-  apiBase = apiBase.replace(/\/+$/, '')
+export const useApi = () => {
+  const apiBase = getApiBaseUrl()
 
   const request = async <T>(url: string, options?: Parameters<typeof $fetch>[1] & { locale?: string; guest_id?: string | number }) => {
     const locale = getCurrentApiLocale(options?.locale)
@@ -93,3 +83,4 @@ export const useApi = () => {
     delete: <T>(url: string, options?: any) => request<T>(url, { ...options, method: 'DELETE' }),
   }
 }
+

@@ -1,10 +1,10 @@
-/**
+﻿/**
  * Admin Settings & Business Configuration API Service Layer
  * Supports full multipart/form-data payload with multiple binary media uploads,
  * scalar types (strings, numbers, booleans), and nested configuration mappings.
  */
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://ai-agunt.elbakry2.com/api/v1'
 
 export interface AdminSettingsState {
   // 1. General & SEO
@@ -1058,4 +1058,5 @@ export const adminSettingsApiService = {
     }
   }
 }
+
 

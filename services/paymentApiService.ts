@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Production-ready Payment API Service for Moyasar, Tamara, and Tabby gateways
  * Aswar Jeddah Electronics E-Commerce Store
  *
@@ -8,7 +8,7 @@
  * - POST /api/v1/tabby/pay    { payment_id: string | number }
  */
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://ai-agunt.elbakry2.com/api/v1'
 
 const getAuthToken = (): string | null => {
   if (process.client) {
@@ -244,3 +244,4 @@ export const paymentApiService = {
     }
   }
 }
+

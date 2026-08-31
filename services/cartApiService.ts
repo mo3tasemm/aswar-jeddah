@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Production-ready Cart API Service Layer for WedgetStore Live API
  * Rules & Requirements:
  * 1. Authenticated User:
@@ -16,7 +16,7 @@
 import type { CartItem, Product } from '~/types/product'
 import { mapApiProductToProduct } from '~/types/product'
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://ai-agunt.elbakry2.com/api/v1'
 
 // Module-level cached cart_group_id
 let cachedCartGroupId: string | null = null
@@ -365,3 +365,4 @@ export const cartApiService = {
     }
   }
 }
+

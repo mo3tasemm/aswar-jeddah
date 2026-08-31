@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Admin Categories API Service Layer with Multi-language Translation & FormData Support
  * Live Endpoints:
  * 1. GET    /api/v1/admin/categories/list?page={page}&searchValue={searchValue}&parent_id={parentId}&position={position}
@@ -7,7 +7,7 @@
  * 4. DELETE /api/v1/admin/categories/delete/{id}
  */
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://ai-agunt.elbakry2.com/api/v1'
 
 export interface AdminCategoryItem {
   id: number | string;
@@ -466,3 +466,4 @@ export const adminCategoriesApiService = {
     }
   }
 }
+

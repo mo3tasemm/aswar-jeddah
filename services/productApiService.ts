@@ -1,14 +1,14 @@
-/**
+﻿/**
  * Products API Service Layer
  * Connects directly to WedgetStore Live API Endpoints:
- * 1. Category Products: GET https:/ai-agunt.elbakry2.com/api/v1/categories/products/{category_id}?guest_id=1&locale=sa
- * 2. Brand Products: GET https:/ai-agunt.elbakry2.com/api/v1/brands/products/{brand_id}?guest_id=1&locale=sa
- * 3. Search Products: GET https:/ai-agunt.elbakry2.com/api/v1/products/search?name={keyword}&guest_id=1&locale=sa
- * 4. Latest Products: GET https:/ai-agunt.elbakry2.com/api/v1/products/latest?guest_id=1&locale=sa
- * 5. Product Details: GET https:/ai-agunt.elbakry2.com/api/v1/products/details/{slug}?guest_id=1&locale=sa
- * 6. Product Reviews: GET https:/ai-agunt.elbakry2.com/api/v1/products/reviews/{productId}?locale=sa
- * 7. Submit Review: POST https:/ai-agunt.elbakry2.com/api/v1/products/reviews/submit (via FormData with fileUpload[])
- * 8. Like Review: POST https:/ai-agunt.elbakry2.com/api/v1/products/review/like
+ * 1. Category Products: GET https://ai-agunt.elbakry2.com/api/v1/categories/products/{category_id}?guest_id=1&locale=sa
+ * 2. Brand Products: GET https://ai-agunt.elbakry2.com/api/v1/brands/products/{brand_id}?guest_id=1&locale=sa
+ * 3. Search Products: GET https://ai-agunt.elbakry2.com/api/v1/products/search?name={keyword}&guest_id=1&locale=sa
+ * 4. Latest Products: GET https://ai-agunt.elbakry2.com/api/v1/products/latest?guest_id=1&locale=sa
+ * 5. Product Details: GET https://ai-agunt.elbakry2.com/api/v1/products/details/{slug}?guest_id=1&locale=sa
+ * 6. Product Reviews: GET https://ai-agunt.elbakry2.com/api/v1/products/reviews/{productId}?locale=sa
+ * 7. Submit Review: POST https://ai-agunt.elbakry2.com/api/v1/products/reviews/submit (via FormData with fileUpload[])
+ * 8. Like Review: POST https://ai-agunt.elbakry2.com/api/v1/products/review/like
  */
 import type { ApiProduct, ApiProductsResponse, ProductFetchParams, Product } from '~/types/product'
 import { mapApiProductToProduct } from '~/types/product'
@@ -160,7 +160,7 @@ export const productApiService = {
 
   /**
    * Search and filter products via API
-   * Endpoint: GET https:/ai-agunt.elbakry2.com/api/v1/products/search?name={keyword}
+   * Endpoint: GET https://ai-agunt.elbakry2.com/api/v1/products/search?name={keyword}
    */
   async searchProducts(params: {
     name?: string;
@@ -276,7 +276,7 @@ export const productApiService = {
 
   /**
    * Fetch Product Reviews
-   * GET https:/ai-agunt.elbakry2.com/api/v1/products/reviews/{product_id}
+   * GET https://ai-agunt.elbakry2.com/api/v1/products/reviews/{product_id}
    */
   async fetchProductReviews(productId: number | string, guestId?: string, localeInput?: string): Promise<ProductReviewItem[]> {
     try {
@@ -307,7 +307,7 @@ export const productApiService = {
 
   /**
    * Submit Review via FormData
-   * POST https:/ai-agunt.elbakry2.com/api/v1/products/reviews/submit
+   * POST https://ai-agunt.elbakry2.com/api/v1/products/reviews/submit
    */
   async submitReview(data: {
     product_id: number | string;
@@ -382,7 +382,7 @@ export const productApiService = {
 
   /**
    * Like a Product Review
-   * POST https:/ai-agunt.elbakry2.com/api/v1/products/review/like
+   * POST https://ai-agunt.elbakry2.com/api/v1/products/review/like
    */
   async likeProductReview(reviewId: number | string): Promise<{ success: boolean }> {
     try {
@@ -399,3 +399,4 @@ export const productApiService = {
     }
   }
 }
+

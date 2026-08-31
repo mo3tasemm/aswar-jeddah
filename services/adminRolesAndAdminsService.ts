@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
+﻿const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://ai-agunt.elbakry2.com/api/v1'
 
 /**
  * Standard Admin Modules for Permissions
@@ -871,3 +871,4 @@ export const adminRolesAndAdminsService = {
     return { success: false, message: 'فشل في حذف المشرف' }
   }
 }
+

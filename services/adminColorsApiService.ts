@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Admin Colors API Service Layer
  * Live API Endpoints:
  * 1. GET /api/v1/admin/colors/list?searchValue={searchValue}&page={page}&limit={limit}&_t={timestamp}
@@ -7,7 +7,7 @@
  * 4. DELETE /api/v1/admin/colors/delete/{id}
  */
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://ai-agunt.elbakry2.com/api/v1'
 
 export type ColorType = 'code' | 'image'
 
@@ -267,3 +267,4 @@ export const adminColorsApiService = {
     }
   }
 }
+

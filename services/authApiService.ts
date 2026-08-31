@@ -1,15 +1,15 @@
-/**
+﻿/**
  * Production-ready Auth API Service Layer for WedgetStore Live API
  * Endpoints:
- * - POST   https:/ai-agunt.elbakry2.com/api/v1/auth/login
- * - POST   https:/ai-agunt.elbakry2.com/api/v1/auth/register
- * - GET    https:/ai-agunt.elbakry2.com/api/v1/auth/logout (Authorization: Bearer <token>)
- * - GET    https:/ai-agunt.elbakry2.com/api/v1/customer/info (Authorization: Bearer <token>)
- * - POST   https:/ai-agunt.elbakry2.com/api/v1/customer/update-profile (_method: 'PUT', Authorization: Bearer <token>)
- * - DELETE https:/ai-agunt.elbakry2.com/api/v1/customer/account-delete (Authorization: Bearer <token>)
+ * - POST   https://ai-agunt.elbakry2.com/api/v1/auth/login
+ * - POST   https://ai-agunt.elbakry2.com/api/v1/auth/register
+ * - GET    https://ai-agunt.elbakry2.com/api/v1/auth/logout (Authorization: Bearer <token>)
+ * - GET    https://ai-agunt.elbakry2.com/api/v1/customer/info (Authorization: Bearer <token>)
+ * - POST   https://ai-agunt.elbakry2.com/api/v1/customer/update-profile (_method: 'PUT', Authorization: Bearer <token>)
+ * - DELETE https://ai-agunt.elbakry2.com/api/v1/customer/account-delete (Authorization: Bearer <token>)
  */
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://ai-agunt.elbakry2.com/api/v1'
 
 export interface LoginPayload {
   email_or_phone: string;
@@ -271,3 +271,4 @@ export const authApiService = {
     }
   }
 }
+

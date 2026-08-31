@@ -4,8 +4,7 @@
  * - POST /api/v1/admin/auth/login (or fallback /api/v1/auth/admin/login)
  * - POST /api/v1/admin/auth/logout
  */
-
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
+import { getApiBaseUrl } from './apiConfig'
 
 export interface AdminLoginPayload {
   email: string;
@@ -34,11 +33,13 @@ export const adminAuthApiService = {
       password: payload.password
     }
 
+    const baseUrl = getApiBaseUrl()
+
     // Try primary admin endpoints
     const endpoints = [
-      `${API_BASE_URL}/admin/auth/login`,
-      `${API_BASE_URL}/auth/admin/login`,
-      `${API_BASE_URL}/admin/login`
+      `${baseUrl}/admin/auth/login`,
+      `${baseUrl}/auth/admin/login`,
+      `${baseUrl}/admin/login`
     ]
 
     let lastErrorMsg = 'بيانات الاعتماد غير صحيحة.'
@@ -101,7 +102,8 @@ export const adminAuthApiService = {
     if (!token) return { success: false, message: 'No token provided' }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/admin/auth/info`, {
+      const baseUrl = getApiBaseUrl()
+      const response = await fetch(`${baseUrl}/admin/auth/info`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -153,7 +155,8 @@ export const adminAuthApiService = {
    */
   async logout(token: string): Promise<boolean> {
     try {
-      await $fetch(`${API_BASE_URL}/admin/auth/logout`, {
+      const baseUrl = getApiBaseUrl()
+      await $fetch(`${baseUrl}/admin/auth/logout`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -166,3 +169,4 @@ export const adminAuthApiService = {
     }
   }
 }
+

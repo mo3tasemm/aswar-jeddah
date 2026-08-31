@@ -1,9 +1,9 @@
-/**
+﻿/**
  * Brand API Service Layer
- * Endpoint: GET https:/ai-agunt.elbakry2.com/api/v1/brands?guest_id=1&locale=sa
+ * Endpoint: GET https://ai-agunt.elbakry2.com/api/v1/brands?guest_id=1&locale=sa
  */
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://ai-agunt.elbakry2.com/api/v1'
 
 export interface BrandItem {
   id: number | string;
@@ -179,3 +179,4 @@ export const brandApiService = {
     }
   }
 }
+

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Production-ready Admin Customers API Service Layer
  * Endpoints:
  * - GET /api/v1/admin/customers/list?limit=10&offset=1&search=...
@@ -6,7 +6,7 @@
  * - POST /api/v1/admin/customers/status-update (or /update-status)
  */
 
-const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https:/ai-agunt.elbakry2.com/api/v1'
+const API_BASE_URL = process.env.NUXT_PUBLIC_API_BASE || 'https://ai-agunt.elbakry2.com/api/v1'
 
 export interface AdminCustomerAddress {
   id?: string | number;
@@ -462,3 +462,4 @@ export const adminCustomersApiService = {
     }
   }
 }
+
