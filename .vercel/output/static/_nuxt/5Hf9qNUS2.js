@@ -1,1 +1,0 @@
-import{$ as e,E as t,F as n}from"./BcpgHYxp.js";import{t as r}from"./RzAS5Qr3.js";var i=n({__name:`shop`,setup(n){return(n,i)=>{let a=r;return e(),t(a)}}});export{i as default};

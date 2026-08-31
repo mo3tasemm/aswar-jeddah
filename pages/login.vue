@@ -2,117 +2,222 @@
   <div class="login-page-wrapper selection:bg-amber-500 selection:text-white" :dir="layoutDirection">
     
     <!-- SECTION 1: SLIDING AUTH FORM CONTAINER -->
-    <section class="auth-section flex-col">
+    <section class="auth-section flex-col py-8 sm:py-12 px-4">
       
-      <!-- Mobile Tabs (Visible only on smaller screens since the overlay is hidden) -->
-      <div class="md:hidden flex w-full max-w-sm mx-auto mb-6 bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+      <!-- Mobile & Tablet Quick Switch Tabs -->
+      <div class="lg:hidden flex w-full max-w-sm mx-auto mb-6 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-1">
         <button 
+          type="button"
           @click="isRightPanelActive = false" 
-          class="flex-1 py-3 text-sm font-bold transition-colors cursor-pointer"
-          :class="!isRightPanelActive ? 'bg-[#0B0E28] text-white' : 'text-slate-500 hover:bg-slate-50'"
+          class="flex-1 py-2.5 text-xs sm:text-sm font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5"
+          :class="!isRightPanelActive ? 'bg-[#0B0E28] text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'"
         >
-          {{ t('auth.login_tab') }}
+          <i class="fa-solid fa-arrow-right-to-bracket text-xs" :class="!isRightPanelActive ? 'text-amber-400' : 'text-slate-400'"></i>
+          <span>{{ t('auth.login_tab') || 'تسجيل الدخول' }}</span>
         </button>
         <button 
+          type="button"
           @click="isRightPanelActive = true" 
-          class="flex-1 py-3 text-sm font-bold transition-colors cursor-pointer"
-          :class="isRightPanelActive ? 'bg-[#0B0E28] text-white' : 'text-slate-500 hover:bg-slate-50'"
+          class="flex-1 py-2.5 text-xs sm:text-sm font-black rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5"
+          :class="isRightPanelActive ? 'bg-[#0B0E28] text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'"
         >
-          {{ t('auth.register_tab') }}
+          <i class="fa-solid fa-user-plus text-xs" :class="isRightPanelActive ? 'text-amber-400' : 'text-slate-400'"></i>
+          <span>{{ t('auth.register_tab') || 'إنشاء حساب' }}</span>
         </button>
       </div>
 
-      <!-- Container forced with dir="ltr" internally for coordinate stability, while inner forms adopt layoutDirection -->
-      <div class="container" :class="{ 'right-panel-active': isRightPanelActive }" id="container" dir="ltr">
+      <!-- Main Animated Card Container -->
+      <div 
+        class="auth-slider-container" 
+        :class="{ 'right-panel-active': isRightPanelActive }" 
+        id="auth-container" 
+        dir="ltr"
+      >
         
-        <!-- SIGN UP CONTAINER -->
-        <div class="form-container sign-up-container" :dir="layoutDirection">
-          <form @submit.prevent="handleSignUp">
-            <h1 class="title">{{ t('auth.create_account') }}</h1>
-            <div class="social-container">
-              <a href="#" class="social" title="Google">
-                <svg viewBox="0 0 24 24" class="w-4 h-4"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-              </a>
-              <a href="#" class="social" title="Apple">
-                <svg viewBox="0 0 384 512" class="w-4 h-4 fill-slate-800"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
-              </a>
-            </div>
-            <span>{{ t('auth.or_register_with') }}</span>
+        <!-- ================= 1. SIGN UP FORM PANEL ================= -->
+        <div class="auth-form-panel sign-up-panel" :dir="layoutDirection">
+          <form @submit.prevent="handleSignUp" class="auth-form">
+            <h1 class="auth-title">{{ t('auth.create_account') || 'إنشاء حساب جديد' }}</h1>
+            <p class="auth-desc">{{ t('auth.welcome_new_desc') || 'أدخل بياناتك للتسجيل والاستمتاع بأفضل العروض' }}</p>
 
             <!-- Error Banner -->
-            <div v-if="registerError" class="w-full my-2 p-2.5 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs font-bold text-center">
-              {{ registerError }}
+            <div v-if="registerError" class="w-full my-2 p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs font-bold flex items-center gap-2">
+              <i class="fa-solid fa-circle-exclamation shrink-0"></i>
+              <span>{{ registerError }}</span>
             </div>
 
+            <!-- Form Inputs -->
             <div class="grid grid-cols-2 gap-2 w-full">
-              <input type="text" :placeholder="t('auth.first_name')" v-model="signUpForm.f_name" required />
-              <input type="text" :placeholder="t('auth.last_name')" v-model="signUpForm.l_name" required />
-            </div>
-            <input type="email" :placeholder="t('auth.email_placeholder')" v-model="signUpForm.email" required />
-            <input type="tel" :placeholder="t('auth.phone_placeholder')" v-model="signUpForm.phone" required dir="ltr" class="text-start" />
-            <input type="password" :placeholder="t('auth.password_placeholder')" v-model="signUpForm.password" required minlength="6" />
-
-            <button type="submit" :disabled="registerPending" class="btn-primary flex items-center justify-center gap-2">
-              <svg v-if="registerPending" class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-              <span>{{ registerPending ? t('auth.creating_account') : t('auth.create_account_btn') }}</span>
-            </button>
-          </form>
-        </div>
-
-        <!-- SIGN IN CONTAINER -->
-        <div class="form-container sign-in-container" :dir="layoutDirection">
-          <form @submit.prevent="handleSignIn">
-            <h1 class="title">{{ t('auth.login_title') }}</h1>
-            <div class="social-container">
-              <a href="#" class="social" title="Google">
-                <svg viewBox="0 0 24 24" class="w-4 h-4"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-              </a>
-              <a href="#" class="social" title="Apple">
-                <svg viewBox="0 0 384 512" class="w-4 h-4 fill-slate-800"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
-              </a>
-            </div>
-            <span>{{ t('auth.or_login_with') }}</span>
-
-            <!-- Error Banner -->
-            <div v-if="loginError" class="w-full my-2 p-2.5 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs font-bold text-center">
-              {{ loginError }}
+              <input 
+                type="text" 
+                :placeholder="t('auth.first_name') || 'الاسم الأول'" 
+                v-model="signUpForm.f_name" 
+                required 
+                class="auth-input"
+              />
+              <input 
+                type="text" 
+                :placeholder="t('auth.last_name') || 'اسم العائلة'" 
+                v-model="signUpForm.l_name" 
+                required 
+                class="auth-input"
+              />
             </div>
 
-            <input type="text" :placeholder="t('auth.email_or_phone_placeholder')" v-model="signInForm.email" required />
-            <input type="password" :placeholder="t('auth.password_label')" v-model="signInForm.password" required />
-            
-            <NuxtLink to="/forgot-password" class="forgot-link text-xs font-bold text-slate-700 hover:text-amber-600 my-2 transition-colors">
-              {{ t('auth.forgot_password') }}
-            </NuxtLink>
-            
-            <button type="submit" :disabled="loginPending" class="btn-primary flex items-center justify-center gap-2">
-              <svg v-if="loginPending" class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-              <span>{{ loginPending ? t('auth.logging_in') : t('auth.login_btn') }}</span>
-            </button>
-          </form>
-        </div>
+            <input 
+              type="email" 
+              :placeholder="t('auth.email_placeholder') || 'البريد الإلكتروني'" 
+              v-model="signUpForm.email" 
+              required 
+              dir="ltr"
+              class="auth-input"
+            />
 
-        <!-- OVERLAY CONTAINER -->
-        <div class="overlay-container hidden md:block" style="z-index: 100;" :dir="layoutDirection">
-          <div class="overlay">
-            
-            <!-- OVERLAY LEFT (Appears when switching to Sign In) -->
-            <div class="overlay-panel overlay-left">
-              <img src="~/assets/images/Logo.png" alt="أسوار جدة" class="overlay-logo" />
-              <h1>{{ t('auth.welcome_back_title') }}</h1>
-              <p>{{ t('auth.welcome_back_desc') }}</p>
-              <button class="ghost cursor-pointer" id="signIn" @click="isRightPanelActive = false">
-                {{ t('auth.login_tab') }}
+            <input 
+              type="tel" 
+              :placeholder="t('auth.phone_placeholder') || 'رقم الجوال (05xxxxxxxx)'" 
+              v-model="signUpForm.phone" 
+              required 
+              dir="ltr" 
+              class="auth-input" 
+            />
+
+            <div class="relative w-full">
+              <input 
+                :type="showRegisterPassword ? 'text' : 'password'" 
+                :placeholder="t('auth.password_placeholder') || 'كلمة المرور (6 خانات فأكثر)'" 
+                v-model="signUpForm.password" 
+                required 
+                minlength="6" 
+                class="auth-input pe-10"
+              />
+              <button 
+                type="button"
+                @click="showRegisterPassword = !showRegisterPassword"
+                class="absolute end-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 cursor-pointer p-1"
+                :title="showRegisterPassword ? 'إخفاء' : 'إظهار'"
+              >
+                <i :class="showRegisterPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'" class="text-xs"></i>
               </button>
             </div>
 
-            <!-- OVERLAY RIGHT (Appears when switching to Sign Up) -->
-            <div class="overlay-panel overlay-right">
-              <img src="~/assets/images/Logo.png" alt="أسوار جدة" class="overlay-logo" />
-              <h1>{{ t('auth.welcome_new_title') }}</h1>
-              <p>{{ t('auth.welcome_new_desc') }}</p>
-              <button class="ghost cursor-pointer" id="signUp" @click="isRightPanelActive = true">
-                {{ t('auth.register_now') }}
+            <button type="submit" :disabled="registerPending" class="auth-btn-primary w-full mt-3 flex items-center justify-center gap-2">
+              <svg v-if="registerPending" class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              <span>{{ registerPending ? (t('auth.creating_account') || 'جاري إنشاء الحساب...') : (t('auth.create_account_btn') || 'إنشاء الحساب') }}</span>
+            </button>
+
+            <!-- Bottom Inline Switcher for all viewports -->
+            <div class="mt-4 pt-3 border-t border-slate-100 text-center text-xs text-slate-500 font-bold w-full">
+              <span>{{ t('auth.have_account') || 'لديك حساب بالفعل؟' }}</span>
+              <button 
+                type="button" 
+                @click="isRightPanelActive = false" 
+                class="text-amber-600 hover:text-amber-700 font-extrabold underline underline-offset-4 ms-1 transition-colors cursor-pointer"
+              >
+                {{ t('auth.login_tab') || 'تسجيل الدخول' }}
+              </button>
+            </div>
+          </form>
+        </div>
+
+
+        <!-- ================= 2. SIGN IN FORM PANEL ================= -->
+        <div class="auth-form-panel sign-in-panel" :dir="layoutDirection">
+          <form @submit.prevent="handleSignIn" class="auth-form">
+            <h1 class="auth-title">{{ t('auth.login_title') || 'تسجيل الدخول' }}</h1>
+            <p class="auth-desc">{{ t('auth.welcome_desc') || 'أهلاً بك مجدداً! أدخل بيانات حسابك للمتابعة' }}</p>
+
+            <!-- Error Banner -->
+            <div v-if="loginError" class="w-full my-2 p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs font-bold flex items-center gap-2">
+              <i class="fa-solid fa-circle-exclamation shrink-0"></i>
+              <span>{{ loginError }}</span>
+            </div>
+
+            <!-- Email or Phone -->
+            <input 
+              type="text" 
+              :placeholder="t('auth.email_or_phone_placeholder') || 'البريد الإلكتروني أو رقم الجوال'" 
+              v-model="signInForm.email" 
+              required 
+              dir="ltr"
+              class="auth-input"
+            />
+
+            <!-- Password & Show Toggle -->
+            <div class="relative w-full">
+              <input 
+                :type="showLoginPassword ? 'text' : 'password'" 
+                :placeholder="t('auth.password_label') || 'كلمة المرور'" 
+                v-model="signInForm.password" 
+                required 
+                class="auth-input pe-10"
+              />
+              <button 
+                type="button"
+                @click="showLoginPassword = !showLoginPassword"
+                class="absolute end-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 cursor-pointer p-1"
+                :title="showLoginPassword ? 'إخفاء' : 'إظهار'"
+              >
+                <i :class="showLoginPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'" class="text-xs"></i>
+              </button>
+            </div>
+            
+            <div class="w-full flex justify-end">
+              <NuxtLink 
+                :to="localePath('/forgot-password')" 
+                class="text-xs font-bold text-slate-600 hover:text-amber-600 my-1 transition-colors"
+              >
+                {{ t('auth.forgot_password') || 'نسيت كلمة المرور؟' }}
+              </NuxtLink>
+            </div>
+            
+            <button type="submit" :disabled="loginPending" class="auth-btn-primary w-full mt-2 flex items-center justify-center gap-2">
+              <svg v-if="loginPending" class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              <span>{{ loginPending ? (t('auth.logging_in') || 'جاري تسجيل الدخول...') : (t('auth.login_btn') || 'تسجيل الدخول') }}</span>
+            </button>
+
+            <!-- Bottom Inline Switcher for all viewports -->
+            <div class="mt-4 pt-3 border-t border-slate-100 text-center text-xs text-slate-500 font-bold w-full">
+              <span>{{ t('auth.no_account') || 'ليس لديك حساب؟' }}</span>
+              <button 
+                type="button" 
+                @click="isRightPanelActive = true" 
+                class="text-amber-600 hover:text-amber-700 font-extrabold underline underline-offset-4 ms-1 transition-colors cursor-pointer"
+              >
+                {{ t('auth.register_now') || 'إنشاء حساب جديد' }}
+              </button>
+            </div>
+          </form>
+        </div>
+
+
+        <!-- ================= 3. ANIMATED OVERLAY SLIDER (Desktop >= lg) ================= -->
+        <div class="auth-overlay-container hidden lg:block" dir="ltr">
+          <div class="auth-overlay">
+            
+            <!-- OVERLAY LEFT (Visible when Sign Up is active -> switch to Sign In) -->
+            <div class="auth-overlay-panel auth-overlay-left" :dir="layoutDirection">
+              <img src="~/assets/images/Logo.png" alt="أسوار جدة" class="auth-overlay-logo" />
+              <h2 class="text-xl font-black text-white mb-2">{{ t('auth.welcome_back_title') || 'مرحباً بك مجدداً!' }}</h2>
+              <p class="text-xs text-slate-300 leading-relaxed max-w-xs mb-6">
+                {{ t('auth.welcome_back_desc') || 'للبقاء على اتصال معنا يرجى تسجيل الدخول بمعلوماتك الشخصية' }}
+              </p>
+              <button type="button" class="auth-btn-ghost cursor-pointer" id="signInBtn" @click="isRightPanelActive = false">
+                <i class="fa-solid fa-arrow-right-to-bracket me-2 text-amber-400"></i>
+                <span>{{ t('auth.login_tab') || 'تسجيل الدخول' }}</span>
+              </button>
+            </div>
+
+            <!-- OVERLAY RIGHT (Visible when Sign In is active -> switch to Sign Up) -->
+            <div class="auth-overlay-panel auth-overlay-right" :dir="layoutDirection">
+              <img src="~/assets/images/Logo.png" alt="أسوار جدة" class="auth-overlay-logo" />
+              <h2 class="text-xl font-black text-white mb-2">{{ t('auth.welcome_new_title') || 'مرحباً بك معنا!' }}</h2>
+              <p class="text-xs text-slate-300 leading-relaxed max-w-xs mb-6">
+                {{ t('auth.welcome_new_desc') || 'أدخل بياناتك الشخصية وابدأ رحلة التسوق المميزة معنا في أسوار جدة' }}
+              </p>
+              <button type="button" class="auth-btn-ghost cursor-pointer" id="signUpBtn" @click="isRightPanelActive = true">
+                <i class="fa-solid fa-user-plus me-2 text-amber-400"></i>
+                <span>{{ t('auth.register_now') || 'إنشاء حساب جديد' }}</span>
               </button>
             </div>
 
@@ -139,24 +244,23 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import HomeStoreFeaturesBar from '~/components/home/StoreFeaturesBar.vue'
 import HomeStoreLocationShowcase from '~/components/home/StoreLocationShowcase.vue'
-import { authApiService } from '~/services/authApiService'
 import { useAuth } from '~/composables/useAuth'
 import { useToast } from '~/composables/useToast'
 import { useLanguage } from '~/composables/useLanguage'
 
-const { t, layoutDirection } = useLanguage()
+const { t, layoutDirection, localePath } = useLanguage()
 
 useHead({
-  title: computed(() => t('auth.login_register_title'))
+  title: computed(() => t('auth.login_register_title') || 'تسجيل الدخول / إنشاء حساب | أسوار جدة')
 })
 
-const { setAuth, isLoggedIn } = useAuth()
+const { login, register, isLoggedIn } = useAuth()
 const toast = useToast()
 const route = useRoute()
 
 const targetPath = computed(() => {
   const q = route.query.redirect as string
-  return q ? decodeURIComponent(q) : '/my-account'
+  return q ? decodeURIComponent(q) : localePath('/my-account')
 })
 
 // Redirect if user is already logged in
@@ -165,6 +269,8 @@ if (isLoggedIn.value) {
 }
 
 const isRightPanelActive = ref(false)
+const showLoginPassword = ref(false)
+const showRegisterPassword = ref(false)
 
 onMounted(() => {
   if (route.query.mode === 'register') {
@@ -186,22 +292,21 @@ const handleSignIn = async () => {
   loginPending.value = true
 
   try {
-    const res = await authApiService.login({
+    const res = await login({
       email_or_phone: signInForm.email,
       password: signInForm.password
     })
 
-    if (res.success && res.token) {
-      setAuth(res.token, res.user)
-      toast.success(t('auth.login_btn'), t('auth.welcome_back_title'))
+    if (res.success) {
+      toast.success(t('auth.login_btn') || 'تسجيل الدخول', t('auth.welcome_back_title') || 'مرحباً بك مجدداً!')
       navigateTo(targetPath.value)
     } else {
-      loginError.value = res.message || t('auth.login_error')
-      toast.error(t('auth.login_title'), loginError.value)
+      loginError.value = res.message || t('auth.login_error') || 'فشل تسجيل الدخول.'
+      toast.error(t('auth.login_title') || 'تسجيل الدخول', loginError.value)
     }
   } catch (err: any) {
-    loginError.value = t('auth.login_error')
-    toast.error(t('auth.login_title'), loginError.value)
+    loginError.value = err?.data?.message || err?.message || t('auth.login_error') || 'فشل تسجيل الدخول.'
+    toast.error(t('auth.login_title') || 'تسجيل الدخول', loginError.value)
   } finally {
     loginPending.value = false
   }
@@ -212,7 +317,7 @@ const handleSignUp = async () => {
   registerPending.value = true
 
   try {
-    const res = await authApiService.register({
+    const res = await register({
       f_name: signUpForm.f_name,
       l_name: signUpForm.l_name,
       email: signUpForm.email,
@@ -221,23 +326,296 @@ const handleSignUp = async () => {
     })
 
     if (res.success) {
-      if (res.token) {
-        setAuth(res.token, res.user)
-        toast.success(t('auth.create_account'), t('auth.welcome_new_title'))
-        navigateTo(targetPath.value)
-      } else {
-        toast.success(t('auth.create_account'), t('auth.welcome_new_title'))
-        isRightPanelActive.value = false
-      }
+      toast.success(t('auth.create_account') || 'إنشاء الحساب', t('auth.welcome_new_title') || 'تم إنشاء الحساب بنجاح!')
+      navigateTo(targetPath.value)
     } else {
       registerError.value = res.message || 'فشل إنشاء الحساب.'
-      toast.error(t('auth.create_account'), registerError.value)
+      toast.error(t('auth.create_account') || 'إنشاء الحساب', registerError.value)
     }
   } catch (err: any) {
-    registerError.value = 'تعذر الاتصال بالسيرفر. يرجى المحاولة لاحقاً.'
-    toast.error(t('auth.create_account'), registerError.value)
+    registerError.value = err?.data?.message || err?.message || 'تعذر الاتصال بالسيرفر. يرجى المحاولة لاحقاً.'
+    toast.error(t('auth.create_account') || 'إنشاء الحساب', registerError.value)
   } finally {
     registerPending.value = false
   }
 }
 </script>
+
+<style scoped>
+.login-page-wrapper {
+  background-color: #f8fafc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  min-height: 80vh;
+}
+
+.auth-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.auth-title {
+  font-weight: 900;
+  font-size: 22px;
+  color: #0B0E28;
+  margin-bottom: 4px;
+}
+
+.auth-desc {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+  margin-bottom: 14px;
+  color: #64748b;
+  text-align: center;
+}
+
+.auth-input {
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 11px 14px;
+  margin: 4px 0;
+  width: 100%;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.auth-input:focus {
+  border-color: #f59e0b;
+  background-color: #fff;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+}
+
+.auth-btn-primary {
+  border-radius: 12px;
+  border: none;
+  background-color: #0B0E28;
+  color: #FFFFFF;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 13px 28px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(11, 14, 40, 0.15);
+}
+
+.auth-btn-primary:hover {
+  background-color: #1a204c;
+}
+
+.auth-btn-primary:active {
+  transform: scale(0.98);
+}
+
+.auth-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-btn-ghost {
+  background-color: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  color: #FFFFFF;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 11px 30px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: #FFFFFF;
+}
+
+/* ================= CONTAINER & SLIDING LAYOUT ================= */
+.auth-slider-container {
+  background-color: #fff;
+  border-radius: 28px;
+  box-shadow: 0 20px 40px -15px rgba(11, 14, 40, 0.12), 0 0 1px 1px rgba(11, 14, 40, 0.05);
+  position: relative;
+  overflow: hidden;
+  width: 900px;
+  max-width: 100%;
+  min-height: 560px;
+}
+
+.auth-form-panel {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-form {
+  background-color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 30px 40px;
+  height: 100%;
+  width: 100%;
+  text-align: center;
+}
+
+/* Sign In Panel (Left side by default) */
+.sign-in-panel {
+  left: 0;
+  width: 50%;
+  z-index: 2;
+  opacity: 1;
+}
+
+.auth-slider-container.right-panel-active .sign-in-panel {
+  transform: translateX(100%);
+  opacity: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Sign Up Panel (Hidden behind left by default) */
+.sign-up-panel {
+  left: 0;
+  width: 50%;
+  opacity: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.auth-slider-container.right-panel-active .sign-up-panel {
+  transform: translateX(100%);
+  opacity: 1;
+  z-index: 5;
+  pointer-events: auto;
+}
+
+/* ================= OVERLAY SLIDER ================= */
+.auth-overlay-container {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 50%;
+  height: 100%;
+  overflow: hidden;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 100;
+}
+
+.auth-slider-container.right-panel-active .auth-overlay-container {
+  transform: translateX(-100%);
+}
+
+.auth-overlay {
+  background: #0B0E28;
+  background: linear-gradient(135deg, #0B0E28 0%, #151b47 50%, #0B0E28 100%);
+  color: #FFFFFF;
+  position: relative;
+  left: -100%;
+  height: 100%;
+  width: 200%;
+  transform: translateX(0);
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-slider-container.right-panel-active .auth-overlay {
+  transform: translateX(50%);
+}
+
+.auth-overlay-panel {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 0 40px;
+  text-align: center;
+  top: 0;
+  height: 100%;
+  width: 50%;
+  transform: translateX(0);
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-overlay-left {
+  transform: translateX(-20%);
+}
+
+.auth-slider-container.right-panel-active .auth-overlay-left {
+  transform: translateX(0);
+}
+
+.auth-overlay-right {
+  right: 0;
+  transform: translateX(0);
+}
+
+.auth-slider-container.right-panel-active .auth-overlay-right {
+  transform: translateX(20%);
+}
+
+.auth-overlay-logo {
+  max-width: 130px;
+  height: auto;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4));
+}
+
+/* ================= RESPONSIVE FOR MOBILE / TABLET (< 1024px) ================= */
+@media (max-width: 1023px) {
+  .auth-slider-container {
+    min-height: 520px;
+    width: 100%;
+    max-width: 480px;
+    border-radius: 20px;
+  }
+
+  .auth-form-panel {
+    width: 100%;
+    transform: none !important;
+  }
+
+  .sign-in-panel {
+    z-index: 2;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .sign-up-panel {
+    z-index: 1;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .auth-slider-container.right-panel-active .sign-in-panel {
+    opacity: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .auth-slider-container.right-panel-active .sign-up-panel {
+    opacity: 1;
+    z-index: 2;
+    pointer-events: auto;
+  }
+
+  .auth-form {
+    padding: 24px 20px;
+  }
+}
+</style>

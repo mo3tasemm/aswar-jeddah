@@ -106,7 +106,7 @@ export const orderApiService = {
   /**
    * Place Order via API with 500 error safe handling, discount & order totals synchronization
    */
-  async placeOrder(payload: PlaceOrderPayload): Promise<{ success: boolean; orderId?: number | string; message?: string }> {
+  async placeOrder(payload: PlaceOrderPayload): Promise<{ success: boolean; orderId?: number | string; paymentId?: number | string; message?: string; rawResponse?: any }> {
     const token = getAuthToken()
     const guestId = getGuestId()
     const lang = getLangCode()
@@ -145,10 +145,16 @@ export const orderApiService = {
       })
 
       const extractedId = response?.order_id || response?.orderId || response?.id || response?.order?.id
+      const extractedPaymentId = response?.payment_id || response?.payment_request_id || response?.paymentRequestId || response?.data?.payment_id || extractedId
+      const extractedPaymentUrl = response?.payment_url || response?.checkout_url || response?.redirect_url || response?.url || response?.data?.payment_url || response?.data?.checkout_url
+
       return {
         success: true,
-        orderId: extractedId || Math.floor(100000 + Math.random() * 900000),
-        message: response?.message || 'Order placed successfully'
+        orderId: extractedId || extractedPaymentId || Math.floor(100000 + Math.random() * 900000),
+        paymentId: extractedPaymentId || extractedId,
+        paymentUrl: extractedPaymentUrl || undefined,
+        message: response?.message || 'Order placed successfully',
+        rawResponse: response
       }
 
     } catch (err: any) {
@@ -157,7 +163,8 @@ export const orderApiService = {
 
       return {
         success: false,
-        message: errorMsg || 'فشل إتمام الطلب، يرجى المحاولة مرة أخرى.'
+        message: errorMsg || 'فشل إتمام الطلب، يرجى المحاولة مرة أخرى.',
+        rawResponse: err?.data || err
       }
     }
   },

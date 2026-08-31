@@ -99,7 +99,7 @@
             <!-- Guest Login Button -->
             <button 
               v-if="!isLoggedIn"
-              @click="toggleLogin" 
+              @click="toggleLogin()" 
               :class="[
                 'flex items-center gap-2 group/btn text-start focus:outline-none cursor-pointer',
                 isScrolled ? 'text-white' : 'text-slate-900'

@@ -1,24 +1,42 @@
-import { useState } from '#imports';
+import { ref } from 'vue';
+
+export type AuthDrawerMode = 'login' | 'register';
+
+// Module-level shared singleton reactive state
+const isLoginOpenState = ref<boolean>(false);
+const authDrawerModeState = ref<AuthDrawerMode>('login');
 
 export const useAuthDrawer = () => {
-  const isLoginOpen = useState<boolean>('isLoginOpen', () => false);
-
-  const toggleLogin = () => {
-    isLoginOpen.value = !isLoginOpen.value;
+  const toggleLogin = (mode?: any) => {
+    authDrawerModeState.value = mode === 'register' ? 'register' : 'login';
+    isLoginOpenState.value = !isLoginOpenState.value;
   };
 
-  const openLogin = () => {
-    isLoginOpen.value = true;
+  const openLogin = (mode?: any) => {
+    authDrawerModeState.value = mode === 'register' ? 'register' : 'login';
+    isLoginOpenState.value = true;
+  };
+
+  const openRegister = () => {
+    authDrawerModeState.value = 'register';
+    isLoginOpenState.value = true;
+  };
+
+  const setAuthMode = (mode: AuthDrawerMode) => {
+    authDrawerModeState.value = mode === 'register' ? 'register' : 'login';
   };
 
   const closeLogin = () => {
-    isLoginOpen.value = false;
+    isLoginOpenState.value = false;
   };
 
   return {
-    isLoginOpen,
+    isLoginOpen: isLoginOpenState,
+    authMode: authDrawerModeState,
     toggleLogin,
     openLogin,
+    openRegister,
+    setAuthMode,
     closeLogin,
   };
 };

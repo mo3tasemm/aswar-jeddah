@@ -49,20 +49,25 @@ export const useAuth = () => {
                          localStorage.getItem('access_token')
       const savedUser = localStorage.getItem('user_profile')
 
-      if (savedToken) {
+      if (savedToken && typeof savedToken === 'string' && savedToken !== 'null' && savedToken !== 'undefined' && savedToken.trim().length > 5) {
         tokenState.value = savedToken
         cookieToken.value = savedToken
+      } else {
+        tokenState.value = null
+        cookieToken.value = null
       }
 
-      if (savedUser) {
+      if (savedUser && savedUser !== 'null' && savedUser !== 'undefined') {
         try {
           userState.value = JSON.parse(savedUser)
         } catch {}
+      } else {
+        userState.value = null
       }
 
       isAuthInitialized.value = true
 
-      if (savedToken) {
+      if (tokenState.value) {
         fetchProfile()
       }
     }
@@ -86,6 +91,32 @@ export const useAuth = () => {
     }
 
     fetchProfile()
+  }
+
+  const login = async (payload: { email?: string; email_or_phone?: string; phone?: string; password?: string; type?: string }) => {
+    const inputVal = (payload.email_or_phone || payload.email || payload.phone || '').trim()
+    const res = await authApiService.login({
+      email_or_phone: inputVal,
+      password: payload.password || '',
+      type: payload.type
+    })
+
+    if (res.success && res.token) {
+      setAuth(res.token, res.user)
+      return { success: true, token: res.token, user: res.user, message: res.message }
+    }
+    return { success: false, message: res.message || 'فشل تسجيل الدخول. يرجى التحقق من البيانات.' }
+  }
+
+  const register = async (payload: { f_name: string; l_name: string; email: string; phone: string; password: string; type?: string }) => {
+    const res = await authApiService.register(payload)
+    if (res.success) {
+      if (res.token) {
+        setAuth(res.token, res.user)
+      }
+      return { success: true, token: res.token, user: res.user, message: res.message }
+    }
+    return { success: false, message: res.message || 'فشل إنشاء الحساب. يرجى التحقق من البيانات.' }
   }
 
   const updateProfile = async (payload: any) => {
@@ -203,6 +234,8 @@ export const useAuth = () => {
     updateProfile,
     deleteAccount,
     setAuth,
+    login,
+    register,
     logout
   }
 }

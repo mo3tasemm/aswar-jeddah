@@ -1,1 +1,0 @@
-import{$ as e,F as t,N as n,O as r}from"./BcpgHYxp.js";import{n as i}from"./DFAtmv9t.js";import{t as a}from"./CNs_Ozdc2.js";import{t as o}from"./CzSdavVj2.js";var s=t({__name:`create`,setup(t){return a({layout:`dashboard`}),i({title:`إضافة دور وظيفي جديد | لوحة التحكم`}),(t,i)=>(e(),r(`div`,null,[n(o,{"is-edit":!1})]))}});export{s as default};

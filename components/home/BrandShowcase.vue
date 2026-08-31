@@ -1,12 +1,12 @@
 <template>
-  <div class="max-w-[1550px] mx-auto px-2 sm:px-4 lg:px-6 py-4">
-    <div :class="`rounded-2xl p-4 md:p-6 overflow-hidden ${resolvedBgColor} shadow-sm transition-all`">
+  <div class="max-w-[1550px] mx-auto px-2 sm:px-4 lg:px-6 py-4 select-none">
+    <div :class="`rounded-3xl p-4 md:p-6 overflow-hidden ${resolvedBgColor} shadow-sm transition-all relative group`">
       
       <!-- Header -->
       <div class="flex flex-col md:flex-row items-center justify-between mb-6 px-2 gap-4">
         
         <!-- Title & Subtitle -->
-        <div class="w-full md:w-1/3 text-center md:text-right">
+        <div class="w-full md:w-1/3 text-center md:text-start">
           <h2 class="text-base md:text-lg font-black text-white">{{ resolvedTitle }}</h2>
           <p v-if="resolvedSubtitle" class="text-xs md:text-sm text-white/80 mt-1 font-medium">{{ resolvedSubtitle }}</p>
         </div>
@@ -14,13 +14,39 @@
         <!-- Brand Name or Logo -->
         <div class="w-full md:w-1/3 text-center flex justify-center items-center order-first md:order-none">
           <div v-if="resolvedBrandLogo" class="h-12 md:h-14 max-w-[180px] bg-white/10 backdrop-blur-xs rounded-xl p-2 flex items-center justify-center">
-            <img :src="resolvedBrandLogo" :alt="resolvedBrandName" class="h-full w-full object-contain filter drop-shadow-sm" />
+            <img :src="resolvedBrandLogo" :alt="resolvedBrandName" class="h-full w-full object-contain filter drop-shadow-sm pointer-events-none" />
           </div>
           <h3 v-else class="text-2xl md:text-4xl font-black text-white tracking-wide uppercase drop-shadow-xs">{{ resolvedBrandName }}</h3>
         </div>
 
-        <!-- View All Button -->
-        <div class="w-full md:w-1/3 flex justify-center md:justify-end">
+        <!-- View All Button & Arrow Navigation Controls -->
+        <div class="w-full md:w-1/3 flex items-center justify-center md:justify-end gap-2">
+          <!-- Left / Right Arrows -->
+          <div class="hidden sm:flex items-center gap-1.5 me-1">
+            <button 
+              type="button"
+              @click="scrollRight()"
+              class="w-9 h-9 rounded-full bg-white/20 hover:bg-white text-white hover:text-slate-900 transition-all flex items-center justify-center backdrop-blur-md active:scale-95 cursor-pointer shadow-xs"
+              title="السابق"
+              aria-label="Previous"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 rtl:rotate-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+            </button>
+            <button 
+              type="button"
+              @click="scrollLeft()"
+              class="w-9 h-9 rounded-full bg-white/20 hover:bg-white text-white hover:text-slate-900 transition-all flex items-center justify-center backdrop-blur-md active:scale-95 cursor-pointer shadow-xs"
+              title="التالي"
+              aria-label="Next"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 rtl:rotate-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+            </button>
+          </div>
+
           <NuxtLink :to="resolvedViewAllUrl" :class="['font-bold text-xs md:text-sm px-5 py-2.5 rounded-full hover:opacity-90 transition-all flex items-center justify-center gap-2 w-full md:w-auto shadow-sm', resolvedBtnColor || 'bg-white text-slate-900 hover:bg-slate-50']">
             <span>عرض الكل</span>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5 rtl:-scale-x-100">
@@ -30,7 +56,7 @@
         </div>
       </div>
 
-      <!-- Slider Container -->
+      <!-- Slider Container with Mouse Drag -->
       <div class="relative w-full">
         
         <!-- Loading Skeleton -->
@@ -46,8 +72,17 @@
           </div>
         </div>
 
-        <!-- Products Slider -->
-        <div v-else class="flex gap-3 sm:gap-6 overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar pb-4">
+        <!-- Products Slider with Drag to Scroll -->
+        <div 
+          v-else 
+          ref="sliderRef"
+          @mousedown="onMouseDown"
+          @mousemove="onMouseMove"
+          @mouseup="onMouseUp"
+          @mouseleave="onMouseLeave"
+          @click.capture="onClickCapture"
+          class="flex gap-3 sm:gap-6 overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar pb-4 cursor-grab active:cursor-grabbing"
+        >
           <ProductCard 
             v-for="product in displayProducts" 
             :key="product.id" 
@@ -66,6 +101,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import ProductCard from '~/components/product/ProductCard.vue'
 import { productApiService } from '~/services/productApiService'
 import { getProductsByBrand } from '~/services/productService'
+import { useSliderDrag } from '~/composables/useSliderDrag'
 import type { Product } from '~/types'
 
 const props = defineProps<{
@@ -100,6 +136,17 @@ const props = defineProps<{
 
 const apiProducts = ref<Product[]>([])
 const isLoadingProducts = ref(false)
+
+const {
+  sliderRef,
+  onMouseDown,
+  onMouseMove,
+  onMouseUp,
+  onMouseLeave,
+  onClickCapture,
+  scrollLeft,
+  scrollRight
+} = useSliderDrag({ scrollAmount: 320 })
 
 const resolvedBrandId = computed(() => {
   return props.config?.brand_id || props.config?.brandId || props.brand_id || ''
@@ -139,7 +186,6 @@ const resolvedLimit = computed(() => {
 
 // Fetch live products for this brand
 const fetchShowcaseProducts = async () => {
-  // If static products were directly passed in props, use them
   if (props.config?.products && props.config.products.length > 0) {
     apiProducts.value = props.config.products
     return
@@ -154,7 +200,6 @@ const fetchShowcaseProducts = async () => {
     const limit = resolvedLimit.value
     let fetched: Product[] = []
 
-    // 1. Fetch by Brand ID from backend API
     const brandId = resolvedBrandId.value
     if (brandId) {
       const res = await productApiService.fetchFilteredProducts({
@@ -166,7 +211,6 @@ const fetchShowcaseProducts = async () => {
       }
     }
 
-    // 2. If empty or no brand_id, search by brand name keyword
     if (fetched.length === 0 && resolvedBrandName.value) {
       const searchRes = await productApiService.searchProducts({
         keyword: resolvedBrandName.value,
@@ -178,7 +222,6 @@ const fetchShowcaseProducts = async () => {
       }
     }
 
-    // 3. Fallback: query local mock products or latest products if backend has no items for this brand yet
     if (fetched.length === 0) {
       const mockList = getProductsByBrand(resolvedBrandName.value)
       if (mockList.length > 0) {

@@ -1,5 +1,0 @@
-//#region components/cart/CartDrawer.vue?vue&type=style&index=0&scoped=a58faff1&inline&used&lang.css
-var CartDrawer_vue_vue_type_style_index_0_scoped_a58faff1_inline_used_lang_default = ".slide-left-enter-active[data-v-a58faff1],.slide-left-leave-active[data-v-a58faff1],.slide-right-enter-active[data-v-a58faff1],.slide-right-leave-active[data-v-a58faff1]{transition:transform .3s cubic-bezier(.16,1,.3,1)}.slide-left-enter-from[data-v-a58faff1],.slide-left-leave-to[data-v-a58faff1]{transform:translate(-100%)}.slide-right-enter-from[data-v-a58faff1],.slide-right-leave-to[data-v-a58faff1]{transform:translate(100%)}.fade-enter-active[data-v-a58faff1],.fade-leave-active[data-v-a58faff1]{transition:opacity .3s}.fade-enter-from[data-v-a58faff1],.fade-leave-to[data-v-a58faff1]{opacity:0}.list-enter-active[data-v-a58faff1],.list-leave-active[data-v-a58faff1]{transition:all .3s}.list-enter-from[data-v-a58faff1],.list-leave-to[data-v-a58faff1]{opacity:0;transform:translate(-20px)}";
-
-export { CartDrawer_vue_vue_type_style_index_0_scoped_a58faff1_inline_used_lang_default as C };
-//# sourceMappingURL=default-styles-2.mjs-DY2WMs3Y.mjs.map

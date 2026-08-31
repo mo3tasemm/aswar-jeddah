@@ -185,6 +185,14 @@
       "dest": "/en/compare"
     },
     {
+      "src": "/en/checkout/success",
+      "dest": "/en/checkout/success"
+    },
+    {
+      "src": "/en/checkout/failure",
+      "dest": "/en/checkout/failure"
+    },
+    {
       "src": "/en/checkout",
       "dest": "/en/checkout"
     },
@@ -343,6 +351,14 @@
     {
       "src": "/compare",
       "dest": "/compare"
+    },
+    {
+      "src": "/checkout/success",
+      "dest": "/checkout/success"
+    },
+    {
+      "src": "/checkout/failure",
+      "dest": "/checkout/failure"
     },
     {
       "src": "/checkout",

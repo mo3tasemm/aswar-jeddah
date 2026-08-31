@@ -6,11 +6,8 @@ export default defineNuxtConfig({
   modules: ['@nuxtjs/tailwindcss'],
   css: ['~/assets/css/main.css'],
   
-  // تحويل الموقع بالكامل إلى Static لتجنب حدود الدوال نهائياً
+  // تعطيل الـ SSR ليعمل كـ SPA خفيف وسريع وتجنب حدود دوال السيرفر
   ssr: false,
-  nitro: {
-    preset: 'static'
-  },
 
   runtimeConfig: {
     public: {
