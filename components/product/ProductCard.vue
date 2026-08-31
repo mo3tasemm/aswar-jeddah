@@ -1,5 +1,5 @@
 <template>
-  <div v-if="product" class="group relative bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 w-full h-full flex flex-col overflow-hidden p-3 sm:p-4" :dir="layoutDirection">
+  <div v-if="product" class="group/card relative bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 w-full h-full flex flex-col overflow-hidden p-3 sm:p-4" :dir="layoutDirection">
     
     <!-- Image Area -->
     <div class="relative w-full h-40 sm:h-48 md:h-56 bg-white flex items-center justify-center overflow-hidden shrink-0 rounded-xl p-2 mb-3">
@@ -12,7 +12,7 @@
       </div>
       
       <!-- Side Floating Actions (Top Left/End) -->
-      <div class="absolute top-2 start-2 flex flex-col gap-1.5 z-20 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 rtl:translate-x-2 group-hover:translate-x-0">
+      <div class="absolute top-2 start-2 flex flex-col gap-1.5 z-20 opacity-0 group-hover/card:opacity-100 transition-all duration-300 transform -translate-x-2 rtl:translate-x-2 group-hover/card:translate-x-0">
         <!-- Wishlist Icon -->
         <button 
           @click.prevent.stop="handleWishlistClick"
@@ -62,7 +62,7 @@
           :alt="displayTitle" 
           loading="lazy"
           decoding="async"
-          class="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105 mix-blend-multiply"
+          class="w-full h-full object-contain transition-transform duration-300 group-hover/card:scale-105 mix-blend-multiply"
         />
       </NuxtLink>
     </div>
