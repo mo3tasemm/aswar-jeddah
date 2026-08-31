@@ -1,6 +1,6 @@
 <template>
   <Teleport to="body">
-    <!-- Initial Splash Loader (On First Page Load / Hydration) -->
+    <!-- Initial Splash Loader (Until Core Store APIs are Fully Resolved) -->
     <Transition name="splash-fade">
       <div 
         v-if="!isAppReady" 
@@ -9,7 +9,7 @@
         <!-- Luxury Ambient Glow Background -->
         <div class="absolute w-96 h-96 rounded-full bg-amber-500/10 blur-3xl pointer-events-none animate-pulse"></div>
         
-        <div class="relative z-10 flex flex-col items-center gap-6 px-6 text-center">
+        <div class="relative z-10 flex flex-col items-center gap-6 px-6 text-center max-w-md">
           <!-- Animated Brand Logo Container -->
           <div class="relative flex items-center justify-center">
             <!-- Pulsing Golden Orbit Ring -->
@@ -24,21 +24,34 @@
             </div>
           </div>
 
-          <!-- Brand Title & Slogan -->
+          <!-- Brand Title & Dynamic Loading Status -->
           <div class="space-y-2">
             <h2 class="text-xl sm:text-2xl font-black text-white tracking-wide">
               متجر <span class="text-amber-400">أسوار جدة</span>
             </h2>
-            <p class="text-xs text-slate-400 font-medium">
-              جاري تجهيز تجربة التسوق المميزة...
+            <p v-if="!initError" class="text-xs text-slate-400 font-medium">
+              جاري تجهيز تجربة التسوق وجلب أحدث البيانات...
+            </p>
+            <p v-else class="text-xs text-rose-400 font-medium">
+              {{ initError }}
             </p>
           </div>
 
-          <!-- Loading Dots Indicator -->
-          <div class="flex items-center gap-1.5 pt-2">
+          <!-- Loading Dots Indicator or Retry Button -->
+          <div v-if="!initError" class="flex items-center gap-1.5 pt-2">
             <span class="w-2 h-2 rounded-full bg-amber-400 animate-bounce [animation-delay:-0.3s]"></span>
             <span class="w-2 h-2 rounded-full bg-amber-400 animate-bounce [animation-delay:-0.15s]"></span>
             <span class="w-2 h-2 rounded-full bg-amber-400 animate-bounce"></span>
+          </div>
+
+          <div v-else class="pt-2">
+            <button 
+              @click="handleRetry" 
+              type="button"
+              class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition-all shadow-md active:scale-95 cursor-pointer"
+            >
+              إعادة المحاولة
+            </button>
           </div>
         </div>
       </div>
@@ -57,10 +70,16 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useGlobalLoading } from '~/composables/useGlobalLoading'
+import { useAppInit } from '~/composables/useAppInit'
 import { useNuxtApp } from '#app'
 
-const { isAppReady, isRouteLoading, setAppReady, startLoading, stopLoading } = useGlobalLoading()
+const { isAppReady, isRouteLoading, startLoading, stopLoading } = useGlobalLoading()
+const { initApp, initError } = useAppInit()
 const nuxtApp = useNuxtApp()
+
+const handleRetry = () => {
+  initApp(true)
+}
 
 onMounted(() => {
   // Listen to Nuxt page transition lifecycle hooks
@@ -72,10 +91,8 @@ onMounted(() => {
     stopLoading()
   })
 
-  // Dismiss initial splash after DOM & initial API hydrate smoothly
-  setTimeout(() => {
-    setAppReady(true)
-  }, 450)
+  // Start real initialization bootstrap
+  initApp()
 })
 </script>
 

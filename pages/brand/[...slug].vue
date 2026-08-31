@@ -375,15 +375,6 @@ const fetchBrandProducts = async () => {
       sort_by: sortBy.value === 'default' ? 'latest' : (sortBy.value as any)
     })
   }
-
-  // 3. Fallback: If API returns empty products array, check local mock products for that brand
-  if (products.value.length === 0) {
-    const mockList = getProductsByBrand(displayBrandName.value)
-    if (mockList.length > 0) {
-      products.value = mockList
-      totalProducts.value = mockList.length
-    }
-  }
 }
 
 // Initial Clean Page Setup

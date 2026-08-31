@@ -223,28 +223,21 @@ const fetchShowcaseProducts = async () => {
     }
 
     if (fetched.length === 0) {
-      const mockList = getProductsByBrand(resolvedBrandName.value)
-      if (mockList.length > 0) {
-        fetched = mockList.slice(0, limit)
-      } else {
-        const latestRes = await productApiService.fetchFilteredProducts({ limit })
-        fetched = latestRes.products.slice(0, limit)
-      }
+      const latestRes = await productApiService.fetchFilteredProducts({ limit })
+      fetched = latestRes.products.slice(0, limit)
     }
 
     apiProducts.value = fetched
   } catch (err) {
     console.warn('[BrandShowcase] Error loading brand products:', err)
-    apiProducts.value = getProductsByBrand(resolvedBrandName.value).slice(0, resolvedLimit.value)
+    apiProducts.value = []
   } finally {
     isLoadingProducts.value = false
   }
 }
 
 const displayProducts = computed<Product[]>(() => {
-  return apiProducts.value.length > 0 
-    ? apiProducts.value 
-    : getProductsByBrand(resolvedBrandName.value).slice(0, resolvedLimit.value)
+  return apiProducts.value
 })
 
 onMounted(() => {

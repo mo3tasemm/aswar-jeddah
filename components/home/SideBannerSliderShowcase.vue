@@ -193,48 +193,25 @@ const fetchSideProducts = async () => {
       }
     }
 
-    // 4. Fallbacks
+    // 4. Fallback to latest products from backend API
     if (fetched.length === 0) {
-      if (brandName) {
-        const byBrand = getProductsByBrand(brandName)
-        if (byBrand.length > 0) fetched = byBrand.slice(0, limit)
-      }
-      if (fetched.length === 0 && catName) {
-        const byCat = getProductsByCategory(catName)
-        if (byCat.length > 0) fetched = byCat.slice(0, limit)
-      }
-      if (fetched.length === 0) {
-        const latestRes = await productApiService.fetchFilteredProducts({ limit })
-        if (Array.isArray(latestRes.products) && latestRes.products.length > 0) {
-          fetched = latestRes.products.slice(0, limit)
-        } else {
-          fetched = getNewArrivalProducts().slice(0, limit)
-        }
+      const latestRes = await productApiService.fetchFilteredProducts({ limit })
+      if (Array.isArray(latestRes.products) && latestRes.products.length > 0) {
+        fetched = latestRes.products.slice(0, limit)
       }
     }
 
     apiProducts.value = fetched
   } catch (e) {
     console.warn('[SideBannerSliderShowcase] Error fetching side products:', e)
-    apiProducts.value = getNewArrivalProducts().slice(0, resolvedLimit.value)
+    apiProducts.value = []
   } finally {
     isLoading.value = false
   }
 }
 
 const displayProducts = computed<Product[]>(() => {
-  if (apiProducts.value.length > 0) return apiProducts.value
-  const limit = resolvedLimit.value
-  const brandName = props.config?.brandName || props.config?.brand_name
-  const catName = props.config?.subCategory || props.config?.sub_category || props.config?.category
-  
-  if (brandName) {
-    return getProductsByBrand(brandName).slice(0, limit)
-  }
-  if (catName) {
-    return getProductsByCategory(catName).slice(0, limit)
-  }
-  return getNewArrivalProducts().slice(0, limit)
+  return apiProducts.value
 })
 
 const startAutoPlay = () => {
